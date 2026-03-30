@@ -47,11 +47,15 @@ ROOT_URLCONF = type(
 LMS_ROOT_URL = "http://localhost:8000"
 
 # Code jail REST service
-ENABLE_CODEJAIL_REST_SERVICE = False
+ENABLE_CODEJAIL_REST_SERVICE = True
 
 # Set the python package.module.function that is reponsible of
-# calling the remote service in charge of jailed code execution
-CODE_JAIL_REST_SERVICE_REMOTE_EXEC = "xblocks_contrib.problem.capa.safe_exec.remote_exec.send_safe_exec_request_v0"
+# calling the remote service in charge of jailed code execution.
+# For tests, we use a mock service that runs CodeJail's unsafe executor with out
+# sandboxing.
+CODE_JAIL_REST_SERVICE_REMOTE_EXEC = (
+    "xblocks_contrib.problem.capa.safe_exec.tests.test_utils.send_safe_exec_request_locally"
+)
 
 # Set the codejail remote service host
 CODE_JAIL_REST_SERVICE_HOST = "http://127.0.0.1:8550"
