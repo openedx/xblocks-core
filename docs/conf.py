@@ -1,6 +1,6 @@
 # pylint: disable=invalid-name
 """
-xblocks-contrib documentation build configuration file.
+xblocks-core documentation build configuration file.
 
 This file is execfile()d with the current directory set to its
 containing dir.
@@ -54,7 +54,7 @@ def get_version(*file_paths):
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(REPO_ROOT)
 
-VERSION = get_version("../xblocks_contrib", "__init__.py")
+VERSION = get_version("../src/xblocks_core", "__init__.py")
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -103,17 +103,17 @@ source_suffix = ".rst"
 top_level_doc = "index"
 
 # General information about the project.
-project = "xblocks-contrib"
+project = "xblocks-core"
 copyright = f"{datetime.now().year}, Axim Collaborative, Inc."  # pylint: disable=redefined-builtin
 author = "Axim Collaborative, Inc."
-project_title = "xblocks-contrib"
+project_title = "xblocks-core"
 documentation_title = f"{project_title}"
 
 # Set display_github to False if you don't want "edit on Github" button
 html_context = {
     "display_github": True,  # Integrate GitHub
     "github_user": "edx",  # Username
-    "github_repo": "xblocks-contrib",  # Repo name
+    "github_repo": "xblocks-core",  # Repo name
     "github_version": "main",  # Version
     "conf_py_path": "/docs/",  # Path in the checkout to the docs root
 }
@@ -198,7 +198,7 @@ html_theme = "sphinx_book_theme"
 # documentation.
 #
 html_theme_options = {
-    "repository_url": "https://github.com/openedx/xblocks-contrib",
+    "repository_url": "https://github.com/openedx/xblocks-core",
     "repository_branch": "main",
     "path_to_docs": "docs/",
     "home_page_in_toc": True,
@@ -235,7 +235,7 @@ html_theme_options = {
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
 #
-# html_title = 'xblocks-contrib v0.1.0'
+# html_title = 'xblocks-core v0.1.0'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #
@@ -551,8 +551,7 @@ def on_init(app):  # pylint: disable=unused-argument
             apidoc_path,
             "-o",
             docs_path,
-            os.path.join(root_path, "xblocks_contrib"),
-            os.path.join(root_path, "xblocks_contrib/migrations"),
+            os.path.join(root_path, "src"),
         ]
     )
 

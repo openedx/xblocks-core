@@ -5,10 +5,12 @@
 .PHONY: detect_changed_source_translations dummy_translations build_dummy_translations
 .PHONY: validate_translations pull_translations push_translations install_transifex_clients
 
-PACKAGE_NAME := xblocks_contrib
+SRC_DIR := src
 EXTRACT_DIR := conf/locale/en/LC_MESSAGES
-COMBINED_LOCALE_DIR := $(PACKAGE_NAME)/conf/locale/en/LC_MESSAGES
-JS_TARGET := $(PACKAGE_NAME)/public/js/translations
+# Combined-locale output for the openedx-translations pipeline (OEP-58),
+# which expects a single `django.po` source file per repository.
+COMBINED_LOCALE_DIR := $(SRC_DIR)/xblocks_core_locale/conf/locale/en/LC_MESSAGES
+JS_TARGET := $(SRC_DIR)/xblocks_core_locale/public/js/translations
 
 help:
 	@perl -nle'print $& if m{^[\.a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m  %-25s\033[0m %s\n", $$1, $$2}'
@@ -37,8 +39,8 @@ piptools: ## install pinned version of pip-compile and pip-sync
 requirements: piptools ## install development environment requirements
 	pip-sync -q requirements/dev.txt requirements/private.*
 
-# XBlock directories
-XBLOCKS=$(shell find $(shell pwd)/$(PACKAGE_NAME) -mindepth 2 -maxdepth 2 -type d -name 'conf' -exec dirname {} \;)
+# XBlock directories: each src/xblock_<name>/ that has its own conf/ subdir
+XBLOCKS=$(shell find $(shell pwd)/$(SRC_DIR) -mindepth 2 -maxdepth 2 -type d -name 'conf' -exec dirname {} \;)
 
 ## Localization targets
 

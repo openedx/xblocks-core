@@ -2,7 +2,7 @@ Change Log
 ##########
 
 ..
-   All enhancements and patches to xblocks-contrib will be documented
+   All enhancements and patches to xblocks-core will be documented
    in this file.  It adheres to the structure of https://keepachangelog.com/ ,
    but in reStructuredText instead of Markdown (for ease of incorporation into
    Sphinx documentation and the PyPI description).
@@ -13,6 +13,15 @@ Change Log
 
 Unreleased
 **********
+
+* Renamed pypi package and repo from ``xblocks-contrib`` to ``xblocks-core``.
+* Restructured Python source into ``src/xblock_<name>/`` packages (one per XBlock); the shared
+  XML helpers moved to ``src/xblocks_core.legacy_utils/``.
+* Renamed Django app entry points ``xblocks_contrib_problem_capa`` → ``xblock_problem_capa`` and
+  ``xblocks_contrib_discussion`` → ``xblock_discussion`` (consumers in edx-platform must update
+  ``INSTALLED_APPS`` and any direct imports).
+* Renamed Transifex resource slugs ``xblocks-contrib-<name>`` → ``xblocks-core-<name>``; the
+  combined source ``django.po`` now lives at ``src/xblocks_core_locale/conf/locale/en/LC_MESSAGES/``.
 
 0.16.0 - 2026-04-21
 **********************************************
