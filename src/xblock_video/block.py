@@ -64,7 +64,6 @@ from .video_utils import (
     format_xml_exception_message,
     get_edxval_api,
     get_poster,
-    get_resource_url,
     rewrite_video_url,
 )
 from .video_xfields import VideoFields
@@ -257,8 +256,8 @@ class VideoBlock(
         Return the student view.
         """
         fragment = Fragment(self.get_html(context=context))
-        fragment.add_css_url(get_resource_url(self, "css/video.css", "video"))
-        fragment.add_javascript_url(get_resource_url(self, "js/video-xblock.js", "video"))
+        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/video.css"))
+        fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/video-xblock.js"))
         fragment.initialize_js("Video")
         return fragment
 
@@ -279,8 +278,8 @@ class VideoBlock(
             return self.student_view(context)
 
         fragment = Fragment(self.get_html(view=PUBLIC_VIEW, context=context))
-        fragment.add_css_url(get_resource_url(self, "css/video.css", "video"))
-        fragment.add_javascript_url(get_resource_url(self, "js/video-xblock.js", "video"))
+        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/video.css"))
+        fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/video-xblock.js"))
         fragment.initialize_js("Video")
         return fragment
 

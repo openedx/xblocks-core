@@ -127,24 +127,12 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
         """
 
         css_file_path = (
-            '/css/inline-discussion-rtl.css'
+            'css/inline-discussion-rtl.css'
             if get_language_bidi()
-            else '/css/inline-discussion.css'
+            else 'css/inline-discussion.css'
         )
-
-        # Determine how static assets should be served based on Django settings.
-        # Open edX requires different asset paths for production vs. local development.
-        pipeline = getattr(settings, "PIPELINE", {})
-        use_pipeline = pipeline.get("PIPELINE_ENABLED", True) or not getattr(settings, "REQUIRE_DEBUG", False)
-
-        # When the Django pipeline is active (production), XBlock assets are namespaced
-        # using the package scope (e.g., "discussion/public").
-        # When inactive (local dev fallback), they are served directly from "public".
-        # https://github.com/openedx/openedx-platform/blob/master/openedx/core/lib/xblock_utils/__init__.py#L417
-        base_path = "discussion/public" if use_pipeline else "public"
-
-        fragment.add_css_url(self.runtime.local_resource_url(self, f"{base_path}{css_file_path}"))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, f"{base_path}/js/discussion_bundle.js"))
+        fragment.add_css_url(self.runtime.local_resource_url(self, f"public/{css_file_path}"))
+        fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/discussion_bundle.js"))
 
     def has_permission(self, permission):
         """

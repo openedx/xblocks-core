@@ -18,7 +18,6 @@ import traceback
 from zoneinfo import ZoneInfo
 
 import nh3
-from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
@@ -430,20 +429,8 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
         else:
             html = self.get_html()
         fragment = Fragment(html)
-
-        # Determine how static assets should be served based on Django settings.
-        # Open edX requires different asset paths for production vs. local development.
-        pipeline = getattr(settings, "PIPELINE", {})
-        use_pipeline = pipeline.get("PIPELINE_ENABLED", True) or not getattr(settings, "REQUIRE_DEBUG", False)
-
-        # When the Django pipeline is active (production), XBlock assets are namespaced
-        # using the package scope (e.g., "problem/public").
-        # When inactive (local dev fallback), they are served directly from "public".
-        # https://github.com/openedx/openedx-platform/blob/master/openedx/core/lib/xblock_utils/__init__.py#L417
-        base_path = "problem/public" if use_pipeline else "public"
-
-        fragment.add_css_url(self.runtime.local_resource_url(self, f"{base_path}/css/ProblemBlockDisplay.css"))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, f"{base_path}/js/ProblemBlockDisplay.js"))
+        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/ProblemBlockDisplay.css"))
+        fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/ProblemBlockDisplay.js"))
         fragment.initialize_js("Problem")
         return fragment
 
