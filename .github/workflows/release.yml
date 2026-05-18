@@ -5,48 +5,31 @@ on:
     branches: [main]
 
 jobs:
-  ci:
-    name: Run CI
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        toxenv: [quality, docs, django42, django52]
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v6
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v6
-
-      - name: Install CI dependencies
-        run: uv sync --group ci
-
-      - name: Run tests (${{ matrix.toxenv }})
-        env:
-          TOXENV: ${{ matrix.toxenv }}
-        run: uv run tox
+  run_tests:
+    uses: ./.github/workflows/python-tests.yml
 
   release:
-    name: Semantic Release
+    needs: run_tests
     runs-on: ubuntu-latest
-    needs: ci
-    concurrency: release
+    if: github.ref_name == 'main'
+    concurrency:
+      group: ${{ github.workflow }}-release-${{ github.ref_name }}
+      cancel-in-progress: false
+
     permissions:
-      id-token: write   # for PyPI trusted publisher (OIDC)
-      contents: write   # to push tags and create GitHub releases
+      contents: write
 
     steps:
-      - name: Check out repository
+      # Checkout at the branch that triggered the workflow, then force-reset to
+      # the exact sha so we don't accidentally release commits that arrived
+      # while this workflow was running.
+      - name: Setup | Checkout Repository on Release Branch
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0
+          ref: ${{ github.ref_name }}
+
+      - name: Setup | Force release branch to workflow sha
+        run: git reset --hard ${{ github.sha }}
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -66,12 +49,51 @@ jobs:
           npm ci
           npm run build
 
-      - name: Python Semantic Release
+      - name: Action | Semantic Version Release
         id: release
-        uses: python-semantic-release/python-semantic-release@v9
+        uses: python-semantic-release/python-semantic-release@v10.5.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          git_committer_name: "github-actions"
+          git_committer_email: "actions@users.noreply.github.com"
+          changelog: "false"
+
+      - name: Publish | Upload to GitHub Release Assets
+        uses: python-semantic-release/publish-action@v10.5.3
+        if: steps.release.outputs.released == 'true'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.release.outputs.tag }}
+
+      - name: Upload | Distribution Artifacts
+        uses: actions/upload-artifact@v4
+        if: steps.release.outputs.released == 'true'
+        with:
+          name: distribution-artifacts
+          path: dist/
+          if-no-files-found: error
+
+    outputs:
+      released: ${{ steps.release.outputs.released || 'false' }}
+      version: ${{ steps.release.outputs.version }}
+
+  publish_to_pypi:
+    # Separate from the release job for least privilege and retry-ability:
+    # publishing can fail independently and shouldn't require reversing the release.
+    runs-on: ubuntu-latest
+    needs: release
+    if: github.ref_name == 'main' && needs.release.outputs.released == 'true'
+
+    permissions:
+      contents: read
+      id-token: write   # for PyPI OIDC trusted publisher
+
+    steps:
+      - name: Download Distribution Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: distribution-artifacts
+          path: dist/
 
       - name: Publish to PyPI
-        if: steps.release.outputs.released == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1

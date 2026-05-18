@@ -1,11 +1,11 @@
 name: Python Tests
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches:
       - "**"
+  # Called from release.yml before publishing on push to main.
+  workflow_call:
 
 jobs:
   python-tests:

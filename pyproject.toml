@@ -184,5 +184,6 @@ constraint-dependencies = [
 ]
 
 [tool.semantic_release]
-tag_format = "v{version}"
+# We use SETUPTOOLS_SCM_PRETEND_VERSION to pull the version from python-semantic-release
+# instead of from version control because the build step happens before the repo gets tagged.
 build_command = "SETUPTOOLS_SCM_PRETEND_VERSION=$NEW_VERSION uv build"
