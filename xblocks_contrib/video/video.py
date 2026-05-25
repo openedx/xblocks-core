@@ -117,7 +117,7 @@ class VideoBlock(
     XML source example::
 
         <video show_captions="true"
-            youtube="0.75:jNCf2gIqpeE,1.0:ZwkTiUPN0mg,1.25:rsq9auxASqI,1.50:kMyNdzVHHgg"
+            youtube="1.0:ZwkTiUPN0mg"
             url_name="lecture_21_3" display_name="S19V3: Vacancies"
         >
             <source src=".../mit-3091x/M-3091X-FA12-L21-3_100.mp4"/>
@@ -861,7 +861,7 @@ class VideoBlock(
         into a dictionary. Necessary for backwards compatibility with
         XML-based courses.
         """
-        ret = {'0.75': '', '1.00': '', '1.25': '', '1.50': ''}
+        ret = {'1.00': ''}
 
         videos = data.split(',')
         for video in videos:

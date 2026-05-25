@@ -114,35 +114,35 @@ class VideoBlockTest(unittest.TestCase):
     }
 
     def test_parse_youtube(self):
-        """Test parsing old-style Youtube ID strings into a dict."""
+        """Test parsing old-style Youtube ID strings — only 1.00 speed is retained."""
         youtube_str = '0.75:jNCf2gIqpeE,1.00:ZwkTiUPN0mg,1.25:rsq9auxASqI,1.50:kMyNdzVHHgg'
         output = VideoBlock._parse_youtube(youtube_str)
-        assert output == {'0.75': 'jNCf2gIqpeE', '1.00': 'ZwkTiUPN0mg', '1.25': 'rsq9auxASqI', '1.50': 'kMyNdzVHHgg'}
+        assert output == {'1.00': 'ZwkTiUPN0mg'}
 
     def test_parse_youtube_one_video(self):
         """
-        Ensure that all keys are present and missing speeds map to the
+        Ensure that non-1.0 speed entries are ignored and missing 1.0 maps to
         empty string.
         """
         youtube_str = '0.75:jNCf2gIqpeE'
         output = VideoBlock._parse_youtube(youtube_str)
-        assert output == {'0.75': 'jNCf2gIqpeE', '1.00': '', '1.25': '', '1.50': ''}
+        assert output == {'1.00': ''}
 
     def test_parse_youtube_invalid(self):
         """Ensure that ids that are invalid return an empty dict"""
         # invalid id
         youtube_str = 'thisisaninvalidid'
         output = VideoBlock._parse_youtube(youtube_str)
-        assert output == {'0.75': '', '1.00': '', '1.25': '', '1.50': ''}
+        assert output == {'1.00': ''}
         # another invalid id
         youtube_str = ',::,:,,'
         output = VideoBlock._parse_youtube(youtube_str)
-        assert output == {'0.75': '', '1.00': '', '1.25': '', '1.50': ''}
+        assert output == {'1.00': ''}
 
-        # and another one, partially invalid
+        # and another one, partially invalid — only 1.0 speed is kept
         youtube_str = '0.75_BAD!!!,1.0:AXdE34_U,1.25:KLHF9K_Y,1.5:VO3SxfeD,'
         output = VideoBlock._parse_youtube(youtube_str)
-        assert output == {'0.75': '', '1.00': 'AXdE34_U', '1.25': 'KLHF9K_Y', '1.50': 'VO3SxfeD'}
+        assert output == {'1.00': 'AXdE34_U'}
 
     def test_parse_youtube_key_format(self):
         """
@@ -157,7 +157,7 @@ class VideoBlockTest(unittest.TestCase):
         Some courses have empty youtube attributes, so we should handle
         that well.
         """
-        assert VideoBlock._parse_youtube('') == {'0.75': '', '1.00': '', '1.25': '', '1.50': ''}
+        assert VideoBlock._parse_youtube('') == {'1.00': ''}
 
 
 class VideoBlockTestBase(unittest.TestCase):
@@ -203,11 +203,10 @@ class TestCreateYoutubeString(VideoBlockTestBase):
 
     def test_create_youtube_string_missing(self):
         """
-        Test that Youtube IDs which aren't explicitly set aren't included in the output string.
+        Test that an empty youtube_id_1_0 produces an empty string.
         """
-        self.block.youtube_id_1_0 = 'p2Q6BrNhdh8'
-        expected = "1.00:p2Q6BrNhdh8"
-        assert create_youtube_string(self.block) == expected
+        self.block.youtube_id_1_0 = ''
+        assert create_youtube_string(self.block) == ""
 
 
 class TestCreateYouTubeUrl(VideoBlockTestBase):
