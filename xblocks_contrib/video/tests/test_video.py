@@ -197,21 +197,16 @@ class TestCreateYoutubeString(VideoBlockTestBase):
         """
         Test that Youtube ID strings are correctly created when writing back out to XML.
         """
-        self.block.youtube_id_0_75 = 'izygArpw-Qo'
         self.block.youtube_id_1_0 = 'p2Q6BrNhdh8'
-        self.block.youtube_id_1_25 = '1EeWXzPdhSA'
-        self.block.youtube_id_1_5 = 'rABDYkeK0x8'
-        expected = "0.75:izygArpw-Qo,1.00:p2Q6BrNhdh8,1.25:1EeWXzPdhSA,1.50:rABDYkeK0x8"
+        expected = "1.00:p2Q6BrNhdh8"
         assert create_youtube_string(self.block) == expected
 
     def test_create_youtube_string_missing(self):
         """
         Test that Youtube IDs which aren't explicitly set aren't included in the output string.
         """
-        self.block.youtube_id_0_75 = 'izygArpw-Qo'
         self.block.youtube_id_1_0 = 'p2Q6BrNhdh8'
-        self.block.youtube_id_1_25 = '1EeWXzPdhSA'
-        expected = "0.75:izygArpw-Qo,1.00:p2Q6BrNhdh8,1.25:1EeWXzPdhSA"
+        expected = "1.00:p2Q6BrNhdh8"
         assert create_youtube_string(self.block) == expected
 
 
@@ -260,10 +255,7 @@ class VideoBlockImportTestCase(TestCase):
         '''
         block = instantiate_block(data=sample_xml)
         self.assert_attributes_equal(block, {
-            'youtube_id_0_75': 'izygArpw-Qo',
             'youtube_id_1_0': 'p2Q6BrNhdh8',
-            'youtube_id_1_25': '1EeWXzPdhSA',
-            'youtube_id_1_5': 'rABDYkeK0x8',
             'download_video': True,
             'show_captions': False,
             'start_time': datetime.timedelta(seconds=1),
@@ -296,10 +288,7 @@ class VideoBlockImportTestCase(TestCase):
         xml_object = etree.fromstring(xml_data)
         output = VideoBlock.parse_xml(xml_object, module_system, None)
         self.assert_attributes_equal(output, {
-            'youtube_id_0_75': 'izygArpw-Qo',
             'youtube_id_1_0': 'p2Q6BrNhdh8',
-            'youtube_id_1_25': '1EeWXzPdhSA',
-            'youtube_id_1_5': 'rABDYkeK0x8',
             'show_captions': False,
             'start_time': datetime.timedelta(seconds=1),
             'end_time': datetime.timedelta(seconds=60),
@@ -374,10 +363,7 @@ class VideoBlockImportTestCase(TestCase):
 
         output = VideoBlock.parse_xml(xml_object, module_system, None)
         self.assert_attributes_equal(output, {
-            'youtube_id_0_75': 'izygArpw-Qo',
             'youtube_id_1_0': 'p2Q6BrNhdh8',
-            'youtube_id_1_25': '1EeWXzPdhSA',
-            'youtube_id_1_5': 'rABDYkeK0x8',
             'show_captions': False,
             'start_time': datetime.timedelta(seconds=1),
             'end_time': datetime.timedelta(seconds=60),
@@ -406,10 +392,7 @@ class VideoBlockImportTestCase(TestCase):
         xml_object = etree.fromstring(xml_data)
         output = VideoBlock.parse_xml(xml_object, module_system, None)
         self.assert_attributes_equal(output, {
-            'youtube_id_0_75': '',
             'youtube_id_1_0': 'p2Q6BrNhdh8',
-            'youtube_id_1_25': '1EeWXzPdhSA',
-            'youtube_id_1_5': '',
             'show_captions': True,
             'start_time': datetime.timedelta(seconds=0.0),
             'end_time': datetime.timedelta(seconds=0.0),
@@ -438,10 +421,7 @@ class VideoBlockImportTestCase(TestCase):
         xml_object = etree.fromstring(xml_data)
         output = VideoBlock.parse_xml(xml_object, module_system, None)
         self.assert_attributes_equal(output, {
-            'youtube_id_0_75': '',
             'youtube_id_1_0': 'p2Q6BrNhdh8',
-            'youtube_id_1_25': '1EeWXzPdhSA',
-            'youtube_id_1_5': '',
             'show_captions': True,
             'start_time': datetime.timedelta(seconds=0.0),
             'end_time': datetime.timedelta(seconds=0.0),
@@ -462,10 +442,7 @@ class VideoBlockImportTestCase(TestCase):
         xml_object = etree.fromstring(xml_data)
         output = VideoBlock.parse_xml(xml_object, module_system, None)
         self.assert_attributes_equal(output, {
-            'youtube_id_0_75': '',
             'youtube_id_1_0': '3_yD_cEKoCk',
-            'youtube_id_1_25': '',
-            'youtube_id_1_5': '',
             'show_captions': True,
             'start_time': datetime.timedelta(seconds=0.0),
             'end_time': datetime.timedelta(seconds=0.0),
@@ -493,19 +470,13 @@ class VideoBlockImportTestCase(TestCase):
                 track="&quot;http://www.example.com/track&quot;"
                 handout="&quot;http://www.example.com/handout&quot;"
                 download_track="true"
-                youtube_id_0_75="&quot;OEoXaMPEzf65&quot;"
-                youtube_id_1_25="&quot;OEoXaMPEzf125&quot;"
-                youtube_id_1_5="&quot;OEoXaMPEzf15&quot;"
                 youtube_id_1_0="&quot;OEoXaMPEzf10&quot;"
                 />
         '''
         xml_object = etree.fromstring(xml_data)
         output = VideoBlock.parse_xml(xml_object, module_system, None)
         self.assert_attributes_equal(output, {
-            'youtube_id_0_75': 'OEoXaMPEzf65',
             'youtube_id_1_0': 'OEoXaMPEzf10',
-            'youtube_id_1_25': 'OEoXaMPEzf125',
-            'youtube_id_1_5': 'OEoXaMPEzf15',
             'show_captions': False,
             'start_time': datetime.timedelta(seconds=0.0),
             'end_time': datetime.timedelta(seconds=0.0),
@@ -527,10 +498,7 @@ class VideoBlockImportTestCase(TestCase):
         xml_object = etree.fromstring(xml_data)
         output = VideoBlock.parse_xml(xml_object, module_system, None)
         self.assert_attributes_equal(output, {
-            'youtube_id_0_75': '',
             'youtube_id_1_0': 'p2Q6BrNhdh8',
-            'youtube_id_1_25': '1EeWXzPdhSA',
-            'youtube_id_1_5': '',
             'show_captions': True,
             'start_time': datetime.timedelta(seconds=0.0),
             'end_time': datetime.timedelta(seconds=0.0),
@@ -561,10 +529,7 @@ class VideoBlockImportTestCase(TestCase):
         xml_object = etree.fromstring(xml_data)
         output = VideoBlock.parse_xml(xml_object, module_system, None)
         self.assert_attributes_equal(output, {
-            'youtube_id_0_75': 'izygArpw-Qo',
             'youtube_id_1_0': 'p2Q6BrNhdh8',
-            'youtube_id_1_25': '1EeWXzPdhSA',
-            'youtube_id_1_5': 'rABDYkeK0x8',
             'show_captions': False,
             'start_time': datetime.timedelta(seconds=1),
             'end_time': datetime.timedelta(seconds=60),
@@ -592,10 +557,7 @@ class VideoBlockImportTestCase(TestCase):
         xml_object = etree.fromstring(xml_data)
         video = VideoBlock.parse_xml(xml_object, module_system, None)
         self.assert_attributes_equal(video, {
-            'youtube_id_0_75': 'izygArpw-Qo',
             'youtube_id_1_0': 'p2Q6BrNhdh8',
-            'youtube_id_1_25': '1EeWXzPdhSA',
-            'youtube_id_1_5': 'rABDYkeK0x8',
             'show_captions': False,
             'start_time': datetime.timedelta(seconds=1),
             'end_time': datetime.timedelta(seconds=60),
@@ -623,10 +585,7 @@ class VideoBlockImportTestCase(TestCase):
         xml_object = etree.fromstring(xml_data)
         video = VideoBlock.parse_xml(xml_object, module_system, None)
         self.assert_attributes_equal(video, {
-            'youtube_id_0_75': 'izygArpw-Qo',
             'youtube_id_1_0': 'p2Q6BrNhdh8',
-            'youtube_id_1_25': '1EeWXzPdhSA',
-            'youtube_id_1_5': 'rABDYkeK0x8',
             'show_captions': False,
             'start_time': datetime.timedelta(seconds=1),
             'end_time': datetime.timedelta(seconds=60),
@@ -722,10 +681,7 @@ class VideoExportTestCase(VideoBlockTestBase):
         mock_val_api.export_to_xml = Mock(
             return_value={"xml": etree.Element('video_asset'), "transcripts": {}}
         )
-        self.block.youtube_id_0_75 = 'izygArpw-Qo'
         self.block.youtube_id_1_0 = 'p2Q6BrNhdh8'
-        self.block.youtube_id_1_25 = '1EeWXzPdhSA'
-        self.block.youtube_id_1_5 = 'rABDYkeK0x8'
         self.block.show_captions = False
         self.block.start_time = datetime.timedelta(seconds=1.0)
         self.block.end_time = datetime.timedelta(seconds=60)
@@ -747,7 +703,7 @@ class VideoExportTestCase(VideoBlockTestBase):
             end_time="0:01:00"
             download_video="true"
             download_track="true"
-            youtube="0.75:izygArpw-Qo,1.00:p2Q6BrNhdh8,1.25:1EeWXzPdhSA,1.50:rABDYkeK0x8"
+            youtube="1.00:p2Q6BrNhdh8"
             transcripts='{"ge": "german_translation.srt", "ua": "ukrainian_translation.srt"}'
          >
            <source src="http://www.example.com/source.mp4"/>
@@ -772,10 +728,7 @@ class VideoExportTestCase(VideoBlockTestBase):
         """
         Test that we write the correct XML on export of a video without edx_video_id.
         """
-        self.block.youtube_id_0_75 = 'izygArpw-Qo'
         self.block.youtube_id_1_0 = 'p2Q6BrNhdh8'
-        self.block.youtube_id_1_25 = '1EeWXzPdhSA'
-        self.block.youtube_id_1_5 = 'rABDYkeK0x8'
         self.block.show_captions = False
         self.block.start_time = datetime.timedelta(seconds=1.0)
         self.block.end_time = datetime.timedelta(seconds=60)
@@ -796,7 +749,7 @@ class VideoExportTestCase(VideoBlockTestBase):
             end_time="0:01:00"
             download_video="true"
             download_track="true"
-            youtube="0.75:izygArpw-Qo,1.00:p2Q6BrNhdh8,1.25:1EeWXzPdhSA,1.50:rABDYkeK0x8"
+            youtube="1.00:p2Q6BrNhdh8"
             transcripts='{"ge": "german_translation.srt", "ua": "ukrainian_translation.srt"}'
          >
            <source src="http://www.example.com/source.mp4"/>
@@ -829,10 +782,7 @@ class VideoExportTestCase(VideoBlockTestBase):
         """
         Test that we write the correct XML on export.
         """
-        self.block.youtube_id_0_75 = 'izygArpw-Qo'
         self.block.youtube_id_1_0 = 'p2Q6BrNhdh8'
-        self.block.youtube_id_1_25 = '1EeWXzPdhSA'
-        self.block.youtube_id_1_5 = 'rABDYkeK0x8'
         self.block.show_captions = False
         self.block.start_time = datetime.timedelta(seconds=5.0)
         self.block.end_time = datetime.timedelta(seconds=0.0)
@@ -845,7 +795,7 @@ class VideoExportTestCase(VideoBlockTestBase):
         parser = etree.XMLParser(remove_blank_text=True)
         xml_string = '''\
          <video url_name="SampleProblem" start_time="0:00:05"
-                youtube="0.75:izygArpw-Qo,1.00:p2Q6BrNhdh8,1.25:1EeWXzPdhSA,1.50:rABDYkeK0x8"
+                youtube="1.00:p2Q6BrNhdh8"
                 show_captions="false" download_video="true" download_track="true">
            <source src="http://www.example.com/source.mp4"/>
            <source src="http://www.example.com/source.ogg"/>
