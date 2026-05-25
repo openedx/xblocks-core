@@ -137,7 +137,7 @@ class VideoBlockTest(unittest.TestCase):
         assert output == {'1.00': 'jNCf2gIqpeE'}
 
     def test_parse_youtube_invalid(self):
-        """Ensure that ids that are invalid return an empty dict"""
+        """Ensure that invalid IDs return {'1.00': ''}"""
         # invalid id
         youtube_str = 'thisisaninvalidid'
         output = VideoBlock._parse_youtube(youtube_str)

@@ -117,7 +117,7 @@ class VideoBlock(
     XML source example::
 
         <video show_captions="true"
-            youtube="1.0:ZwkTiUPN0mg"
+            youtube="1.00:ZwkTiUPN0mg"
             url_name="lecture_21_3" display_name="S19V3: Vacancies"
         >
             <source src=".../mit-3091x/M-3091X-FA12-L21-3_100.mp4"/>
@@ -881,7 +881,7 @@ class VideoBlock(
             except (ValueError, IndexError):
                 log.warning('Invalid YouTube ID: %s', video)
 
-        # Use the 1.00 entry if present; otherwise fall back to the first non-empty speed
+        # Use the 1.00 entry if present; otherwise fall back to the lowest speed entry
         # to avoid silently losing a YouTube ID from legacy OLX that only specified
         # non-1.0 speed variants (e.g. youtube="0.75:abc").
         youtube_id_1_0 = parsed.get('1.00', '')
@@ -938,14 +938,10 @@ class VideoBlock(
             if attr in cls.metadata_to_strip + ('url_name', 'name'):
                 continue
             if attr == 'youtube':
-                speeds = cls._parse_youtube(value)
-                for speed, youtube_id in speeds.items():
-                    # should have made these youtube_id_1_00 for
-                    # cleanliness, but hindsight doesn't need glasses
-                    normalized_speed = speed[:-1] if speed.endswith('0') else speed
-                    # If the user has specified html5 sources, make sure we don't use the default video
-                    if youtube_id != '' or 'html5_sources' in field_data:
-                        field_data['youtube_id_{}'.format(normalized_speed.replace('.', '_'))] = youtube_id
+                youtube_id = cls._parse_youtube(value).get('1.00', '')
+                # If the user has specified html5 sources, make sure we don't use the default video
+                if youtube_id != '' or 'html5_sources' in field_data:
+                    field_data['youtube_id_1_0'] = youtube_id
             elif attr in conversions:
                 field_data[attr] = conversions[attr](value)
             elif attr not in cls.fields:  # lint-amnesty, pylint: disable=unsupported-membership-test
