@@ -121,12 +121,20 @@ class VideoBlockTest(unittest.TestCase):
 
     def test_parse_youtube_one_video(self):
         """
-        Ensure that non-1.0 speed entries are ignored and missing 1.0 maps to
-        empty string.
+        Ensure that a 1.0 entry is extracted correctly on its own.
+        """
+        youtube_str = '1.00:ZwkTiUPN0mg'
+        output = VideoBlock._parse_youtube(youtube_str)
+        assert output == {'1.00': 'ZwkTiUPN0mg'}
+
+    def test_parse_youtube_legacy_fallback(self):
+        """
+        Legacy OLX that only specifies non-1.0 speeds should not silently drop
+        the YouTube ID — the first non-empty speed should be promoted to 1.00.
         """
         youtube_str = '0.75:jNCf2gIqpeE'
         output = VideoBlock._parse_youtube(youtube_str)
-        assert output == {'1.00': ''}
+        assert output == {'1.00': 'jNCf2gIqpeE'}
 
     def test_parse_youtube_invalid(self):
         """Ensure that ids that are invalid return an empty dict"""

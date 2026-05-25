@@ -860,8 +860,12 @@ class VideoBlock(
         Parses a string of Youtube IDs such as "1.0:AXdE34_U,1.5:VO3SxfeD"
         into a dictionary. Necessary for backwards compatibility with
         XML-based courses.
+
+        Only the 1.00 speed key is returned. If no 1.00 entry is present in
+        the source string (legacy OLX with only non-1.0 speeds), the first
+        non-empty speed ID is used as a fallback so no YouTube ID is lost.
         """
-        ret = {'1.00': ''}
+        parsed = {}
 
         videos = data.split(',')
         for video in videos:
@@ -873,10 +877,18 @@ class VideoBlock(
                 # Note: we pass in "VideoFields.youtube_id_1_0" so we deserialize as a String--
                 # it doesn't matter what the actual speed is for the purposes of deserializing.
                 youtube_id = deserialize_field(cls.youtube_id_1_0, pieces[1])
-                ret[speed] = youtube_id
+                parsed[speed] = youtube_id
             except (ValueError, IndexError):
                 log.warning('Invalid YouTube ID: %s', video)
-        return ret
+
+        # Use the 1.00 entry if present; otherwise fall back to the first non-empty speed
+        # to avoid silently losing a YouTube ID from legacy OLX that only specified
+        # non-1.0 speed variants (e.g. youtube="0.75:abc").
+        youtube_id_1_0 = parsed.get('1.00', '')
+        if not youtube_id_1_0:
+            youtube_id_1_0 = next((v for _, v in sorted(parsed.items()) if v), '')
+
+        return {'1.00': youtube_id_1_0}
 
     @classmethod
     def parse_video_xml(cls, xml, id_generator=None):
