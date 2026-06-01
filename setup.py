@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Package metadata for xblocks-contrib.
+Package metadata for xblocks-core.
 """
 import os
 import re
@@ -117,7 +117,7 @@ def is_requirement(line):
     return line and line.strip() and not line.startswith(("-r", "#", "-e", "git+", "-c"))
 
 
-VERSION = get_version("xblocks_contrib", "__init__.py")
+VERSION = get_version("src", "xblocks_core", "__init__.py")
 
 if sys.argv[-1] == "tag":
     print("Tagging the version on github:")
@@ -129,17 +129,15 @@ README = open(os.path.join(os.path.dirname(__file__), "README.rst"), encoding="u
 CHANGELOG = open(os.path.join(os.path.dirname(__file__), "CHANGELOG.rst"), encoding="utf8").read()
 
 setup(
-    name="xblocks-contrib",
+    name="xblocks-core",
     version=VERSION,
     description="""core xblocks""",
     long_description=README + "\n\n" + CHANGELOG,
     author="Open edX Project",
     author_email="oscm@openedx.org",
-    url="https://github.com/openedx/xblocks-contrib",
-    packages=find_packages(
-        include=["xblocks_contrib", "xblocks_contrib.*", "xblock_pdf"],
-        exclude=["*tests"],
-    ),
+    url="https://github.com/openedx/xblocks-core",
+    packages=find_packages("src"),
+    package_dir={"": "src"},
     include_package_data=True,
     install_requires=load_requirements("requirements/base.in"),
     python_requires=">=3.12",
@@ -147,7 +145,7 @@ setup(
     zip_safe=False,
     keywords="Python edx",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
         "Natural Language :: English",
@@ -157,14 +155,14 @@ setup(
     entry_points={
         "xblock.v1": [
             # _extracted suffix is added for testing only.
-            "_annotatable_extracted = xblocks_contrib:AnnotatableBlock",
-            "_discussion_extracted = xblocks_contrib:DiscussionXBlock",
-            "_html_extracted = xblocks_contrib:HtmlBlock",
-            "_lti_extracted = xblocks_contrib:LTIBlock",
-            "_poll_question_extracted = xblocks_contrib:PollBlock",
-            "_problem_extracted = xblocks_contrib:ProblemBlock",
-            "_video_extracted = xblocks_contrib:VideoBlock",
-            "_word_cloud_extracted = xblocks_contrib:WordCloudBlock",
+            "_annotatable_extracted = xblock_annotatable:AnnotatableBlock",
+            "_discussion_extracted = xblock_discussion:DiscussionXBlock",
+            "_html_extracted = xblock_html:HtmlBlock",
+            "_lti_extracted = xblock_lti:LTIBlock",
+            "_poll_question_extracted = xblock_poll_question:PollBlock",
+            "_problem_extracted = xblock_problem:ProblemBlock",
+            "_video_extracted = xblock_video:VideoBlock",
+            "_word_cloud_extracted = xblock_word_cloud:WordCloudBlock",
             # 'Done' XBlocks-- ones that are ready for general use today,
             # and have been migrated fully from edx-platform or their original
             # repository.
@@ -173,12 +171,12 @@ setup(
         # Dynamically inject the CAPA problem module as a Django app
         # so edx-platform natively discovers the templates/ directory.
         "lms.djangoapp": [
-            "xblocks_contrib_problem_capa = xblocks_contrib.problem.capa.apps:CapaAppConfig",
-            "xblocks_contrib_discussion = xblocks_contrib.discussion.apps:DiscussionAppConfig",
+            "xblock_problem_capa = xblock_problem.capa.apps:CapaAppConfig",
+            "xblock_discussion = xblock_discussion.apps:DiscussionAppConfig",
         ],
         "cms.djangoapp": [
-            "xblocks_contrib_problem_capa = xblocks_contrib.problem.capa.apps:CapaAppConfig",
-            "xblocks_contrib_discussion = xblocks_contrib.discussion.apps:DiscussionAppConfig",
+            "xblock_problem_capa = xblock_problem.capa.apps:CapaAppConfig",
+            "xblock_discussion = xblock_discussion.apps:DiscussionAppConfig",
         ],
     },
 )
