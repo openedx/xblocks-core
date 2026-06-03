@@ -28,6 +28,7 @@ __pycache__/
 wheels/
 pip-wheel-metadata/
 
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
@@ -44,6 +45,7 @@ htmlcov/
 coverage/
 test-results/
 junit.xml
+TESTS.xml
 
 # Virtual environments
 /venv/
@@ -116,7 +118,9 @@ stats.json
 
 *.hot-update.*
 *.map
+**/*.tsbuildinfo
 
 # Karma
 .karma/
 **/.karma/
+
