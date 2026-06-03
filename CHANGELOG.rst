@@ -14,6 +14,13 @@ Change Log
 Unreleased
 **********
 
+0.17.0 - 2026-06-03
+**********************************************
+
+Removed
+=======
+* Studio view for PDF. This is now handled by the react authoring frontend
+
 0.16.0 - 2026-04-21
 **********************************************
 
