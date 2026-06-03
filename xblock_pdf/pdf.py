@@ -95,7 +95,7 @@ class PDFBlock(XBlock):
         """Return a fragment that contains the html for the studio view."""
         # Only the ReactJS editor is supported for this block.
         # See https://github.com/openedx/frontend-app-authoring/tree/master/src/editors/containers/PdfEditor
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @XBlock.json_handler
     def on_download(self, data, suffix=''):  # pylint: disable=unused-argument

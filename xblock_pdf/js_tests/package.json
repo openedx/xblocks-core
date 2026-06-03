@@ -1,0 +1,19 @@
+{
+  "name": "pdf-block",
+  "version": "1.0.0",
+  "scripts": {
+    "setup-tests": "playwright install",
+    "check": "tsc --noEmit",
+    "test": "npm run check && vitest run",
+    "test-ci": "npm run check && vitest run --browser.headless"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@vitest/browser-playwright": "^4.1.8",
+    "@types/jquery": "^4.0.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
+  }
+}
