@@ -31,7 +31,7 @@ The possible XBlock statuses are:
 
 * In Development: We're building and testing this block.
 * Ready to Use: You can try this on your site using the Waffle flag.
-* Done: The built-in block has been removed. The setup.py entrypoint has been removed from edx-platform and added to xblock-contrib.
+* Done: The built-in block has been removed. The ``pyproject.toml`` entry-point has been removed from edx-platform and added to xblock-contrib.
 
 
 Additional XBlocks that belong here
@@ -50,6 +50,29 @@ Over time, more XBlocks may be moved here. An XBlock belongs here if and only if
 
 Installation and Development Guide
 **********************************
+
+Python Setup
+------------
+
+This project uses `uv <https://docs.astral.sh/uv/>`_ for dependency management.
+
+1. `Install uv <https://docs.astral.sh/uv/getting-started/installation/>`_.
+2. Install all development dependencies::
+
+    $ make requirements
+
+   This runs ``uv sync --group dev`` and installs the package in editable mode.
+
+3. Run the test suite::
+
+    $ uv run tox
+
+4. To upgrade all dependencies::
+
+    $ make upgrade
+
+Frontend Setup
+--------------
 
 Study scripts in the ``package.json`` file to understand the available commands.
 
