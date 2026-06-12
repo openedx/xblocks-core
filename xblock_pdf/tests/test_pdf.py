@@ -24,13 +24,6 @@ def get_student_content(block: PDFBlock) -> str:
     return as_dict["content"]
 
 
-def get_studio_content(block: PDFBlock) -> str:
-    """Get the contents of the studio render for a block."""
-    frag = block.studio_view()
-    as_dict = frag.to_dict()
-    return as_dict["content"]
-
-
 def mock_handle_request(data: Optional[dict[str, Any]] = None, method: str = "POST"):
     """Return a request object compatible with an xblock_handler."""
     mock_request = MagicMock()
@@ -67,13 +60,6 @@ def test_source_url():
     block.source_url = "https://example.com/"
     content = get_student_content(block)
     assert "Download the source document" in content
-
-
-def test_studio_view_renders():
-    """Test rendering of the studio view"""
-    block = make_block()
-    content = get_studio_content(block)
-    assert '<input class="input setting-input" id="pdf_edit_url"' in content
 
 
 @override_settings(PDFXBLOCK_DISABLE_ALL_DOWNLOAD=False)

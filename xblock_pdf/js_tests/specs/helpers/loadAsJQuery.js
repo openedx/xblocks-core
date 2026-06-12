@@ -1,0 +1,1 @@
+pdfXBlockInitView(Runtime, $('#xblock'))
