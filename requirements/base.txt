@@ -31,7 +31,7 @@ click==8.4.1
     #   nltk
 code-annotations==3.0.0
     # via edx-toggles
-cryptography==48.0.1
+cryptography==49.0.0
     # via pyjwt
 defusedxml==0.7.1
     # via -r requirements/base.in
@@ -240,7 +240,7 @@ webob==1.8.10
     #   xblock
 wrapt==2.2.1
     # via -r requirements/base.in
-xblock==6.2.0
+xblock==6.3.0
     # via -r requirements/base.in
 
 # The following packages are considered to be unsafe in a requirements file:
