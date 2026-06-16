@@ -1,5 +1,7 @@
 /* eslint-disable */
 
+import $ from 'jquery';
+
 //////////////////////////////////////////////////////////////////////////////
 //
 //  Circuit simulator
@@ -13,7 +15,7 @@
 // for modified nodal analysis (MNA) stamps see
 // http://www.analog-electronics.eu/analog-electronics/modified-nodal-analysis/modified-nodal-analysis.xhtml
 
-var cktsim = (function () {
+const cktsim = (function () {
   ///////////////////////////////////////////////////////////////////////////////
   //
   //  Circuit
@@ -1978,7 +1980,7 @@ function update_schematics() {
 }
 window.update_schematics = update_schematics;
 
-schematic = (function () {
+const schematic = (function () {
   var background_style = "rgb(220,220,220)";
   var element_style = "rgb(255,255,255)";
   var thumb_style = "rgb(128,128,128)";
@@ -6289,3 +6291,6 @@ schematic = (function () {
   };
   return module;
 })();
+
+export { update_schematics, schematic };
+export default schematic;

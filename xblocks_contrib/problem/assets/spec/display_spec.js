@@ -4,9 +4,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import Problem from '../static/js/display.js';
+
 describe("Problem", function () {
   const problem_content_default = readFixtures("problem_content.html");
-  var mockRuntime = {};
 
   beforeEach(function () {
     // Stub MathJax
@@ -37,7 +38,7 @@ describe("Problem", function () {
 
   describe("constructor", function () {
     it("set the element from html", function () {
-      this.problem999 = new Problem(mockRuntime,`\
+      this.problem999 = new Problem(`\
 <section class='xblock xblock-student_view xmodule_display xmodule_CapaModule' data-type='Problem'> \
 <section id='problem_999' \
 class='problems-wrapper' \
@@ -50,7 +51,7 @@ data-url='/problem/quiz/'> \
     });
 
     it("set the element from loadFixtures", function () {
-      this.problem1 = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem1 = new Problem($(".xblock-student_view"));
       expect(this.problem1.element_id).toBe("problem_1");
     });
   });
@@ -59,7 +60,7 @@ data-url='/problem/quiz/'> \
     beforeEach(function () {
       spyOn(window, "update_schematics");
       MathJax.Hub.getAllJax.and.returnValue([this.stubbedJax]);
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
     });
 
     it("set mathjax typeset", () => expect(MathJax.Hub.Queue).toHaveBeenCalled());
@@ -95,7 +96,7 @@ data-url='/problem/quiz/'> \
     beforeEach(function () {
       spyOn(window, "update_schematics");
       MathJax.Hub.getAllJax.and.returnValue([this.stubbedJax]);
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
       return $(this).html(readFixtures("problem_content_1240.html"));
     });
 
@@ -110,7 +111,7 @@ data-url='/problem/quiz/'> \
 
   describe("renderProgressState", function () {
     beforeEach(function () {
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
     });
 
     const testProgessData = function (
@@ -213,7 +214,7 @@ data-url='/problem/quiz/'> \
 
   describe("render", function () {
     beforeEach(function () {
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
       this.bind = this.problem.bind;
       spyOn(this.problem, "bind");
     });
@@ -252,7 +253,7 @@ data-url='/problem/quiz/'> \
     beforeEach(function () {
       // Insert an input of type file outside of the problem.
       $(".xblock-student_view").after('<input type="file" />');
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
       spyOn(this.problem, "submit");
     });
 
@@ -264,7 +265,7 @@ data-url='/problem/quiz/'> \
 
   describe("submit", function () {
     beforeEach(function () {
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
       this.problem.answers = "foo=1&bar=2";
     });
 
@@ -410,7 +411,7 @@ data-url='/problem/quiz/'> \
 
   describe("submit button on problems", function () {
     beforeEach(function () {
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
       this.submitDisabled = (disabled) => {
         if (disabled) {
           expect(this.problem.submitButton).toHaveAttr("disabled");
@@ -496,7 +497,7 @@ data-url='/problem/quiz/'> \
 
   describe("reset", function () {
     beforeEach(function () {
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
     });
 
     it("log the problem_reset event", function () {
@@ -604,7 +605,7 @@ data-url='/problem/quiz/'> \
 
   describe("show problem with column in id", function () {
     beforeEach(function () {
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
       this.problem.el.prepend('<div id="answer_1_1:11" /><div id="answer_1_2:12" />');
     });
 
@@ -637,7 +638,7 @@ data-url='/problem/quiz/'> \
 
   describe("show", function () {
     beforeEach(function () {
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
       this.problem.el.prepend('<div id="answer_1_1" /><div id="answer_1_2" />');
     });
 
@@ -740,7 +741,7 @@ data-url='/problem/quiz/'> \
         };
 
         beforeEach(function () {
-          this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+          this.problem = new Problem($(".xblock-student_view"));
           this.problem.el.prepend(_.template(imageinput_html)(DEFAULTS));
         });
 
@@ -904,7 +905,7 @@ data-url='/problem/quiz/'> \
 
   describe("save", function () {
     beforeEach(function () {
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
       this.problem.answers = "foo=1&bar=2";
     });
 
@@ -994,7 +995,16 @@ data-url='/problem/quiz/'> \
 
   describe("refreshMath", function () {
     beforeEach(function () {
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
+      // Reset Queue spy so that bind()'s Queue call ([fn, null, domEl]) is not
+      // included when toHaveBeenCalledWith scans recorded calls. In Jasmine 2.99,
+      // toHaveBeenCalledWith iterates ALL recorded calls' args element-by-element
+      // (even mismatched ones, for diff output). jasmine-jquery's custom equality
+      // tester calls $(domEl).is(anyString) when comparing a DOM node against a
+      // string — which throws a Sizzle syntax error if the string isn't a valid
+      // CSS selector (e.g. "E=mc^2"). Resetting here isolates this describe to
+      // testing only what refreshMath itself queues.
+      MathJax.Hub.Queue.calls.reset();
       $("#input_example_1").val("E=mc^2");
       this.problem.refreshMath({ target: $("#input_example_1").get(0) });
     });
@@ -1009,7 +1019,7 @@ data-url='/problem/quiz/'> \
 
   describe("updateMathML", function () {
     beforeEach(function () {
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
       this.stubbedJax.root.toMathML.and.returnValue("<MathML>");
     });
 
@@ -1037,7 +1047,7 @@ data-url='/problem/quiz/'> \
 
   describe("refreshAnswers", function () {
     beforeEach(function () {
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
       this.problem.el.html(`\
 <textarea class="CodeMirror" />
 <input id="input_1_1" name="input_1_1" class="schematic" value="one" />
@@ -1065,7 +1075,7 @@ data-url='/problem/quiz/'> \
     const jsinput_html = readFixtures("jsinput_problem.html");
 
     beforeEach(function () {
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
       this.problem.render(jsinput_html);
     });
 
@@ -1081,7 +1091,7 @@ data-url='/problem/quiz/'> \
     beforeEach(function () {
       spyOn($, "postWithPrefix").and.callFake((url, callback) => callback({ html: matlabinput_html }));
       jasmine.clock().install();
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
       spyOn(this.problem, "poll").and.callThrough();
       this.problem.render(matlabinput_html);
     });
@@ -1116,7 +1126,7 @@ data-url='/problem/quiz/'> \
 
     beforeEach(function () {
       spyOn($, "postWithPrefix").and.callFake((url, callback) => callback({ html: codeinputProblemHtml }));
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
       this.problem.render(codeinputProblemHtml);
     });
 
@@ -1140,7 +1150,7 @@ data-url='/problem/quiz/'> \
     const checkboxProblemHtml = readFixtures("checkbox_problem.html");
 
     beforeEach(function () {
-      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      this.problem = new Problem($(".xblock-student_view"));
 
       this.checkAssertionsAfterClickingAnotherOption = () => {
         // verify that 'show answer button is no longer disabled'
