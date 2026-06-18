@@ -1,5 +1,3 @@
-import Collapsible from '../static/js/collapsible.js';
-
 describe("Collapsible", function () {
   let $el;
   const initialize = function (template) {

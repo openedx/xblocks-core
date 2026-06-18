@@ -5,9 +5,6 @@
  * ~ Donald Knuth
  */
 
-import $ from 'jquery';
-import ImageInput from '../static/js/imageinput.js';
-
 describe('ImageInput', function() {
   let state;
 

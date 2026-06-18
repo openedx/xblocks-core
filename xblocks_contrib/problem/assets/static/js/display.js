@@ -5,8 +5,6 @@
 // the max line length of 120.
 /* eslint max-len: ["error", 120, { "ignoreComments": true }] */
 
-import $ from 'jquery';
-
 function Problem(runtime, element) { // eslint-disable-line no-unused-vars
   this.hint_button = this.hint_button.bind(this);
   this.enableSubmitButtonAfterTimeout = this.enableSubmitButtonAfterTimeout.bind(this);
@@ -1268,4 +1266,3 @@ Problem.prototype.hint_button = function () {
 };
 
 window.Problem = Problem;
-export default Problem;

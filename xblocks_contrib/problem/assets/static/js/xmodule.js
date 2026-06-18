@@ -1,5 +1,3 @@
-import $ from 'jquery';
-
 const XModule = {};
 
 XModule.Descriptor = (function () {
@@ -92,5 +90,3 @@ const XBlockToXModuleShim = function (runtime, element, initArgs) {
 
 window.XModule = XModule;
 window.XBlockToXModuleShim = XBlockToXModuleShim;
-export { XBlockToXModuleShim };
-export default XModule;

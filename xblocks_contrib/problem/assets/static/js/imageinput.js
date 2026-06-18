@@ -4,8 +4,6 @@
  * Click on image. Update the coordinates of a dot on the image.
  * The new coordinates are the location of the click.
  */
-import $ from 'jquery';
-
 class ImageInput {
   constructor(elementId) {
     this.el = $(`#imageinput_${elementId}`);
@@ -33,4 +31,3 @@ class ImageInput {
 }
 
 window.ImageInput = ImageInput;
-export default ImageInput;

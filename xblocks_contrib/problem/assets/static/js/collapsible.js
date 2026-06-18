@@ -1,5 +1,3 @@
-import $ from 'jquery';
-
 // [module Collapsible]
 //
 // [description]
@@ -106,4 +104,3 @@ function toggleHint(event) {
 }
 
 window.Collapsible = Collapsible;
-export default Collapsible;

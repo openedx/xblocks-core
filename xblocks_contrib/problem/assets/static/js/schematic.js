@@ -1,6 +1,5 @@
 /* eslint-disable */
 
-import $ from 'jquery';
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -6292,5 +6291,3 @@ const schematic = (function () {
   return module;
 })();
 
-export { update_schematics, schematic };
-export default schematic;

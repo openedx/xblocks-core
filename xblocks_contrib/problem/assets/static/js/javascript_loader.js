@@ -1,5 +1,3 @@
-import $ from 'jquery';
-
 /**
  * Set of library functions that provide common interface for javascript loading
  * for all module types. All functionality provided by JavascriptLoader should take
@@ -86,4 +84,3 @@ JavascriptLoader.executeModuleScripts = function (el, callback) {
 };
 
 window.JavascriptLoader = JavascriptLoader;
-export default JavascriptLoader;

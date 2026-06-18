@@ -1,5 +1,3 @@
-import Problem from '../static/js/display.js';
-
 describe("Problem", function () {
   const problem_content_default = readFixtures("problem_content.html");
 
