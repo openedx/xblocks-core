@@ -105,40 +105,9 @@ module.exports = {
                 test: /\.(js|jsx)$/,
                 exclude: [
                     /node_modules/,
-                    /\/static\/js\/(?!(display|imageinput|schematic)\.js|vendor\/codemirror-compressed\.js)/
+                    /\/static\/js\/(?!(display|imageinput|schematic|collapsible|javascript_loader|xmodule)\.js|vendor\/codemirror-compressed\.js)/
                 ],
                 use: 'babel-loader'
-            },
-            {
-                test: /static\/js\/collapsible.js/,
-                use: [
-                    {
-                        loader: 'imports-loader',
-                        options: 'this=>window'
-                    }
-                ]
-            },
-            {
-                test: /static\/js\/javascript_loader.js/,
-                use: [
-                    {
-                        loader: 'imports-loader',
-                        options: 'this=>window'
-                    }
-                ]
-            },
-            {
-                test: /static\/js\/xmodule.js/,
-                use: [
-                    {
-                        loader: 'exports-loader',
-                        options: 'window.XModule'
-                    },
-                    {
-                        loader: 'imports-loader',
-                        options: 'this=>window'
-                    }
-                ]
             },
             {
                 test: /codemirror/,

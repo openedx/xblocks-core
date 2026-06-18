@@ -7,7 +7,7 @@
 
 import $ from 'jquery';
 
-function Problem(element) {
+function Problem(runtime, element) { // eslint-disable-line no-unused-vars
   this.hint_button = this.hint_button.bind(this);
   this.enableSubmitButtonAfterTimeout = this.enableSubmitButtonAfterTimeout.bind(this);
   this.enableSubmitButtonAfterResponse = this.enableSubmitButtonAfterResponse.bind(this);
@@ -432,7 +432,7 @@ Problem.prototype.submit_fd = function () {
   const that = this;
   let abortSubmission,
     error,
-    errorHtml,
+    errorHtml = "",
     fileTooLarge,
     fileNotSelected,
     requiredFilesNotSubmitted,
@@ -516,7 +516,6 @@ Problem.prototype.submit_fd = function () {
   if (fileNotSelected) {
     errors.push(gettext("You did not select any files to submit."));
   }
-  errorHtml = "";
   for (let i = 0, len = errors.length; i < len; i++) {
     error = errors[i];
     errorHtml = edx.HtmlUtils.joinHtml(
