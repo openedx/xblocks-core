@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: upgrade help requirements
+.PHONY: upgrade help requirements lint format test docs
 .PHONY: extract_translations compile_translations
 .PHONY: detect_changed_source_translations dummy_translations build_dummy_translations
 .PHONY: validate_translations pull_translations push_translations install_transifex_clients
@@ -13,12 +13,26 @@ JS_TARGET := $(PACKAGE_NAME)/public/js/translations
 help:
 	@perl -nle'print $& if m{^[\.a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m  %-25s\033[0m %s\n", $$1, $$2}'
 
+lint: ## run linting checks
+	tox -e quality
+
+format: ## auto-fix ruff lint and formatting issues
+	uv run ruff check --fix .
+	uv run ruff format .
+
+test: ## run tests against all supported Python/Django combinations
+	tox -e "py312-django{42,52}"
+
+docs: ## build documentation
+	tox -e docs
+
 upgrade: ## update uv.lock and regenerate uv constraints from edx-lint
 	uv run --with edx-lint edx_lint write_uv_constraints pyproject.toml
 	uv lock --upgrade
 
 requirements: ## install development environment requirements using uv
 	uv sync --group dev
+	uv tool install tox --with tox-uv
 
 # XBlock directories
 XBLOCKS=$(shell find $(shell pwd)/$(PACKAGE_NAME) -mindepth 2 -maxdepth 2 -type d -name 'conf' -exec dirname {} \;)

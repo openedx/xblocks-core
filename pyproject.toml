@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools-scm"]
+requires = ["setuptools>=64", "setuptools-scm>=8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -19,6 +19,9 @@ classifiers = [
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.2",
 ]
 requires-python = ">=3.12"
 dependencies = [
@@ -97,11 +100,7 @@ django42 = [
 ]
 quality = [
     { include-group = "test" },
-    "edx-lint",
-    "isort",
-    "pycodestyle",
-    "pydocstyle",
-    "pylint",
+    "ruff",
 ]
 doc = [
     { include-group = "test" },
@@ -139,12 +138,15 @@ uv_constraints = [
     "setuptools<=80.9.0",
 ]
 
-[tool.isort]
-include_trailing_comma = true
-indent = "    "
-line_length = 120
-multi_line_output = 3
-skip = ["migrations"]
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.ruff.format]
+quote-style = "double"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "test_settings"
@@ -152,12 +154,18 @@ django_find_project = false
 addopts = "--cov xblocks_contrib --cov xblock_pdf --cov-report term-missing --cov-report xml"
 norecursedirs = [".*", "docs", "requirements", "site-packages"]
 
-[tool.pycodestyle]
-exclude = ".git,.tox,migrations"
-max-line-length = 120
+[tool.coverage.run]
+branch = true
+source = [
+    "xblocks_contrib",
+    "xblock_pdf",
+]
 
-[tool.pydocstyle]
-match-dir = "(?!migrations)"
+[tool.coverage.report]
+fail_under = 70
+
+[tool.coverage.html]
+directory = "htmlcov"
 
 [tool.doc8]
 # D001 = Line too long
