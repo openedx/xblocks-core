@@ -58,15 +58,15 @@ class TestWordCloudBlock(TestCase):
         self.assertTrue(state["submitted"])
         self.assertEqual(
             state["top_words"],
-            [{'text': 'Banana', 'size': 21, 'percent': 29}, {'text': 'Strawberry', 'size': 28, 'percent': 71}]
+            [{"text": "Banana", "size": 21, "percent": 29}, {"text": "Strawberry", "size": 28, "percent": 71}],
         )
-        self.assertEqual(state['total_count'], 73)
+        self.assertEqual(state["total_count"], 73)
 
     def test_submit_state_first_time(self):
         self.block.submitted = False
         data = {"student_words": ["hello", "world", "hello"]}
         response = self.block.submit_state(data)
-        self.assertEqual(response['status'], 'success')
+        self.assertEqual(response["status"], "success")
         self.assertTrue(self.block.submitted)
         self.assertEqual(self.block.student_words, ["hello", "world", "hello"])
         self.assertEqual(self.block.all_words["hello"], 2)

@@ -20,8 +20,7 @@ def test_send_to_queue_with_flag_enabled(mock_send_to_submission):
     header = json.dumps(
         {
             "lms_callback_url": (
-                "http://example.com/courses/course-v1:test_org+test_course+test_run/"
-                "xqueue/block@item_id/type@problem"
+                "http://example.com/courses/course-v1:test_org+test_course+test_run/xqueue/block@item_id/type@problem"
             ),
             "lms_key": "default",
         }
@@ -52,8 +51,7 @@ def test_send_to_queue_with_flag_disabled(mock_http_post):
     header = json.dumps(
         {
             "lms_callback_url": (
-                "http://example.com/courses/course-v1:test_org+test_course+test_run/"
-                "xqueue/block@item_id/type@problem"
+                "http://example.com/courses/course-v1:test_org+test_course+test_run/xqueue/block@item_id/type@problem"
             ),
             "lms_key": "default",
         }

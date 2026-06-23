@@ -250,9 +250,9 @@ class ProblemBlockTest(unittest.TestCase):
 
         other_block = CapaFactory.create()
         assert block.get_score().raw_earned == 0
-        assert (
-            block.usage_key.block_id != other_block.usage_key.block_id
-        ), "Factory should be creating unique names for each problem"
+        assert block.usage_key.block_id != other_block.usage_key.block_id, (
+            "Factory should be creating unique names for each problem"
+        )
 
     def test_correct(self):
         """
@@ -1402,7 +1402,6 @@ class ProblemBlockTest(unittest.TestCase):
         # Try each exception that capa_block should handle
         exception_classes = [StudentInputError, LoncapaProblemError, ResponseError]
         for exception_class in exception_classes:
-
             # Create the block
             block = CapaFactory.create(attempts=1, user_is_staff=False)
 
@@ -1715,7 +1714,6 @@ class ProblemBlockTest(unittest.TestCase):
         with patch.object(
             ProblemBlock, "get_rescore_with_grading_method", wraps=block.get_rescore_with_grading_method
         ) as mock_get_rescore:
-
             block.rescore(only_if_higher=False)
 
             assert block.attempts == 0
@@ -2653,7 +2651,6 @@ class ProblemBlockTest(unittest.TestCase):
         # Otherwise, we expect the seed to change
         # to another valid seed
         else:
-
             # Since there's a small chance (expected) we might get the
             # same seed again, give it 60 chances
             # to generate a different seed

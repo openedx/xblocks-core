@@ -100,16 +100,14 @@ def test_send_to_submission(mock_create_external_grader_detail, xqueue_service):
 
 @pytest.mark.django_db
 @patch("submissions.api.create_external_grader_detail")
-def test_send_to_submission_with_missing_fields(
-    mock_create_external_grader_detail, xqueue_service
-):  # pylint: disable=redefined-outer-name
+def test_send_to_submission_with_missing_fields(mock_create_external_grader_detail, xqueue_service):  # pylint: disable=redefined-outer-name
     """
     Test send_to_submission with missing required fields.
     """
     header = json.dumps(
         {
             "lms_callback_url": (
-                "http://example.com/courses/course-v1:test_org+test_course+test_run/xqueue/5/" "block@item_id/"
+                "http://example.com/courses/course-v1:test_org+test_course+test_run/xqueue/5/block@item_id/"
             )
         }
     )

@@ -132,7 +132,7 @@ class TargetedFeedbackRenderer:
         # xss-lint: disable=python-wrap-html
         html_str = (
             f'<section class="targeted-feedback-span">'
-            f'<span>{etree.tostring(self.xml, encoding="unicode")}</span>'
+            f"<span>{etree.tostring(self.xml, encoding='unicode')}</span>"
             f"</section>"
         )
         try:

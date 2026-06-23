@@ -116,10 +116,8 @@ class TestSafeOrNot(unittest.TestCase):
         """
         # If in-platform codejail isn't configured...
         if not jail_code.is_configured("python"):
-
             # ...AND if remote codejail isn't configured...
             if not is_codejail_rest_service_enabled():
-
                 # ...then skip this test.
                 pytest.skip(reason="Local or remote codejail has to be configured and enabled to run this test.")
 

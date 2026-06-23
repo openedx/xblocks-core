@@ -84,9 +84,9 @@ from xblocks_contrib.legacy_utils.xml_utils import LegacyXmlMixin
 from .lti_2_util import LTI20BlockMixin, LTIError
 
 # The anonymous user ID for the user in the course.
-ATTR_KEY_ANONYMOUS_USER_ID = 'edx-platform.anonymous_user_id'
+ATTR_KEY_ANONYMOUS_USER_ID = "edx-platform.anonymous_user_id"
 # The user's role in the course ('staff', 'instructor', or 'student').
-ATTR_KEY_USER_ROLE = 'edx-platform.user_role'
+ATTR_KEY_USER_ROLE = "edx-platform.user_role"
 
 resource_loader = ResourceLoader(__name__)
 
@@ -96,7 +96,7 @@ DOCS_ANCHOR_TAG_OPEN = (
     "<a rel='noopener' target='_blank' "
     "href='https://edx.readthedocs.io/projects/edx-partner-course-staff/en/latest/exercises_tools/lti_component.html'>"
 )
-BREAK_TAG = '<br />'
+BREAK_TAG = "<br />"
 
 
 class LTIFields:
@@ -119,7 +119,8 @@ class LTIFields:
 
         https://github.com/idan/oauthlib/blob/master/oauthlib/oauth1/rfc5849/signature.py#L136
     """
-    data = String(default='', scope=Scope.content)
+
+    data = String(default="", scope=Scope.content)
 
     display_name = String(
         display_name=_("Display Name"),
@@ -133,47 +134,56 @@ class LTIFields:
 
     lti_id = String(
         display_name=_("LTI ID"),
-        help=markupsafe.escape(_(
-            "Enter the LTI ID for the external LTI provider.  "
-            "This value must be the same LTI ID that you entered in the "
-            "LTI Passports setting on the Advanced Settings page."
-            "{break_tag}See {docs_anchor_open}the edX LTI documentation{anchor_close} for more details on this setting."
-        )).format(
+        help=markupsafe.escape(
+            _(
+                "Enter the LTI ID for the external LTI provider.  "
+                "This value must be the same LTI ID that you entered in the "
+                "LTI Passports setting on the Advanced Settings page."
+                "{break_tag}See {docs_anchor_open}the edX LTI documentation"
+                "{anchor_close} for more details on this setting."
+            )
+        ).format(
             break_tag=markupsafe.Markup(BREAK_TAG),
             docs_anchor_open=markupsafe.Markup(DOCS_ANCHOR_TAG_OPEN),
-            anchor_close=markupsafe.Markup("</a>")
+            anchor_close=markupsafe.Markup("</a>"),
         ),
-        default='',
-        scope=Scope.settings
+        default="",
+        scope=Scope.settings,
     )
 
     launch_url = String(
         display_name=_("LTI URL"),
-        help=markupsafe.escape(_(
-            "Enter the URL of the external tool that this component launches. "
-            "This setting is only used when Hide External Tool is set to False."
-            "{break_tag}See {docs_anchor_open}the edX LTI documentation{anchor_close} for more details on this setting."
-        )).format(
+        help=markupsafe.escape(
+            _(
+                "Enter the URL of the external tool that this component launches. "
+                "This setting is only used when Hide External Tool is set to False."
+                "{break_tag}See {docs_anchor_open}the edX LTI documentation"
+                "{anchor_close} for more details on this setting."
+            )
+        ).format(
             break_tag=markupsafe.Markup(BREAK_TAG),
             docs_anchor_open=markupsafe.Markup(DOCS_ANCHOR_TAG_OPEN),
-            anchor_close=markupsafe.Markup("</a>")
+            anchor_close=markupsafe.Markup("</a>"),
         ),
-        default='http://www.example.com',
-        scope=Scope.settings
+        default="http://www.example.com",
+        scope=Scope.settings,
     )
 
     custom_parameters = List(
         display_name=_("Custom Parameters"),
-        help=markupsafe.escape(_(
-            "Add the key/value pair for any custom parameters, such as the page your e-book should open to or "
-            "the background color for this component."
-            "{break_tag}See {docs_anchor_open}the edX LTI documentation{anchor_close} for more details on this setting."
-        )).format(
+        help=markupsafe.escape(
+            _(
+                "Add the key/value pair for any custom parameters, such as the page your e-book should open to or "
+                "the background color for this component."
+                "{break_tag}See {docs_anchor_open}the edX LTI documentation"
+                "{anchor_close} for more details on this setting."
+            )
+        ).format(
             break_tag=markupsafe.Markup(BREAK_TAG),
             docs_anchor_open=markupsafe.Markup(DOCS_ANCHOR_TAG_OPEN),
-            anchor_close=markupsafe.Markup("</a>")
+            anchor_close=markupsafe.Markup("</a>"),
         ),
-        scope=Scope.settings
+        scope=Scope.settings,
     )
 
     open_in_a_new_page = Boolean(
@@ -184,16 +194,14 @@ class LTIFields:
             "This setting is only used when Hide External Tool is set to False.  "
         ),
         default=True,
-        scope=Scope.settings
+        scope=Scope.settings,
     )
 
     has_score = Boolean(
         display_name=_("Scored"),
-        help=_(
-            "Select True if this component will receive a numerical score from the external LTI system."
-        ),
+        help=_("Select True if this component will receive a numerical score from the external LTI system."),
         default=False,
-        scope=Scope.settings
+        scope=Scope.settings,
     )
 
     weight = Float(
@@ -211,14 +219,10 @@ class LTIFields:
     module_score = Float(
         help=_("The score kept in the xblock KVS -- duplicate of the published score in django DB"),
         default=None,
-        scope=Scope.user_state
+        scope=Scope.user_state,
     )
 
-    score_comment = String(
-        help=_("Comment as returned from grader, LTI2.0 spec"),
-        default="",
-        scope=Scope.user_state
-    )
+    score_comment = String(help=_("Comment as returned from grader, LTI2.0 spec"), default="", scope=Scope.user_state)
 
     hide_launch = Boolean(
         display_name=_("Hide External Tool"),
@@ -228,7 +232,7 @@ class LTIFields:
             "This setting hides the Launch button and any IFrames for this component."
         ),
         default=False,
-        scope=Scope.settings
+        scope=Scope.settings,
     )
 
     # Users will be presented with a message indicating that their e-mail/username would be sent to a third
@@ -239,7 +243,7 @@ class LTIFields:
         # Translators: This is used to request the user's username for a third party service.
         help=_("Select True to request the user's username."),
         default=False,
-        scope=Scope.settings
+        scope=Scope.settings,
     )
 
     ask_to_send_email = Boolean(
@@ -247,7 +251,7 @@ class LTIFields:
         # Translators: This is used to request the user's email for a third party service.
         help=_("Select True to request the user's email address."),
         default=False,
-        scope=Scope.settings
+        scope=Scope.settings,
     )
 
     description = String(
@@ -257,29 +261,37 @@ class LTIFields:
             " box to inform users why their username and/or email will be forwarded to a third party application."
         ),
         default="",
-        scope=Scope.settings
+        scope=Scope.settings,
     )
 
     button_text = String(
         display_name=_("Button Text"),
-        help=_(
-            "Enter the text on the button used to launch the third party application."
-        ),
+        help=_("Enter the text on the button used to launch the third party application."),
         default="",
-        scope=Scope.settings
+        scope=Scope.settings,
     )
 
     accept_grades_past_due = Boolean(
         display_name=_("Accept grades past deadline"),
         help=_("Select True to allow third party systems to post grades past the deadline."),
         default=True,
-        scope=Scope.settings
+        scope=Scope.settings,
     )
 
     editable_fields = (
-        "accept_grades_past_due", "ask_to_send_email", "ask_to_send_username", "button_text",
-        "custom_parameters", "description", "display_name", "has_score", "hide_launch",
-        "launch_url", "lti_id", "open_in_a_new_page", "weight",
+        "accept_grades_past_due",
+        "ask_to_send_email",
+        "ask_to_send_username",
+        "button_text",
+        "custom_parameters",
+        "description",
+        "display_name",
+        "has_score",
+        "hide_launch",
+        "launch_url",
+        "lti_id",
+        "open_in_a_new_page",
+        "weight",
     )
 
 
@@ -425,7 +437,7 @@ class LTIBlock(
 
         for custom_parameter in self.custom_parameters:
             try:
-                param_name, param_value = [p.strip() for p in custom_parameter.split('=', 1)]
+                param_name, param_value = [p.strip() for p in custom_parameter.split("=", 1)]
             except ValueError:
                 _ = self.runtime.service(self, "i18n").ugettext
                 msg = _('Could not parse custom parameter: {custom_parameter}. Should be "x=y" string.').format(
@@ -435,7 +447,7 @@ class LTIBlock(
 
             # LTI specs: 'custom_' should be prepended before each custom parameter, as pointed in link above.
             if param_name not in PARAMETERS:
-                param_name = 'custom_' + param_name
+                param_name = "custom_" + param_name
 
             custom_parameters[str(param_name)] = str(param_value)
 
@@ -488,25 +500,24 @@ class LTIBlock(
         sanitized_comment = nh3.clean(self.score_comment)
 
         return {
-            'input_fields': self.get_input_fields(),
-
+            "input_fields": self.get_input_fields(),
             # These parameters do not participate in OAuth signing.
-            'launch_url': self.launch_url.strip(),
-            'element_id': self.usage_key.html_id(),
-            'element_class': self.scope_ids.block_type,
-            'open_in_a_new_page': self.open_in_a_new_page,
-            'display_name': self.display_name,
-            'form_url': self.runtime.handler_url(self, 'preview_handler').rstrip('/?'),
-            'hide_launch': self.hide_launch,
-            'has_score': self.has_score,
-            'weight': self.weight,
-            'module_score': self.module_score,
-            'comment': sanitized_comment,
-            'description': self.description,
-            'ask_to_send_username': self.ask_to_send_username,
-            'ask_to_send_email': self.ask_to_send_email,
-            'button_text': self.button_text,
-            'accept_grades_past_due': self.accept_grades_past_due,
+            "launch_url": self.launch_url.strip(),
+            "element_id": self.usage_key.html_id(),
+            "element_class": self.scope_ids.block_type,
+            "open_in_a_new_page": self.open_in_a_new_page,
+            "display_name": self.display_name,
+            "form_url": self.runtime.handler_url(self, "preview_handler").rstrip("/?"),
+            "hide_launch": self.hide_launch,
+            "has_score": self.has_score,
+            "weight": self.weight,
+            "module_score": self.module_score,
+            "comment": sanitized_comment,
+            "description": self.description,
+            "ask_to_send_username": self.ask_to_send_username,
+            "ask_to_send_email": self.ask_to_send_email,
+            "button_text": self.button_text,
+            "accept_grades_past_due": self.accept_grades_past_due,
         }
 
     def student_view(self, _context=None):
@@ -516,8 +527,7 @@ class LTIBlock(
         frag = Fragment()
         frag.add_content(
             resource_loader.render_django_template(
-                "templates/lti.html", self.get_context(),
-                i18n_service=self.runtime.service(self, 'i18n')
+                "templates/lti.html", self.get_context(), i18n_service=self.runtime.service(self, "i18n")
             )
         )
 
@@ -532,7 +542,7 @@ class LTIBlock(
         This is called to get context with new oauth params to iframe.
         """
         template = resource_loader.render_django_template("templates/lti_form.html", self.get_context())
-        return Response(template, content_type='text/html')
+        return Response(template, content_type="text/html")
 
     @XBlock.handler
     def grade_handler(self, request, suffix):  # lint-amnesty, pylint: disable=unused-argument
@@ -593,10 +603,10 @@ class LTIBlock(
         # Supported actions:
         #   - replaceResultRequest.
         unsupported_values = {
-            'imsx_codeMajor': 'unsupported',
-            'imsx_description': 'Target does not support the requested operation.',
-            'imsx_messageIdentifier': 'unknown',
-            'response': ''
+            "imsx_codeMajor": "unsupported",
+            "imsx_description": "Target does not support the requested operation.",
+            "imsx_messageIdentifier": "unknown",
+            "response": "",
         }
         # Returns if:
         #   - past due grades are not accepted and grade is past due
@@ -604,14 +614,14 @@ class LTIBlock(
         #   - can't parse response from TP;
         #   - can't verify OAuth signing or OAuth signing is incorrect.
         failure_values = {
-            'imsx_codeMajor': 'failure',
-            'imsx_description': 'The request has failed.',
-            'imsx_messageIdentifier': 'unknown',
-            'response': ''
+            "imsx_codeMajor": "failure",
+            "imsx_description": "The request has failed.",
+            "imsx_messageIdentifier": "unknown",
+            "response": "",
         }
 
         if not self.accept_grades_past_due and self.is_past_due():
-            failure_values['imsx_description'] = "Grade is past due"
+            failure_values["imsx_description"] = "Grade is past due"
             return Response(response_xml_template.format(**failure_values), content_type="application/xml")
 
         try:
@@ -619,40 +629,40 @@ class LTIBlock(
         except Exception as e:  # lint-amnesty, pylint: disable=broad-except
             error_message = "Request body XML parsing error: " + escape(str(e))
             log.debug("[LTI]: " + error_message)  # lint-amnesty, pylint: disable=logging-not-lazy
-            failure_values['imsx_description'] = error_message
+            failure_values["imsx_description"] = error_message
             return Response(response_xml_template.format(**failure_values), content_type="application/xml")
 
         # Verify OAuth signing.
         try:
             self.verify_oauth_body_sign(request)
         except (ValueError, LTIError) as e:
-            failure_values['imsx_messageIdentifier'] = escape(imsx_messageIdentifier)
+            failure_values["imsx_messageIdentifier"] = escape(imsx_messageIdentifier)
             error_message = "OAuth verification error: " + escape(str(e))
-            failure_values['imsx_description'] = error_message
+            failure_values["imsx_description"] = error_message
             log.debug("[LTI]: " + error_message)  # lint-amnesty, pylint: disable=logging-not-lazy
             return Response(response_xml_template.format(**failure_values), content_type="application/xml")
 
-        real_user = self.runtime.service(self, 'user').get_user_by_anonymous_id(parse.unquote(sourcedId.split(':')[-1]))
+        real_user = self.runtime.service(self, "user").get_user_by_anonymous_id(parse.unquote(sourcedId.split(":")[-1]))
         if not real_user:  # that means we can't save to database, as we do not have real user id.
-            failure_values['imsx_messageIdentifier'] = escape(imsx_messageIdentifier)
-            failure_values['imsx_description'] = "User not found."
+            failure_values["imsx_messageIdentifier"] = escape(imsx_messageIdentifier)
+            failure_values["imsx_description"] = "User not found."
             return Response(response_xml_template.format(**failure_values), content_type="application/xml")
 
-        if action == 'replaceResultRequest':
+        if action == "replaceResultRequest":
             self.set_user_module_score(real_user, score, self.max_score())
 
             values = {
-                'imsx_codeMajor': 'success',
-                'imsx_description': f'Score for {sourcedId} is now {score}',
-                'imsx_messageIdentifier': escape(imsx_messageIdentifier),
-                'response': '<replaceResultResponse/>'
+                "imsx_codeMajor": "success",
+                "imsx_description": f"Score for {sourcedId} is now {score}",
+                "imsx_messageIdentifier": escape(imsx_messageIdentifier),
+                "response": "<replaceResultResponse/>",
             }
             log.debug("[LTI]: Grade is saved.")
             return Response(response_xml_template.format(**values), content_type="application/xml")
 
-        unsupported_values['imsx_messageIdentifier'] = escape(imsx_messageIdentifier)
+        unsupported_values["imsx_messageIdentifier"] = escape(imsx_messageIdentifier)
         log.debug("[LTI]: Incorrect action.")
-        return Response(response_xml_template.format(**unsupported_values), content_type='application/xml')
+        return Response(response_xml_template.format(**unsupported_values), content_type="application/xml")
 
     @staticmethod
     def workbench_scenarios():
@@ -678,7 +688,7 @@ class LTIBlock(
         """
         Returns the current user ID, URL-escaped so it is safe to use as a URL component.
         """
-        user_id = self.runtime.service(self, 'user').get_current_user().opt_attrs.get(ATTR_KEY_ANONYMOUS_USER_ID)
+        user_id = self.runtime.service(self, "user").get_current_user().opt_attrs.get(ATTR_KEY_ANONYMOUS_USER_ID)
         assert user_id is not None
         return str(parse.quote(user_id))
 
@@ -693,7 +703,7 @@ class LTIBlock(
 
         The scheme logic is handled in lms/lib/xblock/runtime.py
         """
-        return self.runtime.handler_url(self, service_name, thirdparty=True).rstrip('/?')
+        return self.runtime.handler_url(self, service_name, thirdparty=True).rstrip("/?")
 
     def get_resource_link_id(self):
         """
@@ -738,9 +748,7 @@ class LTIBlock(
         This field is generally optional, but is required for grading.
         """
         return "{context}:{resource_link}:{user_id}".format(
-            context=parse.quote(self.context_id),
-            resource_link=self.get_resource_link_id(),
-            user_id=self.get_user_id()
+            context=parse.quote(self.context_id), resource_link=self.get_resource_link_id(), user_id=self.get_user_id()
         )
 
     def get_course(self):
@@ -772,18 +780,18 @@ class LTIBlock(
         Get system user role and convert it to LTI role.
         """
         roles = {
-            'student': 'Student',
-            'staff': 'Administrator',
-            'instructor': 'Instructor',
+            "student": "Student",
+            "staff": "Administrator",
+            "instructor": "Instructor",
         }
-        user_role = self.runtime.service(self, 'user').get_current_user().opt_attrs.get(ATTR_KEY_USER_ROLE)
-        return roles.get(user_role, 'Student')
+        user_role = self.runtime.service(self, "user").get_current_user().opt_attrs.get(ATTR_KEY_USER_ROLE)
+        return roles.get(user_role, "Student")
 
     def get_icon_class(self):
-        """ Returns the icon class """
+        """Returns the icon class"""
         if self.graded and self.has_score:  # pylint: disable=no-member
-            return 'problem'
-        return 'other'
+            return "problem"
+        return "other"
 
     def oauth_params(self, custom_parameters, client_key, client_secret):
         """
@@ -795,31 +803,24 @@ class LTIBlock(
         Also *anonymous student id* is passed to template and therefore to LTI provider.
         """
 
-        client = oauthlib.oauth1.Client(
-            client_key=str(client_key),
-            client_secret=str(client_secret)
-        )
+        client = oauthlib.oauth1.Client(client_key=str(client_key), client_secret=str(client_secret))
 
         # Must have parameters for correct signing from LTI:
         body = {
-            'user_id': self.get_user_id(),
-            'oauth_callback': 'about:blank',
-            'launch_presentation_return_url': '',
-            'lti_message_type': 'basic-lti-launch-request',
-            'lti_version': 'LTI-1p0',
-            'roles': self.role,
-
+            "user_id": self.get_user_id(),
+            "oauth_callback": "about:blank",
+            "launch_presentation_return_url": "",
+            "lti_message_type": "basic-lti-launch-request",
+            "lti_version": "LTI-1p0",
+            "roles": self.role,
             # Parameters required for grading:
-            'resource_link_id': self.get_resource_link_id(),
-            'lis_result_sourcedid': self.get_lis_result_sourcedid(),
-
-            'context_id': self.context_id,
+            "resource_link_id": self.get_resource_link_id(),
+            "lis_result_sourcedid": self.get_lis_result_sourcedid(),
+            "context_id": self.context_id,
         }
 
         if self.has_score:
-            body.update({
-                'lis_outcome_service_url': self.get_outcome_service_url()
-            })
+            body.update({"lis_outcome_service_url": self.get_outcome_service_url()})
 
         self.user_email = ""  # lint-amnesty, pylint: disable=attribute-defined-outside-init
         self.user_username = ""  # lint-amnesty, pylint: disable=attribute-defined-outside-init
@@ -827,7 +828,7 @@ class LTIBlock(
         # Username and email can't be sent in studio mode, because the user object is not defined.
         # To test functionality test in LMS
 
-        real_user_object = self.runtime.service(self, 'user').get_user_by_anonymous_id()
+        real_user_object = self.runtime.service(self, "user").get_user_by_anonymous_id()
         try:
             self.user_email = real_user_object.email  # lint-amnesty, pylint: disable=attribute-defined-outside-init
         except AttributeError:
@@ -847,15 +848,11 @@ class LTIBlock(
 
         headers = {
             # This is needed for body encoding:
-            'Content-Type': 'application/x-www-form-urlencoded',
+            "Content-Type": "application/x-www-form-urlencoded",
         }
 
         try:
-            __, headers, __ = client.sign(
-                str(self.launch_url.strip()),
-                http_method='POST',
-                body=body,
-                headers=headers)
+            __, headers, __ = client.sign(str(self.launch_url.strip()), http_method="POST", body=body, headers=headers)
         except ValueError:  # Scheme not in url.
             # https://github.com/idan/oauthlib/blob/master/oauthlib/oauth1/rfc5849/signature.py#L136
             # Stubbing headers for now:
@@ -865,24 +862,25 @@ class LTIBlock(
                 self.context_key,
             )
             headers = {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'OAuth oauth_nonce="80966668944732164491378916897", \
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Authorization": 'OAuth oauth_nonce="80966668944732164491378916897", \
 oauth_timestamp="1378916897", oauth_version="1.0", oauth_signature_method="HMAC-SHA1", \
-oauth_consumer_key="", oauth_signature="frVp4JuvT1mVXlxktiAUjQ7%2F1cw%3D"'}
+oauth_consumer_key="", oauth_signature="frVp4JuvT1mVXlxktiAUjQ7%2F1cw%3D"',
+            }
 
-        params = headers['Authorization']
+        params = headers["Authorization"]
         # Parse headers to pass to template as part of context:
-        params = dict([param.strip().replace('"', '').split('=') for param in params.split(',')])
+        params = dict([param.strip().replace('"', "").split("=") for param in params.split(",")])
 
-        params['oauth_nonce'] = params['OAuth oauth_nonce']
-        del params['OAuth oauth_nonce']
+        params["oauth_nonce"] = params["OAuth oauth_nonce"]
+        del params["OAuth oauth_nonce"]
 
         # oauthlib encodes signature with
         # 'Content-Type': 'application/x-www-form-urlencoded'
         # so '='' becomes '%3D'.
         # We send form via browser, so browser will encode it again,
         # So we need to decode signature back:
-        params['oauth_signature'] = parse.unquote(params['oauth_signature']).encode('utf-8').decode('utf8')
+        params["oauth_signature"] = parse.unquote(params["oauth_signature"]).encode("utf-8").decode("utf8")
 
         # Add LTI parameters to OAuth parameters for sending in form.
         params.update(body)
@@ -900,26 +898,28 @@ oauth_consumer_key="", oauth_signature="frVp4JuvT1mVXlxktiAUjQ7%2F1cw%3D"'}
         Raises Exception if can't parse.
         """
         lti_spec_namespace = "http://www.imsglobal.org/services/ltiv1p1/xsd/imsoms_v1p0"
-        namespaces = {'def': lti_spec_namespace}
+        namespaces = {"def": lti_spec_namespace}
 
         data = body.strip()
-        parser = etree.XMLParser(ns_clean=True, recover=True, encoding='utf-8')
+        parser = etree.XMLParser(ns_clean=True, recover=True, encoding="utf-8")
         root = etree.fromstring(data, parser=parser)
 
-        imsx_messageIdentifier = root.xpath("//def:imsx_messageIdentifier", namespaces=namespaces)[0].text or ''
+        imsx_messageIdentifier = root.xpath("//def:imsx_messageIdentifier", namespaces=namespaces)[0].text or ""
         sourcedId = root.xpath("//def:sourcedId", namespaces=namespaces)[0].text
         score = root.xpath("//def:textString", namespaces=namespaces)[0].text
-        action = root.xpath(
-            "//def:imsx_POXBody", namespaces=namespaces
-        )[0].getchildren()[0].tag.replace('{' + lti_spec_namespace + '}', '')
+        action = (
+            root.xpath("//def:imsx_POXBody", namespaces=namespaces)[0]
+            .getchildren()[0]
+            .tag.replace("{" + lti_spec_namespace + "}", "")
+        )
         # Raise exception if score is not float or not in range 0.0-1.0 regarding spec.
         score = float(score)
         if not 0 <= score <= 1:
-            raise LTIError('score value outside the permitted range of 0-1.')
+            raise LTIError("score value outside the permitted range of 0-1.")
 
         return imsx_messageIdentifier, sourcedId, score, action
 
-    def verify_oauth_body_sign(self, request, content_type='application/x-www-form-urlencoded'):
+    def verify_oauth_body_sign(self, request, content_type="application/x-www-form-urlencoded"):
         """
         Verify grade request from LTI provider using OAuth body signing.
 
@@ -937,43 +937,46 @@ oauth_consumer_key="", oauth_signature="frVp4JuvT1mVXlxktiAUjQ7%2F1cw%3D"'}
 
         client_key, client_secret = self.get_client_key_secret()  # lint-amnesty, pylint: disable=unused-variable
         headers = {
-            'Authorization': str(request.headers.get('Authorization')),
-            'Content-Type': content_type,
+            "Authorization": str(request.headers.get("Authorization")),
+            "Content-Type": content_type,
         }
 
         sha1 = hashlib.sha1()
         sha1.update(request.body)
-        oauth_body_hash = base64.b64encode(sha1.digest()).decode('utf-8')
+        oauth_body_hash = base64.b64encode(sha1.digest()).decode("utf-8")
         oauth_params = signature.collect_parameters(headers=headers, exclude_oauth_signature=False)
         oauth_headers = dict(oauth_params)
-        oauth_signature = oauth_headers.pop('oauth_signature')
+        oauth_signature = oauth_headers.pop("oauth_signature")
         mock_request_lti_1 = mock.Mock(
             uri=str(parse.unquote(self.get_outcome_service_url())),
             http_method=str(request.method),
             params=list(oauth_headers.items()),
-            signature=oauth_signature
+            signature=oauth_signature,
         )
         mock_request_lti_2 = mock.Mock(
             uri=str(parse.unquote(request.url)),
             http_method=str(request.method),
             params=list(oauth_headers.items()),
-            signature=oauth_signature
+            signature=oauth_signature,
         )
-        if oauth_body_hash != oauth_headers.get('oauth_body_hash'):
+        if oauth_body_hash != oauth_headers.get("oauth_body_hash"):
             log.error(
                 "OAuth body hash verification failed, provided: %s, calculated: %s, for url: %s, body is: %s",
-                oauth_headers.get('oauth_body_hash'),
+                oauth_headers.get("oauth_body_hash"),
                 oauth_body_hash,
                 self.get_outcome_service_url(),
-                request.body
+                request.body,
             )
             raise LTIError("OAuth body hash verification is failed.")
 
-        if (not signature.verify_hmac_sha1(mock_request_lti_1, client_secret) and not
-                signature.verify_hmac_sha1(mock_request_lti_2, client_secret)):
+        if not signature.verify_hmac_sha1(mock_request_lti_1, client_secret) and not signature.verify_hmac_sha1(
+            mock_request_lti_2, client_secret
+        ):
             log.error(
                 "OAuth signature verification failed, for headers: %s url: %s method: %s",
-                oauth_headers, self.get_outcome_service_url(), str(request.method)
+                oauth_headers,
+                self.get_outcome_service_url(),
+                str(request.method),
             )
             raise LTIError("OAuth signature verification has failed.")
 
@@ -984,17 +987,17 @@ oauth_consumer_key="", oauth_signature="frVp4JuvT1mVXlxktiAUjQ7%2F1cw%3D"'}
         course = self.get_course()
         for lti_passport in course.lti_passports if course else []:
             try:
-                lti_id, key, secret = [i.strip() for i in lti_passport.split(':')]
+                lti_id, key, secret = [i.strip() for i in lti_passport.split(":")]
             except ValueError:
                 _ = self.runtime.service(self, "i18n").ugettext
                 msg = _('Could not parse LTI passport: {lti_passport}. Should be "id:key:secret" string.').format(
-                    lti_passport=f'{lti_passport!r}'
+                    lti_passport=f"{lti_passport!r}"
                 )
                 raise LTIError(msg)  # lint-amnesty, pylint: disable=raise-missing-from
 
             if lti_id == self.lti_id.strip():
                 return key, secret
-        return '', ''
+        return "", ""
 
     def is_past_due(self):
         """
@@ -1010,8 +1013,8 @@ oauth_consumer_key="", oauth_signature="frVp4JuvT1mVXlxktiAUjQ7%2F1cw%3D"'}
     @classmethod
     def definition_from_xml(cls, xml_object, system):
         if len(xml_object) == 0 and len(list(xml_object.items())) == 0:
-            return {'data': ''}, []
-        return {'data': etree.tostring(xml_object, pretty_print=True, encoding='unicode')}, []
+            return {"data": ""}, []
+        return {"data": etree.tostring(xml_object, pretty_print=True, encoding="unicode")}, []
 
     def definition_to_xml(self, resource_fs):
         if self.data:

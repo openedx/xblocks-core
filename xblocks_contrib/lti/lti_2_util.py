@@ -3,7 +3,6 @@ A mixin class for LTI 2.0 functionality.  This is really just done to refactor t
 keep the LTIBlock class from getting too big
 """
 
-
 import base64
 import hashlib
 import json
@@ -21,7 +20,7 @@ from xblock.core import XBlock
 log = logging.getLogger(__name__)
 
 LTI_2_0_REST_SUFFIX_PARSER = re.compile(r"^user/(?P<anon_id>\w+)", re.UNICODE)
-LTI_2_0_JSON_CONTENT_TYPE = 'application/vnd.ims.lis.v2.result+json'
+LTI_2_0_JSON_CONTENT_TYPE = "application/vnd.ims.lis.v2.result+json"
 
 
 class LTIError(Exception):
@@ -80,7 +79,7 @@ class LTI20BlockMixin:
         except LTIError:
             return Response(status=401)  # Unauthorized in this case.  401 is right
 
-        real_user = self.runtime.service(self, 'user').get_user_by_anonymous_id(anon_id)
+        real_user = self.runtime.service(self, "user").get_user_by_anonymous_id(anon_id)
         if not real_user:  # that means we can't save to database, as we do not have real user id.
             msg = f"[LTI]: Real user not found against anon_id: {anon_id}"
             log.info(msg)
@@ -122,14 +121,14 @@ class LTI20BlockMixin:
         )
         params = client.get_oauth_params(mock_request)
         mock_request.oauth_params = params
-        mock_request.oauth_params.append(('oauth_body_hash', oauth_body_hash))
+        mock_request.oauth_params.append(("oauth_body_hash", oauth_body_hash))
         sig = client.get_oauth_signature(mock_request)
-        mock_request.oauth_params.append(('oauth_signature', sig))
+        mock_request.oauth_params.append(("oauth_signature", sig))
 
         _, headers, _ = client._render(mock_request)  # pylint: disable=protected-access
         log.debug(
             "\n\n#### COPY AND PASTE AUTHORIZATION HEADER ####\n%s\n####################################\n\n",
-            headers['Authorization']
+            headers["Authorization"],
         )
 
     def parse_lti_2_0_handler_suffix(self, suffix):
@@ -151,7 +150,7 @@ class LTI20BlockMixin:
         if suffix:
             match_obj = LTI_2_0_REST_SUFFIX_PARSER.match(suffix)
             if match_obj:
-                return match_obj.group('anon_id')
+                return match_obj.group("anon_id")
         # fall-through handles all error cases
         msg = "No valid user id found in endpoint URL"
         log.info(f"[LTI]: {msg}")
@@ -170,7 +169,7 @@ class LTI20BlockMixin:
         We want to continue to round away from zero so that student grades remain
         consistent and don't suddenly change.
         """
-        p = 10.0 ** digits
+        p = 10.0**digits
 
         if number >= 0:
             return float(math.floor((number * p) + 0.5)) / p
@@ -190,18 +189,15 @@ class LTI20BlockMixin:
         Returns:
             webob.response:  response to this request, in JSON format with status 200 if success
         """
-        base_json_obj = {
-            "@context": "http://purl.imsglobal.org/ctx/lis/v2/Result",
-            "@type": "Result"
-        }
-        self.runtime.service(self, 'rebind_user').rebind_noauth_module_to_user(self, real_user)
+        base_json_obj = {"@context": "http://purl.imsglobal.org/ctx/lis/v2/Result", "@type": "Result"}
+        self.runtime.service(self, "rebind_user").rebind_noauth_module_to_user(self, real_user)
         if self.module_score is None:  # In this case, no score has been ever set
-            return Response(json.dumps(base_json_obj).encode('utf-8'), content_type=LTI_2_0_JSON_CONTENT_TYPE)
+            return Response(json.dumps(base_json_obj).encode("utf-8"), content_type=LTI_2_0_JSON_CONTENT_TYPE)
 
         # Fall through to returning grade and comment
-        base_json_obj['resultScore'] = self._round_away_from_zero(self.module_score, 2)
-        base_json_obj['comment'] = self.score_comment
-        return Response(json.dumps(base_json_obj).encode('utf-8'), content_type=LTI_2_0_JSON_CONTENT_TYPE)
+        base_json_obj["resultScore"] = self._round_away_from_zero(self.module_score, 2)
+        base_json_obj["comment"] = self.score_comment
+        return Response(json.dumps(base_json_obj).encode("utf-8"), content_type=LTI_2_0_JSON_CONTENT_TYPE)
 
     def _lti_2_0_result_del_handler(self, _request, real_user):
         """
@@ -233,7 +229,7 @@ class LTI20BlockMixin:
             webob.response:  response to this request.  status 200 if success.  404 if body of PUT request is malformed
         """
         try:
-            (score, comment) = self.parse_lti_2_0_result_json(request.body.decode('utf-8'))
+            (score, comment) = self.parse_lti_2_0_result_json(request.body.decode("utf-8"))
         except LTIError:
             return Response(status=404)  # have to do 404 due to spec, but 400 is better, with error msg in body
 
@@ -277,17 +273,17 @@ class LTI20BlockMixin:
         else:
             scaled_score = None
 
-        self.runtime.service(self, 'rebind_user').rebind_noauth_module_to_user(self, user)
+        self.runtime.service(self, "rebind_user").rebind_noauth_module_to_user(self, user)
 
         # have to publish for the progress page...
         self.runtime.publish(
             self,
-            'grade',
+            "grade",
             {
-                'value': scaled_score,
-                'max_value': max_score,
-                'user_id': user.id,
-                'score_deleted': score_deleted,
+                "value": scaled_score,
+                "max_value": max_score,
+                "user_id": user.id,
+                "score_deleted": score_deleted,
             },
         )
         self.module_score = scaled_score
@@ -307,12 +303,14 @@ class LTI20BlockMixin:
         Raises:
             LTIError if verification fails
         """
-        content_type = request.headers.get('Content-Type')
+        content_type = request.headers.get("Content-Type")
         if verify_content_type and content_type != LTI_2_0_JSON_CONTENT_TYPE:
             log.info(f"[LTI]: v2.0 result service -- bad Content-Type: {content_type}")
             raise LTIError(
-                "For LTI 2.0 result service, Content-Type must be {}.  Got {}".format(LTI_2_0_JSON_CONTENT_TYPE,
-                                                                                      content_type))
+                "For LTI 2.0 result service, Content-Type must be {}.  Got {}".format(
+                    LTI_2_0_JSON_CONTENT_TYPE, content_type
+                )
+            )
         try:
             self.verify_oauth_body_sign(request, content_type=LTI_2_0_JSON_CONTENT_TYPE)
         except (ValueError, LTIError) as err:
@@ -352,8 +350,9 @@ class LTI20BlockMixin:
             if isinstance(json_obj, list) and len(json_obj) >= 1 and isinstance(json_obj[0], dict):
                 json_obj = json_obj[0]
             else:
-                msg = ("Supplied JSON string is a list that does not contain an object as the first element. {}"
-                       .format(json_str))
+                msg = "Supplied JSON string is a list that does not contain an object as the first element. {}".format(
+                    json_str
+                )
                 log.info(f"[LTI] {msg}")
                 raise LTIError(msg)
 
@@ -376,13 +375,13 @@ class LTI20BlockMixin:
         # to the LTI spec.  We will indicate this by returning None as score, "" as comment.
         # The actual delete will be handled by the caller
         if "resultScore" not in json_obj:
-            return None, json_obj.get('comment', "")
+            return None, json_obj.get("comment", "")
 
         # if present, 'resultScore' must be a number between 0 and 1 inclusive
         try:
-            score = float(json_obj.get('resultScore', "unconvertable"))  # Check if float is present and the right type
+            score = float(json_obj.get("resultScore", "unconvertable"))  # Check if float is present and the right type
             if not 0 <= score <= 1:
-                msg = 'score value outside the permitted range of 0-1.'
+                msg = "score value outside the permitted range of 0-1."
                 log.info(f"[LTI] {msg}")
                 raise LTIError(msg)
         except (TypeError, ValueError) as err:
@@ -390,4 +389,4 @@ class LTI20BlockMixin:
             log.info(f"[LTI] {msg}")
             raise LTIError(msg)  # lint-amnesty, pylint: disable=raise-missing-from
 
-        return score, json_obj.get('comment', "")
+        return score, json_obj.get("comment", "")

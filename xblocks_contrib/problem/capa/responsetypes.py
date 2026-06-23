@@ -28,6 +28,7 @@ import numpy
 import random2 as random
 import requests
 import six
+
 # specific library imports
 from calc import UndefinedVariable, UnmatchedParenthesis, evaluator
 from django.utils import html
@@ -475,7 +476,12 @@ class LoncapaResponse(six.with_metaclass(abc.ABCMeta)):
                 # We need the CorrectMap code for hint functions. No, this is not great.
                 CORRECTMAP_PY = inspect.getsource(correctmap)
 
-            code = CORRECTMAP_PY + "\n" + self.context["script_code"] + "\n" + textwrap.dedent("""
+            code = (
+                CORRECTMAP_PY
+                + "\n"
+                + self.context["script_code"]
+                + "\n"
+                + textwrap.dedent("""
                     new_cmap = CorrectMap()
                     new_cmap.set_dict(new_cmap_dict)
                     old_cmap = CorrectMap()
@@ -484,6 +490,7 @@ class LoncapaResponse(six.with_metaclass(abc.ABCMeta)):
                     new_cmap_dict.update(new_cmap.get_dict())
                     old_cmap_dict.update(old_cmap.get_dict())
                     """).format(hintfn=hintfn)
+            )
             globals_dict = {
                 "answer_ids": self.answer_ids,
                 "student_answers": student_answers,
@@ -535,7 +542,6 @@ class LoncapaResponse(six.with_metaclass(abc.ABCMeta)):
             and hintgroup.find(self.hint_tag) is not None
             and hasattr(self, "check_hint_condition")
         ):
-
             rephints = hintgroup.findall(self.hint_tag)
             hints_to_show = self.check_hint_condition(  # pylint: disable=assignment-from-no-return
                 rephints, student_answers
@@ -688,7 +694,6 @@ class ChoiceResponse(LoncapaResponse):
         self.correct_choices = set()
         self.incorrect_choices = set()
         for choice in self.get_choices():
-
             # contextualize the name and correct attributes
             name = contextualize_text(choice.get("name"), self.context)
             correct = contextualize_text(choice.get("correct"), self.context).upper()
@@ -2283,9 +2288,7 @@ class CustomResponse(LoncapaResponse):
             correct_map.set(idset[k], correct[k], msg=messages[k], npoints=npoints)
         return correct_map
 
-    def execute_check_function(
-        self, idset, submission
-    ):  # pylint: disable=too-many-statements,too-many-locals,too-many-branches
+    def execute_check_function(self, idset, submission):  # pylint: disable=too-many-statements,too-many-locals,too-many-branches
         """Execute the custom check function for a submission, updating correctness,
         messages, and grades in the context."""
 
@@ -2328,7 +2331,6 @@ class CustomResponse(LoncapaResponse):
                 # If there are multiple inputs, they all get marked
                 # to the same correct/incorrect value
                 if "ok" in ret:
-
                     # Returning any falsy value or the "false" string for "ok" gives incorrect.
                     # Returning any string that includes "partial" for "ok" gives partial credit.
                     # Returning any other truthy value for "ok" gives correct
@@ -2435,7 +2437,6 @@ class CustomResponse(LoncapaResponse):
                     raise ResponseError(_("CustomResponse: check function returned an invalid dictionary!"))
 
             else:
-
                 # Returning any falsy value or the "false" string for "ok" gives incorrect.
                 # Returning any string that includes "partial" for "ok" gives partial credit.
                 # Returning any other truthy value for "ok" gives correct
@@ -2461,7 +2462,6 @@ class CustomResponse(LoncapaResponse):
         # will return "</html>".  To avoid this, we first check
         # that *msg* is a non-empty string.
         if msg:
-
             # When we parse *msg* using etree, there needs to be a root
             # element, so we wrap the *msg* text in <html> tags
             msg = HTML("<html>{msg}</html>").format(msg=HTML(msg))
