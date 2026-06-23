@@ -32,9 +32,7 @@ class LTI20RESTResultServiceTest(TestCase):
         self.xblock = LTIBlock(self.runtime, DictFieldData({}), Mock())
         self.lti_id = self.xblock.lti_id
 
-        self.unquoted_resource_link_id = (
-            "{}-i4x-2-3-lti-31de800015cf4afb973356dbe81496df".format(settings.LMS_BASE)
-        )
+        self.unquoted_resource_link_id = "{}-i4x-2-3-lti-31de800015cf4afb973356dbe81496df".format(settings.LMS_BASE)
 
         self.xblock.due = None
         self.xblock.graceperiod = None
@@ -42,9 +40,7 @@ class LTI20RESTResultServiceTest(TestCase):
     def test_sanitize_get_context(self):
         """Tests that the get_context function does basic sanitization"""
         # get_context, unfortunately, requires a lot of mocking machinery
-        mocked_course = Mock(
-            name="mocked_course", lti_passports=["lti_id:test_client:test_secret"]
-        )
+        mocked_course = Mock(name="mocked_course", lti_passports=["lti_id:test_client:test_secret"])
         modulestore = Mock(name="modulestore")
         modulestore.get_course.return_value = mocked_course
         self.xblock.runtime.modulestore = modulestore
@@ -74,9 +70,7 @@ class LTI20RESTResultServiceTest(TestCase):
         err_msg = "OAuth body verification failed"
         self.xblock.verify_oauth_body_sign = Mock(side_effect=LTIError(err_msg))
         with self.assertRaisesRegex(LTIError, err_msg):
-            request = Mock(
-                headers={"Content-Type": "application/vnd.ims.lis.v2.result+json"}
-            )
+            request = Mock(headers={"Content-Type": "application/vnd.ims.lis.v2.result+json"})
             self.xblock.verify_lti_2_0_result_rest_headers(request)
 
     def test_lti20_rest_good_headers(self):
@@ -85,9 +79,7 @@ class LTI20RESTResultServiceTest(TestCase):
         """
         self.xblock.verify_oauth_body_sign = Mock(return_value=True)
 
-        request = Mock(
-            headers={"Content-Type": "application/vnd.ims.lis.v2.result+json"}
-        )
+        request = Mock(headers={"Content-Type": "application/vnd.ims.lis.v2.result+json"})
         self.xblock.verify_lti_2_0_result_rest_headers(request)
         #  We just want the above call to complete without exceptions, and to have called verify_oauth_body_sign
         assert self.xblock.verify_oauth_body_sign.called
@@ -95,13 +87,7 @@ class LTI20RESTResultServiceTest(TestCase):
     BAD_DISPATCH_INPUTS = [
         None,
         "",
-        "abcd"
-        "notuser/abcd"
-        "user/"
-        "user//"
-        "user/gbere/"
-        "user/gbere/xsdf"
-        "user/ಠ益ಠ",  # not alphanumeric
+        "abcdnotuser/abcduser/user//user/gbere/user/gbere/xsdfuser/ಠ益ಠ",  # not alphanumeric
     ]
 
     def test_lti20_rest_bad_dispatch(self):
@@ -128,41 +114,59 @@ class LTI20RESTResultServiceTest(TestCase):
 
     BAD_JSON_INPUTS = [
         # (bad inputs, error message expected)
-        ([
-            "kk",   # ValueError
-            "{{}",  # ValueError
-            "{}}",  # ValueError
-            3,       # TypeError
-            {},      # TypeError
-        ], "Supplied JSON string in request body could not be decoded"),
-        ([
-            "3",        # valid json, not array or object
-            "[]",       # valid json, array too small
-            "[3, {}]",  # valid json, 1st element not an object
-        ], "Supplied JSON string is a list that does not contain an object as the first element"),
-        ([
-            '{"@type": "NOTResult"}',  # @type key must have value 'Result'
-        ], "JSON object does not contain correct @type attribute"),
-        ([
-            # @context missing
-            '{"@type": "Result", "resultScore": 0.1}',
-        ], "JSON object does not contain required key"),
-        ([
-            '''
+        (
+            [
+                "kk",  # ValueError
+                "{{}",  # ValueError
+                "{}}",  # ValueError
+                3,  # TypeError
+                {},  # TypeError
+            ],
+            "Supplied JSON string in request body could not be decoded",
+        ),
+        (
+            [
+                "3",  # valid json, not array or object
+                "[]",  # valid json, array too small
+                "[3, {}]",  # valid json, 1st element not an object
+            ],
+            "Supplied JSON string is a list that does not contain an object as the first element",
+        ),
+        (
+            [
+                '{"@type": "NOTResult"}',  # @type key must have value 'Result'
+            ],
+            "JSON object does not contain correct @type attribute",
+        ),
+        (
+            [
+                # @context missing
+                '{"@type": "Result", "resultScore": 0.1}',
+            ],
+            "JSON object does not contain required key",
+        ),
+        (
+            [
+                """
             {"@type": "Result",
              "@context": "http://purl.imsglobal.org/ctx/lis/v2/Result",
-             "resultScore": 100}'''  # score out of range
-        ], "score value outside the permitted range of 0-1."),
-        ([
-            '''
+             "resultScore": 100}"""  # score out of range
+            ],
+            "score value outside the permitted range of 0-1.",
+        ),
+        (
+            [
+                """
             {"@type": "Result",
              "@context": "http://purl.imsglobal.org/ctx/lis/v2/Result",
-             "resultScore": "1b"}''',   # score ValueError
-            '''
+             "resultScore": "1b"}""",  # score ValueError
+                """
             {"@type": "Result",
              "@context": "http://purl.imsglobal.org/ctx/lis/v2/Result",
-             "resultScore": {}}''',   # score TypeError
-        ], "Could not convert resultScore to float"),
+             "resultScore": {}}""",  # score TypeError
+            ],
+            "Could not convert resultScore to float",
+        ),
     ]
 
     def test_lti20_bad_json(self):
@@ -175,20 +179,29 @@ class LTI20RESTResultServiceTest(TestCase):
                     self.xblock.parse_lti_2_0_result_json(einput)
 
     GOOD_JSON_INPUTS = [
-        ('''
+        (
+            """
         {"@type": "Result",
          "@context": "http://purl.imsglobal.org/ctx/lis/v2/Result",
-         "resultScore": 0.1}''', ""),  # no comment means we expect ""
-        ('''
+         "resultScore": 0.1}""",
+            "",
+        ),  # no comment means we expect ""
+        (
+            """
         [{"@type": "Result",
          "@context": "http://purl.imsglobal.org/ctx/lis/v2/Result",
          "@id": "anon_id:abcdef0123456789",
-         "resultScore": 0.1}]''', ""),  # OK to have array of objects -- just take the first.  @id is okay too
-        ('''
+         "resultScore": 0.1}]""",
+            "",
+        ),  # OK to have array of objects -- just take the first.  @id is okay too
+        (
+            """
         {"@type": "Result",
          "@context": "http://purl.imsglobal.org/ctx/lis/v2/Result",
          "resultScore": 0.1,
-         "comment": "ಠ益ಠ"}''', "ಠ益ಠ"),  # unicode comment
+         "comment": "ಠ益ಠ"}""",
+            "ಠ益ಠ",
+        ),  # unicode comment
     ]
 
     def test_lti20_good_json(self):
@@ -206,14 +219,14 @@ class LTI20RESTResultServiceTest(TestCase):
          "@id": "anon_id:abcdef0123456789",
          "resultScore": 0.1,
          "comment": "ಠ益ಠ"}
-    """).encode('utf-8')
+    """).encode("utf-8")
 
     GOOD_JSON_PUT_LIKE_DELETE = textwrap.dedent("""
         {"@type": "Result",
          "@context": "http://purl.imsglobal.org/ctx/lis/v2/Result",
          "@id": "anon_id:abcdef0123456789",
          "comment": "ಠ益ಠ"}
-    """).encode('utf-8')
+    """).encode("utf-8")
 
     def get_signed_lti20_mock_request(self, body, method="PUT"):
         """
@@ -221,8 +234,8 @@ class LTI20RESTResultServiceTest(TestCase):
         """
         mock_request = Mock()
         mock_request.headers = {
-            'Content-Type': 'application/vnd.ims.lis.v2.result+json',
-            'Authorization': (
+            "Content-Type": "application/vnd.ims.lis.v2.result+json",
+            "Authorization": (
                 'OAuth oauth_nonce="135685044251684026041377608307", '
                 'oauth_timestamp="1234567890", oauth_version="1.0", '
                 'oauth_signature_method="HMAC-SHA1", '
@@ -242,9 +255,7 @@ class LTI20RESTResultServiceTest(TestCase):
         Helper fn to set up mocking for lti 2.0 request test
         """
         self.xblock.max_score = Mock(return_value=1.0)
-        self.xblock.get_client_key_secret = Mock(
-            return_value=("test_client_key", "test_client_secret")
-        )
+        self.xblock.get_client_key_secret = Mock(return_value=("test_client_key", "test_client_secret"))
         self.xblock.verify_oauth_body_sign = Mock()
 
     def test_lti20_put_like_delete_success(self):
@@ -256,18 +267,14 @@ class LTI20RESTResultServiceTest(TestCase):
         COMMENT = "ಠ益ಠ"  # pylint: disable=invalid-name
         self.xblock.module_score = SCORE
         self.xblock.score_comment = COMMENT
-        mock_request = self.get_signed_lti20_mock_request(
-            self.GOOD_JSON_PUT_LIKE_DELETE
-        )
+        mock_request = self.get_signed_lti20_mock_request(self.GOOD_JSON_PUT_LIKE_DELETE)
         # Now call the handler
         response = self.xblock.lti_2_0_result_rest_handler(mock_request, "user/abcd")
         # Now assert there's no score
         assert response.status_code == 200
         assert self.xblock.module_score is None
         assert self.xblock.score_comment == ""
-        (_, evt_type, called_grade_obj), _ = (
-            self.runtime.publish.call_args
-        )
+        (_, evt_type, called_grade_obj), _ = self.runtime.publish.call_args
         assert called_grade_obj == {
             "user_id": self.USER_STANDIN.id,
             "value": None,
@@ -292,9 +299,7 @@ class LTI20RESTResultServiceTest(TestCase):
         assert response.status_code == 200
         assert self.xblock.module_score is None
         assert self.xblock.score_comment == ""
-        (_, evt_type, called_grade_obj), _ = (
-            self.runtime.publish.call_args
-        )
+        (_, evt_type, called_grade_obj), _ = self.runtime.publish.call_args
         assert called_grade_obj == {
             "user_id": self.USER_STANDIN.id,
             "value": None,
@@ -315,9 +320,7 @@ class LTI20RESTResultServiceTest(TestCase):
         assert response.status_code == 200
         assert self.xblock.module_score == 0.1
         assert self.xblock.score_comment == "ಠ益ಠ"
-        (_, evt_type, called_grade_obj), _ = (
-            self.runtime.publish.call_args
-        )
+        (_, evt_type, called_grade_obj), _ = self.runtime.publish.call_args
         assert evt_type == "grade"
         assert called_grade_obj == {
             "user_id": self.USER_STANDIN.id,
@@ -372,9 +375,7 @@ class LTI20RESTResultServiceTest(TestCase):
         mock_request = self.get_signed_lti20_mock_request(self.GOOD_JSON_PUT)
         for bad_method in self.UNSUPPORTED_HTTP_METHODS:
             mock_request.method = bad_method
-            response = self.xblock.lti_2_0_result_rest_handler(
-                mock_request, "user/abcd"
-            )
+            response = self.xblock.lti_2_0_result_rest_handler(mock_request, "user/abcd")
             assert response.status_code == 404
 
     def test_lti20_request_handler_bad_headers(self):

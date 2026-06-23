@@ -1,6 +1,7 @@
 """
 Extension of XBlock Validation class to include information for presentation in Studio.
 """
+
 from xblock.validation import Validation, ValidationMessage
 
 

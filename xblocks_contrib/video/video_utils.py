@@ -2,7 +2,6 @@
 Module contains utils specific for video_block but not for transcripts.
 """
 
-
 import logging
 from collections import OrderedDict
 from urllib.parse import parse_qs, urlencode, urlparse, urlsplit, urlunsplit
@@ -23,19 +22,9 @@ def create_youtube_string(block):
     block.  Necessary for backwards compatibility with XML-based
     courses.
     """
-    youtube_ids = [
-        block.youtube_id_0_75,
-        block.youtube_id_1_0,
-        block.youtube_id_1_25,
-        block.youtube_id_1_5
-    ]
-    youtube_speeds = ['0.75', '1.00', '1.25', '1.50']
-    return ','.join([
-        ':'.join(pair)
-        for pair
-        in zip(youtube_speeds, youtube_ids)
-        if pair[1]
-    ])
+    youtube_ids = [block.youtube_id_0_75, block.youtube_id_1_0, block.youtube_id_1_25, block.youtube_id_1_5]
+    youtube_speeds = ["0.75", "1.00", "1.25", "1.50"]
+    return ",".join([":".join(pair) for pair in zip(youtube_speeds, youtube_ids) if pair[1]])
 
 
 def rewrite_video_url(cdn_base_url, original_video_url):
@@ -89,8 +78,8 @@ def get_poster(video):
     poster = OrderedDict({"url": "", "type": ""})
 
     if video.youtube_streams:
-        youtube_id = video.youtube_streams.split('1.00:')[1].split(',')[0]
-        poster["url"] = settings.YOUTUBE['IMAGE_API'].format(youtube_id=youtube_id)
+        youtube_id = video.youtube_streams.split("1.00:")[1].split(",")[0]
+        poster["url"] = settings.YOUTUBE["IMAGE_API"].format(youtube_id=youtube_id)
         poster["type"] = "youtube"
     else:
         poster["url"] = "https://www.edx.org/sites/default/files/theme/edx-logo-header.png"
@@ -105,9 +94,7 @@ def format_xml_exception_message(location, key, value):
     when setting xml attributes.
     """
     exception_message = "Block-location:{location}, Key:{key}, Value:{value}".format(
-        location=str(location),
-        key=key,
-        value=value
+        location=str(location), key=key, value=value
     )
     return exception_message
 
@@ -134,10 +121,10 @@ def load_metadata_from_youtube(video_id, request):
     """
     metadata = {}
     status_code = 500
-    if video_id and settings.YOUTUBE_API_KEY and settings.YOUTUBE_API_KEY != 'PUT_YOUR_API_KEY_HERE':
+    if video_id and settings.YOUTUBE_API_KEY and settings.YOUTUBE_API_KEY != "PUT_YOUR_API_KEY_HERE":
         yt_api_key = settings.YOUTUBE_API_KEY
-        yt_metadata_url = settings.YOUTUBE['METADATA_URL']
-        yt_timeout = settings.YOUTUBE.get('TEST_TIMEOUT', 1500) / 1000  # converting milli seconds to seconds
+        yt_metadata_url = settings.YOUTUBE["METADATA_URL"]
+        yt_timeout = settings.YOUTUBE.get("TEST_TIMEOUT", 1500) / 1000  # converting milli seconds to seconds
 
         headers = {}
         http_referer = None
@@ -145,42 +132,37 @@ def load_metadata_from_youtube(video_id, request):
         try:
             # This raises an attribute error if called from the xblock yt_video_metadata handler, which passes
             # a webob request instead of a django request.
-            http_referer = request.META.get('HTTP_REFERER')
+            http_referer = request.META.get("HTTP_REFERER")
         except AttributeError:
             # So here, let's assume it's a webob request and access the referer the webob way.
             http_referer = request.referer
 
         if http_referer:
-            headers['Referer'] = http_referer
+            headers["Referer"] = http_referer
 
-        payload = {'id': video_id, 'part': 'contentDetails', 'key': yt_api_key}
+        payload = {"id": video_id, "part": "contentDetails", "key": yt_api_key}
         try:
             res = requests.get(yt_metadata_url, params=payload, timeout=yt_timeout, headers=headers)
             status_code = res.status_code
             if res.status_code == 200:
                 try:
                     res_json = res.json()
-                    if res_json.get('items', []):
+                    if res_json.get("items", []):
                         metadata = res_json
                     else:
                         logging.warning(
-                            'Unable to find the items in response. Following response was received: %s',
-                            res.text
+                            "Unable to find the items in response. Following response was received: %s", res.text
                         )
                 except ValueError:
-                    logging.warning(
-                        'Unable to decode response to json. Following response was received: %s',
-                        res.text
-                    )
+                    logging.warning("Unable to decode response to json. Following response was received: %s", res.text)
             else:
                 logging.warning(
-                    'YouTube API request failed with status code=%s - Error message is=%s',
-                    status_code, res.text
+                    "YouTube API request failed with status code=%s - Error message is=%s", status_code, res.text
                 )
         except (Timeout, ConnectionError):
-            logging.warning('YouTube API request failed because of connection time out or connection error')
+            logging.warning("YouTube API request failed because of connection time out or connection error")
     else:
-        logging.warning('YouTube API key or video id is None. Please make sure API key and video id is not None')
+        logging.warning("YouTube API key or video id is None. Please make sure API key and video id is not None")
 
     return metadata, status_code
 
@@ -206,8 +188,8 @@ def get_resource_url(xblock, path, package_scope=None):
     pipeline_path = dev_path = f"public/{path}"
     if package_scope:
         pipeline_path = f"{package_scope}/{pipeline_path}"
-    pipeline = getattr(settings, 'PIPELINE', {})
-    if pipeline.get('PIPELINE_ENABLED', True) or not getattr(settings, 'REQUIRE_DEBUG', False):
+    pipeline = getattr(settings, "PIPELINE", {})
+    if pipeline.get("PIPELINE_ENABLED", True) or not getattr(settings, "REQUIRE_DEBUG", False):
         resource_path = pipeline_path
     else:
         resource_path = dev_path
@@ -221,6 +203,7 @@ def get_edxval_api():
     """
     try:
         import edxval.api as edxval_api  # pylint: disable=import-outside-toplevel
+
         return edxval_api
     except ImportError:
         return None

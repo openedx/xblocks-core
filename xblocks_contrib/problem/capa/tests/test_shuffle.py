@@ -293,7 +293,7 @@ class CapaShuffleTest(unittest.TestCase):
             + r"<div>.*\[.*'C'.*'A'.*'D'.*'B'.*\].*</div>",
         )
         # Look at the responses in their authored order
-        responses = sorted(list(problem.responders.values()), key=lambda resp: int(resp.id[resp.id.rindex("_") + 1:]))
+        responses = sorted(list(problem.responders.values()), key=lambda resp: int(resp.id[resp.id.rindex("_") + 1 :]))
         assert not responses[0].has_mask()
         assert responses[0].has_shuffle()
         assert responses[1].has_shuffle()

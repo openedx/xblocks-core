@@ -157,7 +157,6 @@ class HtmlBlockCourseApiTestCase(unittest.TestCase):
 
 
 class HtmlBlockSubstitutionTestCase(unittest.TestCase):
-
     def test_substitution_user_id(self):
         sample_xml = """%%USER_ID%%"""
         field_data = DictFieldData({"data": sample_xml})

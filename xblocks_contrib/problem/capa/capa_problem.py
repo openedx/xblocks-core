@@ -239,7 +239,7 @@ class LoncapaProblem:
             # Run response late_transforms last (see MultipleChoiceResponse)
             # Sort the responses to be in *_1 *_2 ... order.
             responses = list(self.responders.values())
-            responses = sorted(responses, key=lambda resp: int(resp.id[resp.id.rindex("_") + 1:]))
+            responses = sorted(responses, key=lambda resp: int(resp.id[resp.id.rindex("_") + 1 :]))
             for response in responses:
                 if hasattr(response, "late_transforms"):
                     response.late_transforms(self)
@@ -925,7 +925,6 @@ class LoncapaProblem:
         python_path = []
 
         for script in tree.findall(".//script"):
-
             stype = script.get("type")
             if stype:
                 if "javascript" in stype:

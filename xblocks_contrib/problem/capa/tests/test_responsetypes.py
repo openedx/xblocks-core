@@ -2267,7 +2267,6 @@ class CustomResponseTest(ResponseTest):
             "miller",
             "draganddrop",
         ]:
-
             # Create a script that checks that the name is defined
             # If the name is not defined, then the script
             # will raise an exception
@@ -2304,7 +2303,6 @@ class CustomResponseTest(ResponseTest):
             "miller",
             "draganddrop",
         ]:
-
             # Create a script that checks that the name is defined
             # If the name is not defined, then the script
             # will raise an exception
