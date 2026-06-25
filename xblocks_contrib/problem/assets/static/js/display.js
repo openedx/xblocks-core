@@ -57,12 +57,21 @@ Problem.prototype.$ = function (selector) {
   return $(selector, this.el);
 };
 
+// MathJax v3/v4 exposes readiness and typesetting through startup/typesetPromise.
+const isMathJaxTypesetReady = () => typeof MathJax !== "undefined" && MathJax !== null
+  && MathJax.startup && MathJax.startup.promise && typeof MathJax.typesetPromise === "function";
+const isMathJaxRefreshReady = () => isMathJaxTypesetReady()
+  && typeof MathJax.typesetClear === "function"
+  && MathJax.startup.document && typeof MathJax.startup.document.getMathItemsWithin === "function";
+const isMathJaxMathMLReady = () => typeof MathJax !== "undefined" && MathJax !== null
+  && MathJax.startup && MathJax.startup.promise && typeof MathJax.startup.toMML === "function";
+
 Problem.prototype.bind = function () {
   const that = this;
   let problemPrefix;
-  if (typeof MathJax !== "undefined" && MathJax !== null) {
+  if (isMathJaxTypesetReady()) {
     this.el.find(".problem > div").each(function (index, element) {
-      return MathJax.Hub.Queue(["Typeset", MathJax.Hub, element]);
+      return MathJax.startup.promise.then(() => MathJax.typesetPromise([element]));
     });
   }
   if (window.hasOwnProperty("update_schematics")) {
@@ -110,10 +119,10 @@ Problem.prototype.bind = function () {
     this.submitAnswersAndSubmitButton(true);
   }
   Collapsible.setCollapsibles(this.el);
-  this.$("input.math").keyup(this.refreshMath);
-  if (typeof MathJax !== "undefined" && MathJax !== null) {
-    this.$("input.math").each(function (index, element) {
-      return MathJax.Hub.Queue([that.refreshMath, null, element]);
+  this.$("input.math, .formulaequationinput input").keyup(this.refreshMath);
+  if (isMathJaxTypesetReady()) {
+    this.$("input.math, .formulaequationinput input").each(function (index, element) {
+      return MathJax.startup.promise.then(() => that.refreshMath(null, element));
     });
   }
 };
@@ -699,9 +708,9 @@ Problem.prototype.show = function () {
       }
       return results;
     });
-    if (typeof MathJax !== "undefined" && MathJax !== null) {
+    if (isMathJaxTypesetReady()) {
       that.el.find(".problem > div").each(function (index, element) {
-        return MathJax.Hub.Queue(["Typeset", MathJax.Hub, element]);
+        return MathJax.startup.promise.then(() => MathJax.typesetPromise([element]));
       });
     }
     that.el.find(".show").attr("disabled", "disabled");
@@ -754,36 +763,51 @@ Problem.prototype.save_internal = function () {
 };
 
 Problem.prototype.refreshMath = function (event, element) {
-  let elid, eqn, jax, mathjaxPreprocessor, preprocessorTag, target;
   if (!element) {
     element = event.target; // eslint-disable-line no-param-reassign
   }
-  elid = element.id.replace(/^input_/, "");
-  target = `display_${elid}`;
-
-  // MathJax preprocessor is loaded by 'setupInputTypes'
-  preprocessorTag = `inputtype_${elid}`;
-  mathjaxPreprocessor = this.inputtypeDisplays[preprocessorTag];
-  if (typeof MathJax !== "undefined" && MathJax !== null && MathJax.Hub.getAllJax(target)[0]) {
-    jax = MathJax.Hub.getAllJax(target)[0];
-    eqn = $(element).val();
-    if (mathjaxPreprocessor) {
-      eqn = mathjaxPreprocessor(eqn);
-    }
-    MathJax.Hub.Queue(["Text", jax, eqn], [this.updateMathML, jax, element]);
+  const elid = element.id.replace(/^input_/, "");
+  const target = `#display_${elid}`;
+  const preprocessor = this.inputtypeDisplays[`inputtype_${elid}`];
+  if (!isMathJaxRefreshReady()) {
+    return;
   }
+  const math = document.querySelector(target) || document.getElementById(`${element.id}_preview`);
+  if (!math) {
+    return;
+  }
+  let eqn = $(element).val();
+  if (preprocessor) {
+    eqn = preprocessor(eqn);
+  }
+  MathJax.typesetClear([math]);
+  if (!eqn) {
+    math.textContent = "";
+    $(`#${element.id}_dynamath`).val("");
+    return;
+  }
+  const isTexDelimited = (eqn.trim().startsWith("$") && eqn.trim().endsWith("$"))
+    || (/^\\s*\\$\\$/.test(eqn) && /\\$\\$\\s*$/.test(eqn));
+  math.textContent = isTexDelimited ? eqn : `\`${eqn}\``;
+  MathJax.typesetPromise([math]).then(() => {
+    const jax = MathJax.startup.document.getMathItemsWithin(math)[0];
+    if (jax) {
+      this.updateMathML(jax, element);
+    }
+  });
 };
 
 Problem.prototype.updateMathML = function (jax, element) {
+  if (!isMathJaxMathMLReady()) {
+    return;
+  }
   try {
-    $(`#${element.id}_dynamath`).val(jax.root.toMathML(""));
+    $(`#${element.id}_dynamath`).val(MathJax.startup.toMML(jax.root));
   } catch (exception) {
     if (!exception.restart) {
       throw exception;
     }
-    if (typeof MathJax !== "undefined" && MathJax !== null) {
-      MathJax.Callback.After([this.refreshMath, jax], exception.restart);
-    }
+    MathJax.startup.promise.then(() => this.refreshMath(null, element));
   }
 };
 
@@ -1250,7 +1274,9 @@ Problem.prototype.hint_button = function () {
         const hintMsgContainer = that.$(".problem-hint .notification-message");
         hintContainer.attr("hint_index", response.hint_index);
         edx.HtmlUtils.setHtml(hintMsgContainer, edx.HtmlUtils.HTML(response.msg));
-        MathJax.Hub.Queue(["Typeset", MathJax.Hub, hintContainer[0]]);
+        if (isMathJaxTypesetReady()) {
+          MathJax.startup.promise.then(() => MathJax.typesetPromise([hintContainer[0]]));
+        }
         if (response.should_enable_next_hint) {
           that.hintButton.removeAttr("disabled");
         } else {
