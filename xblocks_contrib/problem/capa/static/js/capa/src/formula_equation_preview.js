@@ -169,30 +169,21 @@ formulaEquationPreview.enable = function() {
         }
 
         function display(latex) {
-            MathJax.Hub.Startup.signal.Interest(function(message) {
-                if (message === 'End') {
+            if (typeof MathJax !== 'undefined' && MathJax.startup && MathJax.startup.promise) {
+                MathJax.startup.promise.then(function() {
                     var previewElement = inputData.$preview[0];
-                    MathJax.Hub.Queue(function() {
-                        inputData.jax = MathJax.Hub.getAllJax(previewElement)[0];
-                    });
-
-                    MathJax.Hub.Queue(function() {
-                        // Check if MathJax is loaded
-                        if (inputData.jax) {
-                            // Set the text as the latex code, and then update the MathJax.
-                            MathJax.Hub.Queue(
-                                ['Text', inputData.jax, latex]
-                            );
-                        } else if (latex) {
-                            console.log('[FormulaEquationInput] Oops no mathjax for ', latex);
-                            // Fall back to modifying the actual element.
-                            var textNode = previewElement.childNodes[0];
-                            textNode.data = '\\(' + latex + '\\)';
-                            MathJax.Hub.Queue(['Typeset', MathJax.Hub, previewElement]);
-                        }
-                    });
-                }
-            });
+                    MathJax.typesetClear([previewElement]);
+                    // set text directly with delimiters; v3/v4 has no getAllJax/Text API
+                    previewElement.textContent = '\\(' + (latex || '') + '\\)';
+                    return MathJax.typesetPromise([previewElement]);
+                }).catch(function(err) {
+                    console.log('[FormulaEquationInput] MathJax error for "' + latex + '":', err);
+                });
+            } else if (latex) {
+                console.log('[FormulaEquationInput] Oops no mathjax for ', latex);
+                var previewElement = inputData.$preview[0];
+                previewElement.textContent = '\\(' + latex + '\\)';
+            }
         }
 
         if (response.error) {
