@@ -117,7 +117,7 @@ class VideoBlock(
     XML source example::
 
         <video show_captions="true"
-            youtube="0.75:jNCf2gIqpeE,1.0:ZwkTiUPN0mg,1.25:rsq9auxASqI,1.50:kMyNdzVHHgg"
+            youtube="1.00:ZwkTiUPN0mg"
             url_name="lecture_21_3" display_name="S19V3: Vacancies"
         >
             <source src=".../mit-3091x/M-3091X-FA12-L21-3_100.mp4"/>
@@ -860,8 +860,12 @@ class VideoBlock(
         Parses a string of Youtube IDs such as "1.0:AXdE34_U,1.5:VO3SxfeD"
         into a dictionary. Necessary for backwards compatibility with
         XML-based courses.
+
+        Only the 1.00 speed key is returned. If no 1.00 entry is present in
+        the source string (legacy OLX with only non-1.0 speeds), the first
+        non-empty speed ID is used as a fallback so no YouTube ID is lost.
         """
-        ret = {'0.75': '', '1.00': '', '1.25': '', '1.50': ''}
+        parsed = {}
 
         videos = data.split(',')
         for video in videos:
@@ -873,10 +877,18 @@ class VideoBlock(
                 # Note: we pass in "VideoFields.youtube_id_1_0" so we deserialize as a String--
                 # it doesn't matter what the actual speed is for the purposes of deserializing.
                 youtube_id = deserialize_field(cls.youtube_id_1_0, pieces[1])
-                ret[speed] = youtube_id
+                parsed[speed] = youtube_id
             except (ValueError, IndexError):
                 log.warning('Invalid YouTube ID: %s', video)
-        return ret
+
+        # Use the 1.00 entry if present; otherwise fall back to the lowest speed entry
+        # to avoid silently losing a YouTube ID from legacy OLX that only specified
+        # non-1.0 speed variants (e.g. youtube="0.75:abc").
+        youtube_id_1_0 = parsed.get('1.00', '')
+        if not youtube_id_1_0:
+            youtube_id_1_0 = next((v for _, v in sorted(parsed.items()) if v), '')
+
+        return {'1.00': youtube_id_1_0}
 
     @classmethod
     def parse_video_xml(cls, xml, id_generator=None):
@@ -926,14 +938,10 @@ class VideoBlock(
             if attr in cls.metadata_to_strip + ('url_name', 'name'):
                 continue
             if attr == 'youtube':
-                speeds = cls._parse_youtube(value)
-                for speed, youtube_id in speeds.items():
-                    # should have made these youtube_id_1_00 for
-                    # cleanliness, but hindsight doesn't need glasses
-                    normalized_speed = speed[:-1] if speed.endswith('0') else speed
-                    # If the user has specified html5 sources, make sure we don't use the default video
-                    if youtube_id != '' or 'html5_sources' in field_data:
-                        field_data['youtube_id_{}'.format(normalized_speed.replace('.', '_'))] = youtube_id
+                youtube_id = cls._parse_youtube(value).get('1.00', '')
+                # If the user has specified html5 sources, make sure we don't use the default video
+                if youtube_id != '' or 'html5_sources' in field_data:
+                    field_data['youtube_id_1_0'] = youtube_id
             elif attr in conversions:
                 field_data[attr] = conversions[attr](value)
             elif attr not in cls.fields:  # lint-amnesty, pylint: disable=unsupported-membership-test
