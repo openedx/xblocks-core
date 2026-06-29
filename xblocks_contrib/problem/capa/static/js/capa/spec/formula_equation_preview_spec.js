@@ -261,14 +261,15 @@ describe('Formula Equation Preview', function() {
                     request_start: args[3].request_start
                 });
 
-                // The only request returned—textContent replaces all children, removing the img.
-                expect($('img.loading').length).toEqual(0);
+                // The only request returned—mathjax-preview span is inserted, img.loading preserved.
+                expect($('img.loading').length).toEqual(1);
 
-                // Clear and typeset the preview div.
+                // Clear and typeset the stable mathjax-preview span.
                 var previewDiv = $('#input_THE_ID_preview')[0];
-                expect(window.MathJax.typesetClear).toHaveBeenCalledWith([previewDiv]);
-                expect(previewDiv.textContent).toEqual('\\(THE_FORMULA\\)');
-                expect(window.MathJax.typesetPromise).toHaveBeenCalledWith([previewDiv]);
+                var mathSpan = previewDiv.querySelector('.mathjax-preview');
+                expect(window.MathJax.typesetClear).toHaveBeenCalledWith([mathSpan]);
+                expect(mathSpan.textContent).toEqual('\\(THE_FORMULA\\)');
+                expect(window.MathJax.typesetPromise).toHaveBeenCalledWith([mathSpan]);
             }).always(done);
         });
 
@@ -296,9 +297,10 @@ describe('Formula Equation Preview', function() {
                     '[FormulaEquationInput] Oops no mathjax for ', 'THE_FORMULA'
                 );
 
-                // Preview div should contain the raw LaTeX.
+                // Preview span should contain the raw LaTeX.
                 var previewElement = $('#input_THE_ID_preview')[0];
-                expect(previewElement.textContent).toEqual('\\(THE_FORMULA\\)');
+                var mathSpan = previewElement.querySelector('.mathjax-preview');
+                expect(mathSpan.textContent).toEqual('\\(THE_FORMULA\\)');
 
                 // typesetClear/typesetPromise should NOT be called (fallback path).
                 expect(window.MathJax.typesetClear).not.toHaveBeenCalled();
@@ -327,9 +329,10 @@ describe('Formula Equation Preview', function() {
                 }).then(function() {
                     // Error text should be displayed.
                     var previewDiv = $('#input_THE_ID_preview')[0];
-                    expect(window.MathJax.typesetClear).toHaveBeenCalledWith([previewDiv]);
-                    expect(previewDiv.textContent).toEqual('\\(\\text{OOPSIE}\\)');
-                    expect(window.MathJax.typesetPromise).toHaveBeenCalledWith([previewDiv]);
+                    var mathSpan = previewDiv.querySelector('.mathjax-preview');
+                    expect(window.MathJax.typesetClear).toHaveBeenCalledWith([mathSpan]);
+                    expect(mathSpan.textContent).toEqual('\\(\\text{OOPSIE}\\)');
+                    expect(window.MathJax.typesetPromise).toHaveBeenCalledWith([mathSpan]);
                     expect($img.css('visibility')).toEqual('hidden');
                 }).then(done);
             });
@@ -374,13 +377,14 @@ describe('Formula Equation Preview', function() {
             this.callbacks[0](this.responses[0]);
             expect(window.MathJax.typesetClear.calls.count()).toEqual(1);
             expect(window.MathJax.typesetPromise.calls.count()).toEqual(1);
-            expect(previewDiv.textContent).toEqual('\\(THE_FORMULA_0\\)');
+            var mathSpan = previewDiv.querySelector('.mathjax-preview');
+            expect(mathSpan.textContent).toEqual('\\(THE_FORMULA_0\\)');
             expect($img.css('visibility')).toEqual('visible');
 
             this.callbacks[1](this.responses[1]);
             expect(window.MathJax.typesetClear.calls.count()).toEqual(2);
             expect(window.MathJax.typesetPromise.calls.count()).toEqual(2);
-            expect(previewDiv.textContent).toEqual('\\(THE_FORMULA_1\\)');
+            expect(mathSpan.textContent).toEqual('\\(THE_FORMULA_1\\)');
             expect($img.css('visibility')).toEqual('hidden');
         });
 
@@ -394,7 +398,8 @@ describe('Formula Equation Preview', function() {
             this.callbacks[1](this.responses[1]);
             expect(window.MathJax.typesetClear.calls.count()).toEqual(1);
             expect(window.MathJax.typesetPromise.calls.count()).toEqual(1);
-            expect(previewDiv.textContent).toEqual('\\(THE_FORMULA_1\\)');
+            var mathSpan = previewDiv.querySelector('.mathjax-preview');
+            expect(mathSpan.textContent).toEqual('\\(THE_FORMULA_1\\)');
             expect($img.css('visibility')).toEqual('hidden');
 
             window.MathJax.typesetClear.calls.reset();
@@ -416,9 +421,10 @@ describe('Formula Equation Preview', function() {
 
             // Error message waiting to be displayed, then a good response arrives first.
             this.callbacks[1](this.responses[1]);
-            expect(window.MathJax.typesetClear).toHaveBeenCalledWith([previewDiv]);
-            expect(previewDiv.textContent).toEqual('\\(THE_FORMULA_1\\)');
-            expect(window.MathJax.typesetPromise).toHaveBeenCalledWith([previewDiv]);
+            var mathSpan = previewDiv.querySelector('.mathjax-preview');
+            expect(window.MathJax.typesetClear).toHaveBeenCalledWith([mathSpan]);
+            expect(mathSpan.textContent).toEqual('\\(THE_FORMULA_1\\)');
+            expect(window.MathJax.typesetPromise).toHaveBeenCalledWith([mathSpan]);
 
             // Make sure that the error doesn't show up later.
             window.MathJax.typesetClear.calls.reset();

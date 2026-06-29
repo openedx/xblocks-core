@@ -767,12 +767,12 @@ Problem.prototype.refreshMath = function (event, element) {
     element = event.target; // eslint-disable-line no-param-reassign
   }
   const elid = element.id.replace(/^input_/, "");
-  const target = `#display_${elid}`;
   const preprocessor = this.inputtypeDisplays[`inputtype_${elid}`];
   if (!isMathJaxRefreshReady()) {
     return;
   }
-  const math = document.querySelector(target) || document.getElementById(`${element.id}_preview`);
+  // Use getElementById so IDs with : or . do not break as CSS selectors.
+  const math = document.getElementById(`display_${elid}`) || document.getElementById(`${element.id}_preview`);
   if (!math) {
     return;
   }
@@ -783,7 +783,8 @@ Problem.prototype.refreshMath = function (event, element) {
   MathJax.typesetClear([math]);
   if (!eqn) {
     math.textContent = "";
-    $(`#${element.id}_dynamath`).val("");
+    const dynEl = document.getElementById(`${element.id}_dynamath`);
+    if (dynEl) { dynEl.value = ""; }
     return;
   }
   const isTexDelimited = (eqn.trim().startsWith("$") && eqn.trim().endsWith("$"))
@@ -794,6 +795,9 @@ Problem.prototype.refreshMath = function (event, element) {
     if (jax) {
       this.updateMathML(jax, element);
     }
+  }).catch(() => {
+    const dynEl = document.getElementById(`${element.id}_dynamath`);
+    if (dynEl) { dynEl.value = ""; }
   });
 };
 
@@ -802,7 +806,8 @@ Problem.prototype.updateMathML = function (jax, element) {
     return;
   }
   try {
-    $(`#${element.id}_dynamath`).val(MathJax.startup.toMML(jax.root));
+    const dynEl = document.getElementById(`${element.id}_dynamath`);
+    if (dynEl) { dynEl.value = MathJax.startup.toMML(jax.root); }
   } catch (exception) {
     if (!exception.restart) {
       throw exception;

@@ -169,20 +169,37 @@ formulaEquationPreview.enable = function() {
         }
 
         function display(latex) {
+            var previewElement = inputData.$preview[0];
+            // Preserve only span.mathjax-preview and img.loading; drop everything else
+            var mathSpan = previewElement.querySelector('.mathjax-preview');
+            var img = previewElement.querySelector('img.loading');
+            var childNodes = previewElement.childNodes;
+            for (var i = childNodes.length - 1; i >= 0; i--) {
+                var node = childNodes[i];
+                if (node.nodeType !== 1 || (node !== mathSpan && node !== img)) {
+                    previewElement.removeChild(node);
+                }
+            }
+            if (!mathSpan) {
+                mathSpan = document.createElement('span');
+                mathSpan.className = 'mathjax-preview';
+                if (img) {
+                    previewElement.insertBefore(mathSpan, img);
+                } else {
+                    previewElement.appendChild(mathSpan);
+                }
+            }
             if (typeof MathJax !== 'undefined' && MathJax.startup && MathJax.startup.promise) {
                 MathJax.startup.promise.then(function() {
-                    var previewElement = inputData.$preview[0];
-                    MathJax.typesetClear([previewElement]);
-                    // set text directly with delimiters; v3/v4 has no getAllJax/Text API
-                    previewElement.textContent = '\\(' + (latex || '') + '\\)';
-                    return MathJax.typesetPromise([previewElement]);
+                    MathJax.typesetClear([mathSpan]);
+                    mathSpan.textContent = '\\(' + (latex || '') + '\\)';
+                    return MathJax.typesetPromise([mathSpan]);
                 }).catch(function(err) {
                     console.log('[FormulaEquationInput] MathJax error for "' + latex + '":', err);
                 });
             } else if (latex) {
                 console.log('[FormulaEquationInput] Oops no mathjax for ', latex);
-                var previewElement = inputData.$preview[0];
-                previewElement.textContent = '\\(' + latex + '\\)';
+                mathSpan.textContent = '\\(' + latex + '\\)';
             }
         }
 
