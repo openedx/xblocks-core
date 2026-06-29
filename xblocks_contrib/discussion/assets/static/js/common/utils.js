@@ -493,7 +493,10 @@
         };
 
         DiscussionUtil.typesetMathJax = function(element) {
-            if (typeof MathJax !== 'undefined' && MathJax !== null && typeof MathJax.startup !== 'undefined') {
+            if (typeof MathJax !== 'undefined' && MathJax !== null &&
+                typeof MathJax.startup !== 'undefined' && MathJax.startup !== null &&
+                typeof MathJax.startup.promise !== 'undefined' &&
+                typeof MathJax.typesetPromise === 'function') {
                 MathJax.startup.promise
                     .then(() => MathJax.typesetPromise([element[0]]));
             }

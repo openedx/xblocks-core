@@ -906,19 +906,18 @@
           jax,
           mathjaxPreprocessor,
           preprocessorTag,
-          target,
           isTexDelimited;
       if (!element) {
         element = event.target; // eslint-disable-line no-param-reassign
       }
       elid = element.id.replace(/^input_/, "");
-      target = "#display_" + elid;
 
       // MathJax preprocessor is loaded by 'setupInputTypes'
       preprocessorTag = "inputtype_" + elid;
       mathjaxPreprocessor = this.inputtypeDisplays[preprocessorTag];
       if (isMathJaxRefreshReady()) {
-        var math = document.querySelector(target);
+        // Use getElementById so IDs with : . etc. don't break as CSS selectors
+        var math = document.getElementById("display_" + elid);
         if (!math) {
           math = document.getElementById(element.id + "_preview");
         }
@@ -932,7 +931,8 @@
         MathJax.typesetClear([math]);
         if (!eqn) {
           math.textContent = "";
-          $("#" + element.id + "_dynamath").val("");
+          var dynEl = document.getElementById(element.id + "_dynamath");
+          if (dynEl) { dynEl.value = ""; }
           return;
         }
         // Determine rendering mode:
@@ -955,14 +955,19 @@
           if (jax) {
             this.updateMathML(jax, element);
           }
-        }.bind(this));
+        }.bind(this)).catch(function () {
+          // clear hidden field on MathJax failure so stale value isn't sent
+          var dynEl = document.getElementById(element.id + "_dynamath");
+          if (dynEl) { dynEl.value = ""; }
+        });
       }
     };
 
     Problem.prototype.updateMathML = function (jax, element) {
       if (isMathJaxMathMLReady()) {
         try {
-          $("#" + element.id + "_dynamath").val(MathJax.startup.toMML(jax.root));
+          var dynEl = document.getElementById(element.id + "_dynamath");
+          if (dynEl) { dynEl.value = MathJax.startup.toMML(jax.root); }
         } catch (exception) {
           if (!exception.restart) {
             throw exception;
