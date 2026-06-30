@@ -1,12 +1,6 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 describe("Problem", function () {
   const problem_content_default = readFixtures("problem_content.html");
-  var mockRuntime = {};
+  const mockRuntime = {};
 
   beforeEach(function () {
     // Stub MathJax
@@ -37,7 +31,7 @@ describe("Problem", function () {
 
   describe("constructor", function () {
     it("set the element from html", function () {
-      this.problem999 = new Problem(mockRuntime,`\
+      this.problem999 = new Problem(mockRuntime, `\
 <section class='xblock xblock-student_view xmodule_display xmodule_CapaModule' data-type='Problem'> \
 <section id='problem_999' \
 class='problems-wrapper' \
@@ -995,6 +989,15 @@ data-url='/problem/quiz/'> \
   describe("refreshMath", function () {
     beforeEach(function () {
       this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      // Reset Queue spy so that bind()'s Queue call ([fn, null, domEl]) is not
+      // included when toHaveBeenCalledWith scans recorded calls. In Jasmine 2.99,
+      // toHaveBeenCalledWith iterates ALL recorded calls' args element-by-element
+      // (even mismatched ones, for diff output). jasmine-jquery's custom equality
+      // tester calls $(domEl).is(anyString) when comparing a DOM node against a
+      // string — which throws a Sizzle syntax error if the string isn't a valid
+      // CSS selector (e.g. "E=mc^2"). Resetting here isolates this describe to
+      // testing only what refreshMath itself queues.
+      MathJax.Hub.Queue.calls.reset();
       $("#input_example_1").val("E=mc^2");
       this.problem.refreshMath({ target: $("#input_example_1").get(0) });
     });
