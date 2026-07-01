@@ -43,6 +43,9 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
+      - name: Install external dependencies
+        run: npm run setup
+
       - name: Build project
         run: npm run build
 

@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "skipLibCheck": true,
+    "allowJs": true
+  },
+  "types": ["jquery"],
+}

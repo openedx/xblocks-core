@@ -14,7 +14,21 @@ Change Log
 Unreleased
 **********
 
+0.18.0 - 2026-06-12
+**********************************************
+
+Removed
+=======
+
+* Removed backend-rendered studio view for PDF Block. Only the MFE authoring
+  experience is supported now.
+
+Added
+=====
+* Add tests to PDF initialization script
+
 0.17.0 - 2026-06-11
+**********************************************
 
 Changed
 =======
