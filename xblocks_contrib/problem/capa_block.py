@@ -992,6 +992,13 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
         else:
             raw_earned = raw_possible = 0
 
+        if not self.attempts:
+            # Nothing has ever been submitted for this user/block, so there's no
+            # real grade history to protect. Reflect the problem's current
+            # definition instead of a stale persisted score (e.g. left over from
+            # before an author edited the problem after it was first previewed).
+            raw_possible = self.max_score() or raw_possible
+
         if raw_possible > 0:
             if self.weight is not None:
                 # Progress objects expect total > 0
