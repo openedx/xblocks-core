@@ -84,7 +84,7 @@ colorama==0.4.6
     #   -r requirements/quality.txt
     #   -r requirements/test.txt
     #   tox
-coverage[toml]==7.14.3
+coverage[toml]==7.15.0
     # via
     #   -r requirements/quality.txt
     #   -r requirements/test.txt
@@ -212,7 +212,7 @@ edxval==5.0.1
     # via
     #   -r requirements/quality.txt
     #   -r requirements/test.txt
-filelock==3.29.4
+filelock==3.29.5
     # via
     #   -r requirements/quality.txt
     #   -r requirements/test.txt
@@ -296,7 +296,7 @@ nltk==3.9.4
     #   -r requirements/quality.txt
     #   -r requirements/test.txt
     #   chem
-numpy==2.5.0
+numpy==2.5.1
     # via
     #   -r requirements/quality.txt
     #   -r requirements/test.txt
@@ -326,7 +326,7 @@ path==17.1.1
     # via
     #   -r requirements/quality.txt
     #   -r requirements/test.txt
-pillow==12.2.0
+pillow==12.3.0
     # via
     #   -r requirements/quality.txt
     #   -r requirements/test.txt
@@ -443,7 +443,7 @@ python-dateutil==2.9.0.post0
     #   -r requirements/quality.txt
     #   -r requirements/test.txt
     #   xblock
-python-discovery==1.4.2
+python-discovery==1.4.3
     # via
     #   -r requirements/quality.txt
     #   -r requirements/test.txt
@@ -524,7 +524,7 @@ sqlparse==0.5.5
     #   -r requirements/quality.txt
     #   -r requirements/test.txt
     #   django
-stevedore==5.8.0
+stevedore==5.9.0
     # via
     #   -r requirements/quality.txt
     #   -r requirements/test.txt
@@ -560,7 +560,7 @@ tqdm==4.68.3
     #   -r requirements/quality.txt
     #   -r requirements/test.txt
     #   nltk
-typing-extensions==4.15.0
+typing-extensions==4.16.0
     # via
     #   -r requirements/quality.txt
     #   -r requirements/test.txt
