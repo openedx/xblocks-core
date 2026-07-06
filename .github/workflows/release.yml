@@ -8,6 +8,8 @@ jobs:
   run_tests:
     uses: ./.github/workflows/python-tests.yml
     secrets: inherit
+    permissions:
+      contents: read
 
   release:
     needs: run_tests
