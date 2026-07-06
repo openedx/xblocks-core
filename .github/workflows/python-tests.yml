@@ -11,7 +11,7 @@ on:
 
 jobs:
   python-tests:
-    name: Run Python Tests and Coverage
+    name: ${{ matrix.toxenv }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

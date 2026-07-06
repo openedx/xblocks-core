@@ -143,10 +143,26 @@ line-length = 120
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "W"]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "DJ",     # flake8-django
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+]
+
+[tool.ruff.lint.isort]
+known-third-party = ["django", "xblock"]
 
 [tool.ruff.format]
 quote-style = "double"
+indent-style = "space"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "test_settings"
@@ -160,9 +176,24 @@ source = [
     "xblocks_contrib",
     "xblock_pdf",
 ]
+omit = [
+    "*/tests/*",
+    "*/migrations/*",
+    "*/__pycache__/*",
+    "*/settings.py",
+]
 
 [tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
 fail_under = 70
+show_missing = true
 
 [tool.coverage.html]
 directory = "htmlcov"
