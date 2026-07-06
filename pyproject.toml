@@ -28,7 +28,7 @@ dependencies = [
     "beautifulsoup4",
     "chem",
     "defusedxml",
-    "django",
+    "django>=4.2",
     "edx-codejail",
     "edx-django-utils",
     "edx-opaque-keys",
