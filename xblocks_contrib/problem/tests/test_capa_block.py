@@ -2742,6 +2742,94 @@ class ProblemBlockTest(unittest.TestCase):
         other_block.get_progress()
         mock_progress.assert_called_with(1, 1)
 
+    @patch("xblocks_contrib.problem.capa_block.Progress")
+    def test_get_progress_ignores_stale_score_when_unattempted(self, mock_progress):
+        """
+        If a problem has never been attempted, get_progress() should reflect the
+        problem's current max_score() rather than a stale persisted score -- e.g.
+        one left over from a preview/bind that happened before the problem's
+        content was edited to add a real scorable response.
+        """
+        mock_progress.return_value = True
+        block = CapaFactory.create(attempts=0)
+        block.weight = 1
+        # Simulate a stale persisted score, as if this block had been bound/previewed
+        # before its current content (with a scorable response worth 1 point) existed.
+        block.score = Score(raw_earned=0, raw_possible=0)
+
+        block.get_progress()
+
+        mock_progress.assert_called_with(0, 1)
+
+    @patch("xblocks_contrib.problem.capa_block.Progress")
+    def test_get_progress_keeps_historical_score_when_attempted(self, mock_progress):
+        """
+        Once a problem has been attempted, get_progress() must not silently swap in
+        the current max_score() -- the historical score/denominator the learner was
+        actually graded against must be preserved, even if the problem's content or
+        weight has since changed.
+        """
+        mock_progress.return_value = True
+        block = CapaFactory.create(attempts=1)
+        block.weight = None
+        # Historical score computed against an older version of the problem (e.g.
+        # before the author edited it, changing its current max_score() to 1).
+        block.score = Score(raw_earned=1, raw_possible=2)
+
+        block.get_progress()
+
+        mock_progress.assert_called_with(1, 2)
+
+    def test_get_progress_reuses_already_built_lcp(self):
+        """
+        get_progress() should reuse self.lcp when it's already been built (e.g.
+        by handle_ajax, which explicitly touches self.lcp before calling here)
+        instead of re-parsing the problem via max_score(), when the problem
+        hasn't been attempted yet.
+        """
+        block = CapaFactory.create(attempts=0)
+        block.weight = None
+        assert "lcp" in block.__dict__  # CapaFactory.create() forces lcp to build
+
+        # If max_score() were called it would re-parse the problem and return a
+        # value consistent with the current XML (1) -- give it an obviously wrong
+        # value instead so we can tell whether it was actually invoked.
+        block.max_score = Mock(return_value=999)
+
+        _, total = block.get_display_progress()
+
+        block.max_score.assert_not_called()
+        assert total == 1
+
+    def test_get_progress_falls_back_to_max_score_when_lcp_not_built(self):
+        """
+        get_progress() should fall back to max_score() (rather than force a full
+        lcp build) when self.lcp genuinely hasn't been constructed yet.
+        """
+        block = CapaFactory.create(attempts=0)
+        block.weight = None
+        del block.__dict__["lcp"]  # simulate a block whose lcp was never built
+        block.max_score = Mock(return_value=3)
+
+        _, total = block.get_display_progress()
+
+        block.max_score.assert_called_once()
+        assert total == 3
+
+    def test_get_progress_shows_genuine_zero_not_stale_value(self):
+        """
+        A never-attempted problem with no scorable response should show 0 points
+        possible, even if a stale non-zero score was previously persisted -- 0
+        because the problem is genuinely worth 0 points must not be treated the
+        same as "0 because max_score() couldn't be computed", which would wrongly
+        fall back to the old value.
+        """
+        block = CapaFactory.create(xml="<problem/>", attempts=0)
+        block.weight = None
+        block.score = Score(raw_earned=0, raw_possible=5)
+
+        assert block.get_progress() is None
+
     @ddt.data(
         ("never", True, None),
         ("never", False, None),
