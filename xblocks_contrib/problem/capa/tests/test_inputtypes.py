@@ -773,15 +773,13 @@ class MatlabTest(unittest.TestCase):
         # test html, that is correct HTML5 html, but is not parsable by XML parser.
         old_render_template = self.the_input.capa_system.render_template
         self.the_input.capa_system.render_template = lambda *args: textwrap.dedent(
-
-                "<div class='matlabResponse'><div id='mwAudioPlaceHolder'>"
-                "<audio controls autobuffer autoplay src='data:audio/wav;base64='>"
-                "Audio is not supported on this browser.</audio>"
-                "<div>Right click "
-                "<a href=https://endpoint.mss-mathworks.com/media/filename.wav>here</a> "
-                'and click "Save As" to download the file</div></div>'
-                "<div style='white-space:pre' class='commandWindowOutput'></div><ul></ul></div>"
-
+            "<div class='matlabResponse'><div id='mwAudioPlaceHolder'>"
+            "<audio controls autobuffer autoplay src='data:audio/wav;base64='>"
+            "Audio is not supported on this browser.</audio>"
+            "<div>Right click "
+            "<a href=https://endpoint.mss-mathworks.com/media/filename.wav>here</a> "
+            'and click "Save As" to download the file</div></div>'
+            "<div style='white-space:pre' class='commandWindowOutput'></div><ul></ul></div>"
         ).replace("\n", "")
 
         output = self.the_input.get_html()
@@ -874,23 +872,21 @@ class MatlabTest(unittest.TestCase):
         context = the_input._get_render_context()  # pylint: disable=protected-access
         self.maxDiff = None  # pylint: disable=invalid-name
         expected = fromstring(
-
-                '\n<div class="matlabResponse"><div class="commandWindowOutput" '
-                'style="white-space: pre;"> <strong>if</strong> Conditionally execute '
-                "statements.\nThe general form of the <strong>if</strong> statement is\n\n"
-                "   <strong>if</strong> expression\n     statements\n   ELSEIF expression\n"
-                "     statements\n   ELSE\n     statements\n   END\n\nThe statements are "
-                "executed if the real part of the expression \nhas all non-zero elements. "
-                "The ELSE and ELSEIF parts are optional.\nZero or more ELSEIF parts can be "
-                "used as well as nested <strong>if</strong>'s.\nThe expression is usually "
-                "of the form expr rop expr where \nrop is ==, &lt;, &gt;, &lt;=, &gt;=, or "
-                '~=.\n<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAjAAAAGkCAIA'
-                'AACgj==">\n\nExample\n   if I == J\n     A(I,J) = 2;\n   elseif abs(I-J) '
-                "== 1\n     A(I,J) = -1;\n   else\n     A(I,J) = 0;\n   end\n\nSee also "
-                "<a>relop</a>, <a>else</a>, <a>elseif</a>, <a>end</a>, <a>for</a>, "
-                "<a>while</a>, <a>switch</a>.\n\nReference page in Help browser\n   "
-                "<a>doc if</a>\n\n</div><ul></ul></div>\n"
-
+            '\n<div class="matlabResponse"><div class="commandWindowOutput" '
+            'style="white-space: pre;"> <strong>if</strong> Conditionally execute '
+            "statements.\nThe general form of the <strong>if</strong> statement is\n\n"
+            "   <strong>if</strong> expression\n     statements\n   ELSEIF expression\n"
+            "     statements\n   ELSE\n     statements\n   END\n\nThe statements are "
+            "executed if the real part of the expression \nhas all non-zero elements. "
+            "The ELSE and ELSEIF parts are optional.\nZero or more ELSEIF parts can be "
+            "used as well as nested <strong>if</strong>'s.\nThe expression is usually "
+            "of the form expr rop expr where \nrop is ==, &lt;, &gt;, &lt;=, &gt;=, or "
+            '~=.\n<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAjAAAAGkCAIA'
+            'AACgj==">\n\nExample\n   if I == J\n     A(I,J) = 2;\n   elseif abs(I-J) '
+            "== 1\n     A(I,J) = -1;\n   else\n     A(I,J) = 0;\n   end\n\nSee also "
+            "<a>relop</a>, <a>else</a>, <a>elseif</a>, <a>end</a>, <a>for</a>, "
+            "<a>while</a>, <a>switch</a>.\n\nReference page in Help browser\n   "
+            "<a>doc if</a>\n\n</div><ul></ul></div>\n"
         )
 
         received = fromstring(context["queue_msg"])

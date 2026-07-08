@@ -3122,7 +3122,9 @@ class FormulaResponse(LoncapaResponse):
         """
         variables = samples.split("@")[0].split(",")
         numsamples = int(samples.split("@")[1].split("#")[1])
-        sranges = list(zip(*[list(map(float, x.split(","))) for x in samples.split("@")[1].split("#")[0].split(":")], strict=False))
+        sranges = list(
+            zip(*[list(map(float, x.split(","))) for x in samples.split("@")[1].split("#")[0].split(":")], strict=False)
+        )
         ranges = dict(list(zip(variables, sranges, strict=False)))
 
         out = []

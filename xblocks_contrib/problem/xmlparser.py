@@ -2,7 +2,6 @@
 #
 """lxml.etree protection"""
 
-
 import threading
 
 from defusedxml.common import DTDForbidden, EntitiesForbidden, NotSupportedError

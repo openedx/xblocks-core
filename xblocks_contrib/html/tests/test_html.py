@@ -115,7 +115,8 @@ class HtmlBlockCourseApiTestCase(unittest.TestCase):
 
         with override_settings(**settings):
             assert block.student_view_data() == {
-                "enabled": False, "message": 'To enable, set FEATURES["ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA"]'
+                "enabled": False,
+                "message": 'To enable, set FEATURES["ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA"]',
             }
 
     @ddt.data(
