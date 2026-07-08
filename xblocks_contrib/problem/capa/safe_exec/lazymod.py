@@ -36,7 +36,7 @@ class LazyModule:
         try:
             subname = f"{self.__name__}.{name}"
             __import__(subname)
-            submod = getattr(mod, name)  # pylint: disable=unused-variable
+            _submod = getattr(mod, name)
         except ImportError as exc:
             raise AttributeError(f"'module' object has no attribute {name!r}") from exc
         self.__dict__[name] = LazyModule(subname)

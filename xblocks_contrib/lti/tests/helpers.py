@@ -11,12 +11,12 @@ from xblock.reference.user_service import UserService, XBlockUser
 from xblock.runtime import Runtime
 
 TIMEDELTA_REGEX = re.compile(
-    r'^'
-    r'((?P<days>\d+?) day(?:s?))?(\s)?'
-    r'((?P<hours>\d+?) hour(?:s?))?(\s)?'
-    r'((?P<minutes>\d+?) minute(?:s)?)?(\s)?'
-    r'((?P<seconds>\d+?) second(?:s)?)?'
-    r'$'
+    r"^"
+    r"((?P<days>\d+?) day(?:s?))?(\s)?"
+    r"((?P<hours>\d+?) hour(?:s?))?(\s)?"
+    r"((?P<minutes>\d+?) minute(?:s)?)?(\s)?"
+    r"((?P<seconds>\d+?) second(?:s)?)?"
+    r"$"
 )
 
 
@@ -45,7 +45,7 @@ class Timedelta(JSONField):  # lint-amnesty, pylint: disable=missing-class-docst
             return
         parts = parts.groupdict()
         time_params = {}
-        for (name, param) in parts.items():
+        for name, param in parts.items():
             if param:
                 time_params[name] = int(param)
         return datetime.timedelta(**time_params)
@@ -55,11 +55,11 @@ class Timedelta(JSONField):  # lint-amnesty, pylint: disable=missing-class-docst
             return None
 
         values = []
-        for attr in ('days', 'hours', 'minutes', 'seconds'):
+        for attr in ("days", "hours", "minutes", "seconds"):
             cur_value = getattr(value, attr, 0)
             if cur_value > 0:
                 values.append("%d %s" % (cur_value, attr))
-        return ' '.join(values)
+        return " ".join(values)
 
     def enforce_type(self, value):
         """
@@ -76,14 +76,16 @@ class StubUserService(UserService):
     Stub UserService for testing the sequence block.
     """
 
-    def __init__(self,  # pylint: disable=too-many-positional-arguments
-                 user=None,
-                 user_is_staff=False,
-                 user_role=None,
-                 anonymous_user_id=None,
-                 deprecated_anonymous_user_id=None,
-                 request_country_code=None,
-                 **kwargs):
+    def __init__(
+        self,  # pylint: disable=too-many-positional-arguments
+        user=None,
+        user_is_staff=False,
+        user_role=None,
+        anonymous_user_id=None,
+        deprecated_anonymous_user_id=None,
+        request_country_code=None,
+        **kwargs,
+    ):
         self.user = user
         self.user_is_staff = user_is_staff
         self.user_role = user_role
@@ -99,17 +101,17 @@ class StubUserService(UserService):
         """
         user = XBlockUser()
         if self.user and self.user.is_authenticated:
-            user.opt_attrs['edx-platform.anonymous_user_id'] = self.anonymous_user_id
-            user.opt_attrs['edx-platform.deprecated_anonymous_user_id'] = self.deprecated_anonymous_user_id
-            user.opt_attrs['edx-platform.request_country_code'] = self.request_country_code
-            user.opt_attrs['edx-platform.user_is_staff'] = self.user_is_staff
-            user.opt_attrs['edx-platform.user_id'] = self.user.id
-            user.opt_attrs['edx-platform.user_role'] = self.user_role
-            user.opt_attrs['edx-platform.username'] = self.user.username
+            user.opt_attrs["edx-platform.anonymous_user_id"] = self.anonymous_user_id
+            user.opt_attrs["edx-platform.deprecated_anonymous_user_id"] = self.deprecated_anonymous_user_id
+            user.opt_attrs["edx-platform.request_country_code"] = self.request_country_code
+            user.opt_attrs["edx-platform.user_is_staff"] = self.user_is_staff
+            user.opt_attrs["edx-platform.user_id"] = self.user.id
+            user.opt_attrs["edx-platform.user_role"] = self.user_role
+            user.opt_attrs["edx-platform.username"] = self.user.username
         else:
-            user.opt_attrs['edx-platform.username'] = 'anonymous'
-            user.opt_attrs['edx-platform.request_country_code'] = self.request_country_code
-            user.opt_attrs['edx-platform.is_authenticated'] = False
+            user.opt_attrs["edx-platform.username"] = "anonymous"
+            user.opt_attrs["edx-platform.request_country_code"] = self.request_country_code
+            user.opt_attrs["edx-platform.is_authenticated"] = False
         return user
 
     def get_user_by_anonymous_id(self, uid=None):  # pylint: disable=unused-argument
@@ -127,9 +129,7 @@ class MockRuntime(Runtime):  # pylint: disable=abstract-method
         super().__init__(id_reader=lambda: None, id_generator=lambda: None, services=services)
         self.anonymous_student_id = anonymous_student_id
 
-    def handler_url(
-        self, block, handler_name, suffix="", query="", thirdparty=False
-    ):  # pylint: disable=too-many-positional-arguments
+    def handler_url(self, block, handler_name, suffix="", query="", thirdparty=False):  # pylint: disable=too-many-positional-arguments
         return f"/mock_url/{handler_name}"
 
     def local_resource_url(self, block, resource):  # pylint: disable=arguments-renamed
@@ -149,19 +149,19 @@ def get_test_system(
     """Construct a minimal test system for the LTIBlockTest."""
 
     if not user:
-        user = Mock(name='get_test_system.user', is_staff=False)
+        user = Mock(name="get_test_system.user", is_staff=False)
     user_service = StubUserService(
         user=user,
-        anonymous_user_id='student',
-        deprecated_anonymous_user_id='student',
+        anonymous_user_id="student",
+        deprecated_anonymous_user_id="student",
         user_is_staff=user_is_staff,
-        user_role='student',
+        user_role="student",
     )
     runtime = MockRuntime(
         anonymous_student_id="student",
         services={
             "user": user_service,
-        }
+        },
     )
 
     return runtime

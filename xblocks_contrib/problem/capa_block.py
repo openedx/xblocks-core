@@ -77,8 +77,7 @@ NUM_RANDOMIZATION_BINS = 20
 MAX_RANDOMIZATION_BINS = 1000
 
 DEFAULT_PUBLIC_VIEW_MESSAGE = (
-    "This content is only accessible to enrolled learners. "
-    "Sign in or register, and enroll in this course to view it."
+    "This content is only accessible to enrolled learners. Sign in or register, and enroll in this course to view it."
 )
 
 
@@ -275,8 +274,7 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
     show_correctness = String(
         display_name=_("Show Results"),
         help=_(
-            "Defines when to show whether a learner's answer to the problem is correct. "
-            "Configured on the subsection."
+            "Defines when to show whether a learner's answer to the problem is correct. Configured on the subsection."
         ),
         scope=Scope.settings,
         default=ShowCorrectness.ALWAYS,
@@ -783,7 +781,6 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
 
         count = 0
         for user_state in user_state_iterator:
-
             if "student_answers" not in user_state.state:
                 continue
             try:
@@ -2448,7 +2445,7 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
             line, offset = err.position  # pylint: disable=unpacking-non-sequence
             msg = (
                 f"Unable to create xml for block {self.usage_key}. "
-                f"Context: '{lines[line - 1][offset - 40: offset + 40]}'"
+                f"Context: '{lines[line - 1][offset - 40 : offset + 40]}'"
             )
             raise SerializationError(self.usage_key, msg) from err
 

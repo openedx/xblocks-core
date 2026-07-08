@@ -739,7 +739,7 @@ class MatlabTest(unittest.TestCase):
         the_input = lookup_tag("matlabinput")(system, elt, {})
 
         data = {"submission": "x = 1234;"}
-        response = the_input.handle_ajax("plot", data)  # pylint: disable=unused-variable
+        the_input.handle_ajax("plot", data)
 
         body = system.xqueue.interface.send_to_queue.call_args[1]["body"]
         payload = json.loads(body)

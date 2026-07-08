@@ -21,7 +21,7 @@ from xblocks_contrib.legacy_utils.xml_utils import LegacyXmlMixin
 
 log = logging.getLogger(__name__)
 loader = ResourceLoader(__name__)
-Text = markupsafe.escape                        # pylint: disable=invalid-name
+Text = markupsafe.escape  # pylint: disable=invalid-name
 
 
 def _(text):
@@ -31,7 +31,7 @@ def _(text):
     return text
 
 
-def HTML(html):                                 # pylint: disable=invalid-name
+def HTML(html):  # pylint: disable=invalid-name
     """
     Mark a string as already HTML, so that it won't be escaped before output.
 
@@ -56,12 +56,13 @@ def HTML(html):                                 # pylint: disable=invalid-name
 
 @XBlock.needs("i18n")
 @XBlock.needs("user")
-@XBlock.wants('discussion_config_service')
+@XBlock.wants("discussion_config_service")
 # pylint: disable=abstract-method
 class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
     """
     Provides a discussion forum that is inline with other content in the courseware.
     """
+
     is_extracted = True
     completion_mode = XBlockCompletionMode.EXCLUDED
 
@@ -70,7 +71,7 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
         display_name=_("Display Name"),
         help=_("The display name for this component."),
         default="Discussion",
-        scope=Scope.settings
+        scope=Scope.settings,
     )
     discussion_category = String(
         display_name=_("Category"),
@@ -79,7 +80,7 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
             "A category name for the discussion. "
             "This name appears in the left pane of the discussion forum for the course."
         ),
-        scope=Scope.settings
+        scope=Scope.settings,
     )
     discussion_target = String(
         display_name=_("Subcategory"),
@@ -88,7 +89,7 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
             "A subcategory name for the discussion. "
             "This name appears in the left pane of the discussion forum for the course."
         ),
-        scope=Scope.settings
+        scope=Scope.settings,
     )
     sort_key = String(scope=Scope.settings)
 
@@ -101,7 +102,7 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
         """
         Returns discussion service.
         """
-        return self.runtime.service(self, 'discussion_config_service')
+        return self.runtime.service(self, "discussion_config_service")
 
     @property
     def is_visible(self):
@@ -116,7 +117,7 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
         Returns django user associated with user currently interacting
         with the XBlock.
         """
-        user_service = self.runtime.service(self, 'user')
+        user_service = self.runtime.service(self, "user")
         if not user_service:
             return None
         return user_service._django_user  # pylint: disable=protected-access
@@ -126,11 +127,7 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
         Adds URLs for JS and CSS resources that this XBlock depends on to `fragment`.
         """
 
-        css_file_path = (
-            '/css/inline-discussion-rtl.css'
-            if get_language_bidi()
-            else '/css/inline-discussion.css'
-        )
+        css_file_path = "/css/inline-discussion-rtl.css" if get_language_bidi() else "/css/inline-discussion.css"
 
         # Determine how static assets should be served based on Django settings.
         # Open edX requires different asset paths for production vs. local development.
@@ -171,46 +168,50 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
             return fragment
 
         self.add_resource_urls(fragment)
-        login_msg = ''
+        login_msg = ""
 
         if not self.django_user.is_authenticated:
-            qs = urllib.parse.urlencode({
-                'course_id': self.context_key,
-                'enrollment_action': 'enroll',
-                'email_opt_in': False,
-            })
-            login_msg = Text(_("You are not signed in. To view the discussion content, {sign_in_link} or "
-                               "{register_link}, and enroll in this course.")).format(
+            qs = urllib.parse.urlencode(
+                {
+                    "course_id": self.context_key,
+                    "enrollment_action": "enroll",
+                    "email_opt_in": False,
+                }
+            )
+            login_msg = Text(
+                _(
+                    "You are not signed in. To view the discussion content, {sign_in_link} or "
+                    "{register_link}, and enroll in this course."
+                )
+            ).format(
                 sign_in_link=HTML('<a href="{url}">{sign_in_label}</a>').format(
-                    sign_in_label=_('sign in'),
-                    url='{}?{}'.format(reverse('signin_user'), qs),
+                    sign_in_label=_("sign in"),
+                    url="{}?{}".format(reverse("signin_user"), qs),
                 ),
                 register_link=HTML('<a href="/{url}">{register_label}</a>').format(
-                    register_label=_('register'),
-                    url='{}?{}'.format(reverse('register_user'), qs),
+                    register_label=_("register"),
+                    url="{}?{}".format(reverse("register_user"), qs),
                 ),
             )
 
         if self.discussion_config.is_discussion_enabled:
             context = {
-                'discussion_id': self.discussion_id,
-                'display_name': self.display_name if self.display_name else _("Discussion"),
-                'user': self.django_user,
-                'course_id': self.context_key,
-                'discussion_category': self.discussion_category,
-                'discussion_target': self.discussion_target,
-                'can_create_thread': self.has_permission("create_thread"),
-                'can_create_comment': self.has_permission("create_comment"),
-                'can_create_subcomment': self.has_permission("create_sub_comment"),
-                'login_msg': login_msg,
-                'PLATFORM_NAME': settings.PLATFORM_NAME,
-                'enable_discussion_home_panel': settings.FEATURES.get("ENABLE_DISCUSSION_HOME_PANEL", False),
+                "discussion_id": self.discussion_id,
+                "display_name": self.display_name if self.display_name else _("Discussion"),
+                "user": self.django_user,
+                "course_id": self.context_key,
+                "discussion_category": self.discussion_category,
+                "discussion_target": self.discussion_target,
+                "can_create_thread": self.has_permission("create_thread"),
+                "can_create_comment": self.has_permission("create_comment"),
+                "can_create_subcomment": self.has_permission("create_sub_comment"),
+                "login_msg": login_msg,
+                "PLATFORM_NAME": settings.PLATFORM_NAME,
+                "enable_discussion_home_panel": settings.FEATURES.get("ENABLE_DISCUSSION_HOME_PANEL", False),
             }
-            fragment.add_content(
-                render_to_string('discussion_templates/_discussion_inline.html', context)
-            )
+            fragment.add_content(render_to_string("discussion_templates/_discussion_inline.html", context))
 
-        fragment.initialize_js('DiscussionInlineBlock')
+        fragment.initialize_js("DiscussionInlineBlock")
 
         return fragment
 
@@ -220,19 +221,17 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
         """
         fragment = Fragment()
         context = {
-            'discussion_id': self.discussion_id,
-            'is_visible': self.is_visible,
+            "discussion_id": self.discussion_id,
+            "is_visible": self.is_visible,
         }
-        fragment.add_content(
-            loader.render_django_template('templates/_discussion_inline_studio.html', context)
-        )
+        fragment.add_content(loader.render_django_template("templates/_discussion_inline_studio.html", context))
         return fragment
 
     def student_view_data(self):
         """
         Returns a JSON representation of the student_view of this XBlock.
         """
-        return {'topic_id': self.discussion_id}
+        return {"topic_id": self.discussion_id}
 
     @classmethod
     def parse_xml(cls, node, runtime, keys):
@@ -259,7 +258,7 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
         """
         Attempt to load definition XML from "discussion" folder in OLX, than parse it and update block fields
         """
-        if node.get('url_name') is None:
+        if node.get("url_name") is None:
             return  # Newer/XBlock XML format - no need to load an additional file.
         try:
             definition_xml, _ = cls.load_definition_xml(node, runtime, block.scope_ids.def_id)
@@ -267,7 +266,7 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
             log.info(
                 "Exception %s when trying to load definition xml for block %s - assuming XBlock export format",
                 err,
-                block
+                block,
             )
             return
 

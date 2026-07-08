@@ -507,7 +507,6 @@ class FormulaResponseXMLFactory(ResponseXMLFactory):
             hintgroup_element = etree.SubElement(response_element, "hintgroup")
 
             for hint_prompt, hint_name, hint_text in hint_list:
-
                 # For each hint, create a <formulahint> element
                 formulahint_element = etree.SubElement(hintgroup_element, "formulahint")
 

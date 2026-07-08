@@ -1,4 +1,5 @@
-""" Cache Utils for Video Block """
+"""Cache Utils for Video Block"""
+
 import itertools
 
 import wrapt
@@ -42,6 +43,7 @@ def request_cached(namespace=None, arg_map_function=None, request_cache_getter=N
               cache the value it returns, and return that cached value for subsequent calls with the
               same args/kwargs within a single request.
     """
+
     @wrapt.decorator
     def decorator(wrapped, instance, args, kwargs):
         """
@@ -83,7 +85,7 @@ def _func_call_cache_key(func, arg_map_function, *args, **kwargs):
     converted_kwargs = list(map(arg_map_function, _sorted_kwargs_list(kwargs)))
 
     cache_keys = [func.__module__, func.__name__] + converted_args + converted_kwargs
-    return '.'.join(cache_keys)
+    return ".".join(cache_keys)
 
 
 def _sorted_kwargs_list(kwargs):

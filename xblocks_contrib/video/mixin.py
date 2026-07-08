@@ -24,6 +24,7 @@ class LicenseMixin(XBlockMixin):
     is exclusively owned by the creator of the content by default. Other
     countries may have similar laws.
     """
+
     license = String(
         display_name=_("License"),
         help=_("A license defines how the contents of this block can be shared and reused."),
@@ -40,9 +41,9 @@ class LicenseMixin(XBlockMixin):
         to this method, rather than reimplementing it in their XML import
         functions.
         """
-        license = node.get('license', default=None)  # pylint: disable=redefined-builtin
+        license = node.get("license", default=None)  # pylint: disable=redefined-builtin
         if license:
-            definition['license'] = license
+            definition["license"] = license
         return definition
 
     def add_license_to_xml(self, node, default=None):
@@ -54,4 +55,4 @@ class LicenseMixin(XBlockMixin):
         functions.
         """
         if getattr(self, "license", default):
-            node.set('license', self.license)
+            node.set("license", self.license)
