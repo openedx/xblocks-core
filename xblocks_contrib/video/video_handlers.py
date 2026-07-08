@@ -160,9 +160,7 @@ class VideoStudentViewHandlers:
             if asset_path:
                 response = Response(
                     status=307,
-                    location="/static/{}/{}".format(
-                        asset_path, subs_filename(transcript_name, self.transcript_language)
-                    ),
+                    location=f"/static/{asset_path}/{subs_filename(transcript_name, self.transcript_language)}",
                 )
         return response
 

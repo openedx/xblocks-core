@@ -1,7 +1,6 @@
 """Tools for helping with testing capa."""
 
 import gettext
-import io
 import os
 import os.path
 from unittest.mock import MagicMock, Mock
@@ -115,6 +114,6 @@ def load_fixture(relpath):
     in the same directory as the test file.
     """
     abspath = os.path.join(os.path.dirname(__file__), "test_files", relpath)
-    with io.open(abspath, encoding="utf-8") as fixture_file:
+    with open(abspath, encoding="utf-8") as fixture_file:
         contents = fixture_file.read()
         return contents

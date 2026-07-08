@@ -36,7 +36,6 @@ from lxml import etree
 from lxml.html.soupparser import fromstring as fromstring_bs  # uses Beautiful Soup!!! FIXME?
 from pyparsing import ParseException
 from shapely.geometry import MultiPoint, Point
-from six.moves import map, range, zip
 from symmath import symmath_check
 
 from xblocks_contrib.problem.capa.safe_exec import safe_exec
@@ -1674,7 +1673,7 @@ class NumericalResponse(LoncapaResponse):
             if isinstance(student_float, complex):
                 raise StudentInputError(_("You may not use complex numbers in range tolerance problems"))
             boundaries = []
-            for inclusion, answer in zip(self.inclusion, self.answer_range):
+            for inclusion, answer in zip(self.inclusion, self.answer_range, strict=False):
                 boundary = self.get_staff_ans(answer)
                 if boundary.imag != 0:
                     raise StudentInputError(
@@ -2960,7 +2959,7 @@ class ExternalResponse(LoncapaResponse):
         except Exception as err:  # pylint: disable=broad-exception-caught
             log.error("Error %s", err)
             if self.capa_system.DEBUG:
-                cmap.set_dict(dict(list(zip(sorted(self.answer_ids), ["incorrect"] * len(idset)))))
+                cmap.set_dict(dict(list(zip(sorted(self.answer_ids), ["incorrect"] * len(idset), strict=False))))
                 cmap.set_property(
                     self.answer_ids[0], "msg", Text('<span class="inline-error">{}</span>').format(str(err))
                 )
@@ -2997,7 +2996,7 @@ class ExternalResponse(LoncapaResponse):
         if not len(exans) == len(self.answer_ids):
             log.error("Expected %s answers from external server, only got %s!", len(self.answer_ids), len(exans))
             raise Exception("Short response from external server")  # pylint: disable=broad-exception-raised
-        return dict(list(zip(self.answer_ids, exans)))
+        return dict(list(zip(self.answer_ids, exans, strict=False)))
 
 
 # -----------------------------------------------------------------------------
@@ -3123,8 +3122,8 @@ class FormulaResponse(LoncapaResponse):
         """
         variables = samples.split("@")[0].split(",")
         numsamples = int(samples.split("@")[1].split("#")[1])
-        sranges = list(zip(*[list(map(float, x.split(","))) for x in samples.split("@")[1].split("#")[0].split(":")]))
-        ranges = dict(list(zip(variables, sranges)))
+        sranges = list(zip(*[list(map(float, x.split(","))) for x in samples.split("@")[1].split("#")[0].split(":")], strict=False))
+        ranges = dict(list(zip(variables, sranges, strict=False)))
 
         out = []
         for _ in range(numsamples):
@@ -3149,7 +3148,7 @@ class FormulaResponse(LoncapaResponse):
 
         correct = all(
             compare_with_tolerance(student, instructor, self.tolerance)
-            for student, instructor in zip(student_result, instructor_result)
+            for student, instructor in zip(student_result, instructor_result, strict=False)
         )
         if correct:
             return "correct"
@@ -3257,7 +3256,7 @@ class SchematicResponse(LoncapaResponse):
             msg = _("Error in evaluating SchematicResponse. The error was: {error_msg}").format(error_msg=err)
             raise ResponseError(msg) from err
         cmap = CorrectMap()
-        cmap.set_dict(dict(list(zip(sorted(self.answer_ids), self.context["correct"]))))
+        cmap.set_dict(dict(list(zip(sorted(self.answer_ids), self.context["correct"], strict=False))))
         return cmap
 
     def get_answers(self):

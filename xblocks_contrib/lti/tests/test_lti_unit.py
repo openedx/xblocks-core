@@ -74,7 +74,7 @@ class LTIBlockTest(TestCase):
         self.user_id = current_user.opt_attrs.get(ATTR_KEY_ANONYMOUS_USER_ID)
         self.lti_id = self.xblock.lti_id
 
-        self.unquoted_resource_link_id = "{}-i4x-2-3-lti-31de800015cf4afb973356dbe81496df".format(settings.LMS_BASE)
+        self.unquoted_resource_link_id = f"{settings.LMS_BASE}-i4x-2-3-lti-31de800015cf4afb973356dbe81496df"
 
         sourced_id = ":".join(parse.quote(i) for i in (self.lti_id, self.unquoted_resource_link_id, self.user_id))
 

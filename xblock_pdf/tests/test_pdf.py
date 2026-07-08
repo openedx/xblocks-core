@@ -1,7 +1,7 @@
 """Tests for the PDF Block"""
 
 import json
-from typing import Any, Optional
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 from django.test import override_settings
@@ -32,7 +32,7 @@ def get_studio_content(block: PDFBlock) -> str:
     return as_dict["content"]
 
 
-def mock_handle_request(data: Optional[dict[str, Any]] = None, method: str = "POST"):
+def mock_handle_request(data: dict[str, Any] | None = None, method: str = "POST"):
     """Return a request object compatible with an xblock_handler."""
     mock_request = MagicMock()
     mock_request.method = method

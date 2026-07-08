@@ -1,5 +1,4 @@
 # pylint: disable=too-many-lines
-# -*- coding: utf-8 -*-
 """
 Tests of extended hints
 """
@@ -1131,5 +1130,5 @@ class ErrorConditionsTest(HintTest):
     def test_error_conditions_illegal_element(self):
         """Ensure that malformed XML raises an exception when creating a problem."""
         xml_with_errors = load_fixture("extended_hints_with_errors.xml")
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             new_loncapa_problem(xml_with_errors)  # this problem is improperly constructed

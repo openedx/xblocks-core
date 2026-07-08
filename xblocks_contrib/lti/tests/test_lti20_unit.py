@@ -32,7 +32,7 @@ class LTI20RESTResultServiceTest(TestCase):
         self.xblock = LTIBlock(self.runtime, DictFieldData({}), Mock())
         self.lti_id = self.xblock.lti_id
 
-        self.unquoted_resource_link_id = "{}-i4x-2-3-lti-31de800015cf4afb973356dbe81496df".format(settings.LMS_BASE)
+        self.unquoted_resource_link_id = f"{settings.LMS_BASE}-i4x-2-3-lti-31de800015cf4afb973356dbe81496df"
 
         self.xblock.due = None
         self.xblock.graceperiod = None

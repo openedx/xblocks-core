@@ -177,7 +177,7 @@ class VideoBlockTestBase(unittest.TestCase):
             assert expected_attr == actual_attr
 
         assert get_child_tags(expected) == get_child_tags(xml)
-        for left, right in zip(expected, xml):
+        for left, right in zip(expected, xml, strict=False):
             self.assertXmlEqual(left, right)
 
 
@@ -690,11 +690,11 @@ class VideoBlockImportTestCase(TestCase):
         module_system.resources_fs.makedirs(EXPORT_IMPORT_STATIC_DIR, recreate=True)
 
         # import new edx_video_id
-        xml_data = """
+        xml_data = f"""
             <video edx_video_id="{edx_video_id}">
                 <video_asset mock_attr=""/>
             </video>
-        """.format(edx_video_id=edx_video_id)
+        """
         xml_object = etree.fromstring(xml_data)
         module_system.id_generator.target_course_id = "test_course_id"
         video = VideoBlock.parse_xml(xml_object, module_system, None)
@@ -1029,7 +1029,7 @@ class VideoBlockStudentViewDataTestCase(unittest.TestCase):
         "ENGINE": "xmodule.contentstore.mongo.MongoContentStore",
         "DOC_STORE_CONFIG": {
             "host": "localhost",
-            "db": "test_xcontent_%s" % uuid4().hex,
+            "db": f"test_xcontent_{uuid4().hex}",
         },
         # allow for additional options that can be keyed on a name, e.g. 'trashcan'
         "ADDITIONAL_OPTIONS": {"trashcan": {"bucket": "trash_fs"}},
@@ -1163,7 +1163,7 @@ class VideoBlockIndexingTestCase(unittest.TestCase):
         """
         Test the validation message when no associated transcript file uploaded.
         """
-        xml_data_transcripts = """
+        xml_data_transcripts = f"""
             <video display_name="Test Video"
                    youtube="1.0:p2Q6BrNhdh8,0.75:izygArpw-Qo,1.25:1EeWXzPdhSA,1.5:rABDYkeK0x8"
                    show_captions="false"
@@ -1176,7 +1176,7 @@ class VideoBlockIndexingTestCase(unittest.TestCase):
               <handout src="http://www.example.com/handout"/>
               {xml_transcripts}
             </video>
-        """.format(xml_transcripts=xml_transcripts)
+        """
         block = instantiate_block(data=xml_data_transcripts)
         validation = block.validate()
         self.assert_validation_message(validation, expected_validation_msg)

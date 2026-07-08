@@ -21,7 +21,7 @@ def get_test_descriptor_system():
 
 
 def get_test_system(
-    course_id=CourseLocator("org", "course", "run"),
+    course_id=CourseLocator("org", "course", "run"),  # noqa: B008
     user=None,
     user_is_staff=False,
     user_location=None,
@@ -103,7 +103,7 @@ class HtmlBlockCourseApiTestCase(unittest.TestCase):
     Test the HTML XModule's student_view_data method.
     """
 
-    @ddt.data({}, dict(FEATURES={}), dict(FEATURES=dict(ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA=False)))
+    @ddt.data({}, {"FEATURES": {}}, {"FEATURES": {"ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA": False}})
     def test_disabled(self, settings):
         """
         Ensure that student_view_data does not return html if the ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA feature flag
@@ -114,9 +114,9 @@ class HtmlBlockCourseApiTestCase(unittest.TestCase):
         block = HtmlBlock(module_system, field_data, Mock())
 
         with override_settings(**settings):
-            assert block.student_view_data() == dict(
-                enabled=False, message='To enable, set FEATURES["ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA"]'
-            )
+            assert block.student_view_data() == {
+                "enabled": False, "message": 'To enable, set FEATURES["ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA"]'
+            }
 
     @ddt.data(
         "<h1>Some content</h1>",  # Valid HTML
@@ -127,7 +127,7 @@ class HtmlBlockCourseApiTestCase(unittest.TestCase):
         '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',  # Images allowed
         "short string " * 100,  # May contain long strings
     )
-    @override_settings(FEATURES=dict(ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA=True))
+    @override_settings(FEATURES={"ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA": True})
     def test_common_values(self, html):
         """
         Ensure that student_view_data will return HTML data when enabled,
@@ -141,7 +141,7 @@ class HtmlBlockCourseApiTestCase(unittest.TestCase):
         field_data = DictFieldData({"data": html})
         module_system = get_test_system()
         block = HtmlBlock(module_system, field_data, Mock())
-        assert block.student_view_data() == dict(enabled=True, html=html)
+        assert block.student_view_data() == {"enabled": True, "html": html}
 
     @ddt.data("student_view")
     def test_student_preview_view(self, view):

@@ -4,7 +4,6 @@ from abc import ABCMeta, abstractmethod
 
 import six
 from lxml import etree
-from six.moves import range, zip
 
 
 class ResponseXMLFactory(six.with_metaclass(ABCMeta, object)):
@@ -167,7 +166,7 @@ class ResponseXMLFactory(six.with_metaclass(ABCMeta, object)):
         group_element = etree.Element(group_element_names[choice_type])
 
         # Create the <choice> elements
-        for correct_val, name, pointval in zip(choices, choice_names, points):
+        for correct_val, name, pointval in zip(choices, choice_names, points, strict=False):
             choice_element = etree.SubElement(group_element, "choice")
             if correct_val is True:
                 correctness = "true"

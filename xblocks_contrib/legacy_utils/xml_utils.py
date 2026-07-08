@@ -153,10 +153,8 @@ def own_metadata(block: XBlock) -> dict[str, Any]:
             try:
                 result[field.name] = field.read_json(block)
             except TypeError as exception:
-                exception_message = "{message}, Block-location:{location}, Field-name:{field_name}".format(
-                    message=str(exception), location=str(block.usage_key), field_name=field.name
-                )
-                raise TypeError(exception_message)  # lint-amnesty, pylint: disable=raise-missing-from
+                exception_message = f"{str(exception)}, Block-location:{str(block.usage_key)}, Field-name:{field.name}"
+                raise TypeError(exception_message) from None  # lint-amnesty, pylint: disable=raise-missing-from
     return result
 
 
@@ -229,7 +227,7 @@ class LegacyXmlMixin:
 
         xml_object: An etree Element
         """
-        raise NotImplementedError("%s does not implement definition_from_xml" % cls.__name__)
+        raise NotImplementedError(f"{cls.__name__} does not implement definition_from_xml")
 
     @classmethod
     def clean_metadata_from_xml(cls, xml_object, excluded_fields=()):
@@ -574,7 +572,7 @@ class LegacyXmlMixin:
         """
         Return a new etree Element object created from this modules definition.
         """
-        raise NotImplementedError("%s does not implement definition_to_xml" % self.__class__.__name__)
+        raise NotImplementedError(f"{self.__class__.__name__} does not implement definition_to_xml")
 
     @property
     def non_editable_metadata_fields(self):

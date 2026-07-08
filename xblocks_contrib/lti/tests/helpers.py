@@ -58,7 +58,7 @@ class Timedelta(JSONField):  # lint-amnesty, pylint: disable=missing-class-docst
         for attr in ("days", "hours", "minutes", "seconds"):
             cur_value = getattr(value, attr, 0)
             if cur_value > 0:
-                values.append("%d %s" % (cur_value, attr))
+                values.append(f"{cur_value} {attr}")
         return " ".join(values)
 
     def enforce_type(self, value):

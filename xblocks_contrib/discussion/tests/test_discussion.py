@@ -90,21 +90,14 @@ class DiscussionXBlockImportExportTests(TestCase):
         """
         Test that xblock export XML format can be parsed preserving field values
         """
-        xblock_xml = """
+        xblock_xml = f"""
         <discussion
             url_name="82bb87a2d22240b1adac2dfcc1e7e5e4" xblock-family="xblock.v1"
-            {id_attr}="{id_value}"
-            {category_attr}="{category_value}"
-            {target_attr}="{target_value}"
+            {id_pair.name}="{id_pair.value}"
+            {category_pair.name}="{category_pair.value}"
+            {target_pair.name}="{target_pair.value}"
         />
-        """.format(
-            id_attr=id_pair.name,
-            id_value=id_pair.value,
-            category_attr=category_pair.name,
-            category_value=category_pair.value,
-            target_attr=target_pair.name,
-            target_value=target_pair.value,
-        )
+        """
         node = etree.fromstring(xblock_xml)
 
         patched_load_definition_xml.side_effect = Exception("Irrelevant")
@@ -126,19 +119,12 @@ class DiscussionXBlockImportExportTests(TestCase):
         Test that legacy export XML format can be parsed preserving field values
         """
         xblock_xml = """<discussion url_name="82bb87a2d22240b1adac2dfcc1e7e5e4"/>"""
-        xblock_definition_xml = """
+        xblock_definition_xml = f"""
         <discussion
-            {id_attr}="{id_value}"
-            {category_attr}="{category_value}"
-            {target_attr}="{target_value}"
-        />""".format(
-            id_attr=id_pair.name,
-            id_value=id_pair.value,
-            category_attr=category_pair.name,
-            category_value=category_pair.value,
-            target_attr=target_pair.name,
-            target_value=target_pair.value,
-        )
+            {id_pair.name}="{id_pair.value}"
+            {category_pair.name}="{category_pair.value}"
+            {target_pair.name}="{target_pair.value}"
+        />"""
         node = etree.fromstring(xblock_xml)
         definition_node = etree.fromstring(xblock_definition_xml)
 

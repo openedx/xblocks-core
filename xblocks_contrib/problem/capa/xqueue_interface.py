@@ -5,7 +5,7 @@ LMS Interface to external queueing system (xqueue)
 import hashlib
 import json
 import logging
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -75,8 +75,8 @@ class XQueueInterface:
     def __init__(  # pylint: disable=too-many-positional-arguments
         self,
         url: str,
-        django_auth: Dict[str, str],
-        requests_auth: Optional[HTTPBasicAuth] = None,
+        django_auth: dict[str, str],
+        requests_auth: HTTPBasicAuth | None = None,
         block: "ProblemBlock" = None,
         use_submission_service: bool = False,
     ):

@@ -17,7 +17,6 @@ from django.conf import settings
 from django.core.exceptions import MiddlewareNotUsed
 from django.test import override_settings
 from six import unichr
-from six.moves import range
 
 from xblocks_contrib.problem.capa.safe_exec import safe_exec, update_hash
 from xblocks_contrib.problem.capa.safe_exec.remote_exec import (
@@ -649,7 +648,7 @@ class TestSafeExecCaching(unittest.TestCase):
         # Check that using non-ASCII unicode does not raise an encoding error.
         # Try several non-ASCII unicode characters.
         for code in [129, 500, 2**8 - 1, 2**16 - 1]:
-            code_with_unichr = str("# ") + unichr(code)
+            code_with_unichr = "# " + unichr(code)
             try:
                 safe_exec(code_with_unichr, {}, cache=DictCache({}))
             except UnicodeEncodeError:
@@ -673,8 +672,8 @@ class TestUpdateHash(unittest.TestCase):
         make them different.
 
         """
-        d1 = {k: 1 for k in "abcdefghijklmnopqrstuvwxyz"}
-        d2 = {k: 1 for k in "bcdefghijklmnopqrstuvwxyza"}
+        d1 = dict.fromkeys("abcdefghijklmnopqrstuvwxyz", 1)
+        d2 = dict.fromkeys("bcdefghijklmnopqrstuvwxyza", 1)
 
         # Check that our dicts are equal, but with different key order.
         assert d1 == d2

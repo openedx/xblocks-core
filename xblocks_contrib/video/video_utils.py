@@ -24,7 +24,7 @@ def create_youtube_string(block):
     """
     youtube_ids = [block.youtube_id_0_75, block.youtube_id_1_0, block.youtube_id_1_25, block.youtube_id_1_5]
     youtube_speeds = ["0.75", "1.00", "1.25", "1.50"]
-    return ",".join([":".join(pair) for pair in zip(youtube_speeds, youtube_ids) if pair[1]])
+    return ",".join([":".join(pair) for pair in zip(youtube_speeds, youtube_ids, strict=False) if pair[1]])
 
 
 def rewrite_video_url(cdn_base_url, original_video_url):
@@ -93,9 +93,7 @@ def format_xml_exception_message(location, key, value):
     Generate exception message for VideoBlock class which will use for ValueError and UnicodeDecodeError
     when setting xml attributes.
     """
-    exception_message = "Block-location:{location}, Key:{key}, Value:{value}".format(
-        location=str(location), key=key, value=value
-    )
+    exception_message = f"Block-location:{str(location)}, Key:{key}, Value:{value}"
     return exception_message
 
 

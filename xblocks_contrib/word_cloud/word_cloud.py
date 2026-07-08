@@ -150,7 +150,7 @@ class WordCloudBlock(StudioEditableXBlockMixin, LegacyXmlMixin, XBlock):
         :type amount: int
         :rtype: dict
         """
-        return dict(sorted(list(dict_obj.items()), key=lambda x: x[1], reverse=True)[:amount])
+        return dict(sorted(dict_obj.items(), key=lambda x: x[1], reverse=True)[:amount])
 
     def get_state(self):
         """Return success json answer for client."""

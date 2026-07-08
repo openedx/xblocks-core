@@ -71,7 +71,7 @@ class XBlockUserState(namedtuple("_XBlockUserState", ["username", "block_key", "
     __slots__ = ()
 
     def __repr__(self):
-        return "{}{!r}".format(self.__class__.__name__, tuple(self))
+        return f"{self.__class__.__name__}{tuple(self)!r}"
 
 
 class CapaFactory:
@@ -1357,7 +1357,7 @@ class ProblemBlockTest(unittest.TestCase):
 
         # Create a webob Request with the files uploaded.
         post_data = []
-        for fname, fileobj in zip(fnames, fileobjs):
+        for fname, fileobj in zip(fnames, fileobjs, strict=False):
             post_data.append((CapaFactoryWithFiles.input_key(response_num=2), (fname, fileobj)))
         post_data.append((CapaFactoryWithFiles.input_key(response_num=3), "None"))
         request = webob.Request.blank("/some/fake/url", POST=post_data, content_type="multipart/form-data")
@@ -3238,7 +3238,7 @@ class ProblemBlockXMLTest(unittest.TestCase):
     @ddt.data(*sorted(responsetypes.registry.registered_tags()))
     def test_all_response_types(self, response_tag):
         """Tests that every registered response tag is correctly returned"""
-        xml = "<problem><{response_tag}></{response_tag}></problem>".format(response_tag=response_tag)
+        xml = f"<problem><{response_tag}></{response_tag}></problem>"
         name = "Some Capa Problem"
         block = self._create_block(xml, name=name)
         assert block.problem_types == {response_tag}
@@ -3662,7 +3662,7 @@ class ProblemBlockXMLTest(unittest.TestCase):
             </optionresponse>
         </problem>
         """)
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             CapaFactory.create(xml=problem_xml)
 
 

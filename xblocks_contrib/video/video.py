@@ -184,7 +184,7 @@ class VideoBlock(
             languages["en"] = "English"
 
         # OrderedDict for easy testing of rendered context in tests
-        sorted_languages = sorted(list(languages.items()), key=itemgetter(1))
+        sorted_languages = sorted(languages.items(), key=itemgetter(1))
 
         sorted_languages = OrderedDict(sorted_languages)
         return track_url, transcript_language, sorted_languages
@@ -866,7 +866,7 @@ class VideoBlock(
         for video in videos:
             pieces = video.split(":")
             try:
-                speed = "%.2f" % float(pieces[0])  # normalize speed
+                speed = f"{float(pieces[0]):.2f}"  # normalize speed
 
                 # Handle the fact that youtube IDs got double-quoted for a period of time.
                 # Note: we pass in "VideoFields.youtube_id_1_0" so we deserialize as a String--
