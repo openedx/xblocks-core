@@ -959,11 +959,10 @@ oauth_consumer_key="", oauth_signature="frVp4JuvT1mVXlxktiAUjQ7%2F1cw%3D"',
         )
         if oauth_body_hash != oauth_headers.get("oauth_body_hash"):
             log.error(
-                "OAuth body hash verification failed, provided: %s, calculated: %s, for url: %s, body is: %s",
+                "OAuth body hash verification failed, provided: %s, calculated: %s, for url: %s",
                 oauth_headers.get("oauth_body_hash"),
                 oauth_body_hash,
                 self.get_outcome_service_url(),
-                request.body,
             )
             raise LTIError("OAuth body hash verification is failed.")
 
@@ -971,8 +970,7 @@ oauth_consumer_key="", oauth_signature="frVp4JuvT1mVXlxktiAUjQ7%2F1cw%3D"',
             mock_request_lti_2, client_secret
         ):
             log.error(
-                "OAuth signature verification failed, for headers: %s url: %s method: %s",
-                oauth_headers,
+                "OAuth signature verification failed, for url: %s method: %s",
                 self.get_outcome_service_url(),
                 str(request.method),
             )
