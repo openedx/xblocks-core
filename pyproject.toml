@@ -129,7 +129,7 @@ include-package-data = true
 include = ["xblocks_contrib*", "xblock_pdf*"]
 exclude = ["*tests*"]
 
-[tool.setuptools.exclude_package_data]
+[tool.setuptools.exclude-package-data]
 "*" = ["tests*", "*.tests*", "spec*", "*.spec*"]
 
 [tool.edx_lint]
