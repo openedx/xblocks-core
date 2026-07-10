@@ -8,5 +8,3 @@ from .poll import PollBlock as PollBlock
 from .problem import ProblemBlock as ProblemBlock
 from .video import VideoBlock as VideoBlock
 from .word_cloud import WordCloudBlock as WordCloudBlock
-
-__version__ = "0.17.0"

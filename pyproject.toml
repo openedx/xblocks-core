@@ -129,6 +129,9 @@ include-package-data = true
 include = ["xblocks_contrib*", "xblock_pdf*"]
 exclude = ["*tests*"]
 
+[tool.setuptools.exclude_package_data]
+"*" = ["tests*", "*.tests*", "spec*", "*.spec*"]
+
 [tool.edx_lint]
 uv_constraints = [
     # Date: 2026-02-10
@@ -192,7 +195,6 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
 ]
-fail_under = 70
 show_missing = true
 
 [tool.coverage.html]

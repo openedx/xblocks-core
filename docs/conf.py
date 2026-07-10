@@ -13,9 +13,9 @@ serve to show the default.
 """
 
 import os
-import re
 import sys
 from datetime import datetime
+from importlib.metadata import PackageNotFoundError, version
 from subprocess import check_call
 
 import django
@@ -36,26 +36,10 @@ settings.configure(
 django.setup()
 
 
-def get_version(*file_paths):
-    """
-    Extract the version string from the file.
-
-    Input:
-     - file_paths: relative path fragments to file with
-                   version string
-    """
-    filename = os.path.join(os.path.dirname(__file__), *file_paths)
-    version_file = open(filename, encoding="utf8").read()
-    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
-    if version_match:
-        return version_match.group(1)
-    raise RuntimeError("Unable to find version string.")
-
-
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(REPO_ROOT)
-
-VERSION = get_version("../xblocks_contrib", "__init__.py")
+try:
+    VERSION = version("xblocks-contrib")
+except PackageNotFoundError:
+    VERSION = "unknown"
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
