@@ -76,7 +76,7 @@ class PDFBlock(XBlock):
     def student_view(self, context=None):  # pylint: disable=unused-argument
         """Primary view of the XBlock, shown to students when viewing courses."""
         html = resource_loader.render_django_template(
-            "templates/html/pdf_view.html",
+            "templates/html/pdf.html",
             context=self.raw_settings,
             i18n_service=self.runtime.service(self, "i18n"),
         )
@@ -88,33 +88,15 @@ class PDFBlock(XBlock):
         }
         self.runtime.publish(self, event_type, event_data)
         frag = Fragment(html)
-        frag.add_javascript(resource_loader.load_unicode("static/js/pdf_view.js"))
+        frag.add_javascript(resource_loader.load_unicode("static/js/pdf.js"))
         frag.initialize_js("pdfXBlockInitView")
         return frag
 
     def studio_view(self, context=None):
-        """
-        Secondary view of the XBlock.
-
-        Shown to teachers when editing the XBlock.
-        """
-        context = {
-            "display_name": self.display_name,
-            "url": self.url,
-            "allow_download": self.allow_download,
-            "disable_all_download": is_all_download_disabled(),
-            "source_text": self.source_text,
-            "source_url": self.source_url,
-        }
-        html = resource_loader.render_django_template(
-            "templates/html/pdf_edit.html",
-            context=context,
-            i18n_service=self.runtime.service(self, "i18n"),
-        )
-        frag = Fragment(html)
-        frag.add_javascript(resource_loader.load_unicode("static/js/pdf_edit.js"))
-        frag.initialize_js("pdfXBlockInitEdit")
-        return frag
+        """Return a fragment that contains the html for the studio view."""
+        # Only the ReactJS editor is supported for this block.
+        # See https://github.com/openedx/frontend-app-authoring/tree/master/src/editors/containers/PdfEditor
+        raise NotImplementedError  # pragma: no cover
 
     @XBlock.json_handler
     def on_download(self, data, suffix=""):  # pylint: disable=unused-argument
