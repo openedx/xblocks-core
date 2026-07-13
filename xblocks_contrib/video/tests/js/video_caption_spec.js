@@ -150,6 +150,8 @@
                 });
 
                 it('fetch the transcript in Flash mode', function(done) {
+                    var transcriptURL = '/transcript/translation/en',
+                        transcriptCall;
                     state = jasmine.initializePlayerYouTube();
                     spyOn(state, 'isFlashMode').and.returnValue(true);
                     state.videoCaption.fetchCaption();
@@ -158,16 +160,18 @@
                         return state.videoCaption.loaded;
                     }).then(function() {
                         expect($.ajaxWithPrefix).toHaveBeenCalledWith({
-                            url: '/transcript/translation/en',
+                            url: transcriptURL,
                             notifyOnError: false,
                             data: jasmine.any(Object),
                             success: jasmine.any(Function),
                             error: jasmine.any(Function)
                         });
-                        expect($.ajaxWithPrefix.calls.mostRecent().args[0].data)
-                            .toEqual({
-                                videoId: 'cogebirgzzM'
-                            });
+                        transcriptCall = $.ajaxWithPrefix.calls.all().find(function(call) {
+                            return call.args[0].url === transcriptURL;
+                        });
+                        expect(transcriptCall.args[0].data).toEqual({
+                            videoId: 'cogebirgzzM'
+                        });
                     }).always(done);
                 });
 
