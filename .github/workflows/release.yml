@@ -86,7 +86,6 @@ jobs:
 
     permissions:
       contents: read
-      id-token: write   # for PyPI OIDC trusted publisher
 
     steps:
       - name: Download Distribution Artifacts
@@ -97,3 +96,6 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@7f25271a4aa483500f742f9492b2ab5648d61011 # v1.12.4
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_UPLOAD_TOKEN }}
