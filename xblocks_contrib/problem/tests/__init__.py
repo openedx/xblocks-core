@@ -191,7 +191,7 @@ class TestDescriptorSystem(TestRuntime):
 
 
 def get_test_system(  # pylint: disable=too-many-arguments,too-many-positional-arguments
-    course_id=CourseLocator("org", "course", "run"),  # pylint: disable=unused-argument
+    course_id=CourseLocator("org", "course", "run"),  # noqa: B008  # pylint: disable=unused-argument
     user=None,
     user_is_staff=False,
     user_location=None,

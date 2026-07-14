@@ -9,7 +9,6 @@ import unittest
 from collections import OrderedDict
 
 from lxml import etree
-from six.moves import range
 
 from xblocks_contrib.problem.capa.inputtypes import Status
 from xblocks_contrib.problem.capa.tests.helpers import capa_render_template

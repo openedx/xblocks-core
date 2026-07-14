@@ -1,5 +1,4 @@
 # pylint: disable=too-many-lines
-# -*- coding: utf-8 -*-
 """
 Tests of responsetypes
 """
@@ -376,7 +375,7 @@ class SymbolicResponseTest(ResponseTest):
 
         # Should not allow multiple inputs, since we specify
         # only one "expect" value
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             self.build_problem(math_display=True, expect="2*x+3*y", num_inputs=3)
 
     def _assert_symbolic_grade(  # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -2267,7 +2266,6 @@ class CustomResponseTest(ResponseTest):
             "miller",
             "draganddrop",
         ]:
-
             # Create a script that checks that the name is defined
             # If the name is not defined, then the script
             # will raise an exception
@@ -2304,7 +2302,6 @@ class CustomResponseTest(ResponseTest):
             "miller",
             "draganddrop",
         ]:
-
             # Create a script that checks that the name is defined
             # If the name is not defined, then the script
             # will raise an exception
@@ -2671,7 +2668,7 @@ class ChoiceTextResponseTest(ResponseTest):
         """
         Test that build problem raises errors for invalid options
         """
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             self.build_problem(type="invalidtextgroup")
 
     def test_unchecked_input_not_validated(self):
@@ -2775,8 +2772,8 @@ class ChoiceTextResponseTest(ResponseTest):
             "checkbox_2_choices_2_inputs": checkbox_two_choices_two_inputs,
         }
 
-        for name, inputs in inputs.items():
-            submission = self._make_answer_dict(inputs)
+        for name, input_values in inputs.items():
+            submission = self._make_answer_dict(input_values)
             # Load the test problem's name and desired correctness
             problem_name, correctness = scenarios[name]
             # Load the problem

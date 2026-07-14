@@ -2,10 +2,7 @@
 Tests for PollBlock
 """
 
-import json
-
 from django.test import TestCase
-from lxml import etree
 from opaque_keys.edx.keys import CourseKey
 from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds

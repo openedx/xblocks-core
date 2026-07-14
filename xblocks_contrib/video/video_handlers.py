@@ -5,7 +5,6 @@ StudentViewHandlers are handlers for video block instance.
 StudioViewHandlers are handlers for video descriptor instance.
 """
 
-
 import json
 import logging
 import math
@@ -27,7 +26,7 @@ log = logging.getLogger(__name__)
 def get_transcript(
     video_block,
     lang: str | None = None,
-    output_format: str = 'srt',
+    output_format: str = "srt",
     youtube_id: str | None = None,
     is_bumper: bool = False,
 ) -> tuple[bytes, str, str]:
@@ -40,7 +39,7 @@ def get_transcript(
     Raises:
         Exception: If the video config service is not available or the transcript cannot be retrieved.
     """
-    video_config_service = video_block.runtime.service(video_block, 'video_config')
+    video_config_service = video_block.runtime.service(video_block, "video_config")
     if not video_config_service:
         raise Exception("Video config service not found")
     return video_config_service.get_transcript(video_block, lang, output_format, youtube_id, is_bumper)
@@ -49,14 +48,15 @@ def get_transcript(
 # Disable no-member warning:
 # pylint: disable=no-member
 
+
 def to_boolean(value):
     """
     Convert a value from a GET or POST request parameter to a bool
     """
     if isinstance(value, bytes):
-        value = value.decode('ascii', errors='replace')
+        value = value.decode("ascii", errors="replace")
     if isinstance(value, str):
-        return value.lower() == 'true'
+        return value.lower() == "true"
     else:
         return bool(value)
 
@@ -65,6 +65,7 @@ class VideoStudentViewHandlers:
     """
     Handlers for video block instance.
     """
+
     global_speed = None
     transcript_language = None
 
@@ -73,21 +74,26 @@ class VideoStudentViewHandlers:
         Update values of xfields, that were changed by student.
         """
         accepted_keys = [
-            'speed', 'auto_advance', 'saved_video_position', 'transcript_language',
-            'transcript_download_format', 'youtube_is_available',
-            'bumper_last_view_date', 'bumper_do_not_show_again'
+            "speed",
+            "auto_advance",
+            "saved_video_position",
+            "transcript_language",
+            "transcript_download_format",
+            "youtube_is_available",
+            "bumper_last_view_date",
+            "bumper_do_not_show_again",
         ]
 
         conversions = {
-            'speed': json.loads,
-            'auto_advance': json.loads,
-            'saved_video_position': RelativeTime.isotime_to_timedelta,
-            'youtube_is_available': json.loads,
-            'bumper_last_view_date': to_boolean,
-            'bumper_do_not_show_again': to_boolean,
+            "speed": json.loads,
+            "auto_advance": json.loads,
+            "saved_video_position": RelativeTime.isotime_to_timedelta,
+            "youtube_is_available": json.loads,
+            "bumper_last_view_date": to_boolean,
+            "bumper_do_not_show_again": to_boolean,
         }
 
-        if dispatch == 'save_user_state':
+        if dispatch == "save_user_state":
             for key in data:
                 if key in accepted_keys:
                     if key in conversions:
@@ -95,25 +101,25 @@ class VideoStudentViewHandlers:
                     else:
                         value = data[key]
 
-                    if key == 'bumper_last_view_date':
+                    if key == "bumper_last_view_date":
                         value = now()
 
-                    if key == 'speed' and math.isnan(value):
+                    if key == "speed" and math.isnan(value):
                         message = f"Invalid speed value {value}, must be a float."
                         log.warning(message)
-                        return json.dumps({'success': False, 'error': message})
+                        return json.dumps({"success": False, "error": message})
 
                     setattr(self, key, value)
 
-                    if key == 'speed':
+                    if key == "speed":
                         self.global_speed = self.speed
 
-            return json.dumps({'success': True})
+            return json.dumps({"success": True})
 
         log.debug(f"GET {data}")
         log.debug(f"DISPATCH {dispatch}")
 
-        raise TranscriptNotFoundError('Unexpected dispatch type')
+        raise TranscriptNotFoundError("Unexpected dispatch type")
 
     def get_static_transcript(self, request, transcripts):
         """
@@ -128,14 +134,14 @@ class VideoStudentViewHandlers:
         """
         response = Response(status=404)
         # Only do redirect for English
-        if not self.transcript_language == 'en':
+        if not self.transcript_language == "en":
             return response
 
         # If this video lives in library, the code below is not relevant and will error.
         if not isinstance(self.context_key, CourseLocator):
             return response
 
-        video_id = request.GET.get('videoId', None)
+        video_id = request.GET.get("videoId", None)
         if video_id:
             transcript_name = video_id
         else:
@@ -149,15 +155,12 @@ class VideoStudentViewHandlers:
                 asset_path = course.static_asset_path
             else:
                 # It seems static_asset_path is not set in any XMLModuleStore courses.
-                asset_path = getattr(course, 'data_dir', '')
+                asset_path = getattr(course, "data_dir", "")
 
             if asset_path:
                 response = Response(
                     status=307,
-                    location='/static/{}/{}'.format(
-                        asset_path,
-                        subs_filename(transcript_name, self.transcript_language)
-                    )
+                    location=f"/static/{asset_path}/{subs_filename(transcript_name, self.transcript_language)}",
                 )
         return response
 
@@ -174,17 +177,17 @@ class VideoStudentViewHandlers:
             dispatch: Ignored.
         Return value: JSON response (200 on success, 400 for malformed data)
         """
-        completion_service = self.runtime.service(self, 'completion')
+        completion_service = self.runtime.service(self, "completion")
         if completion_service is None:
             raise JsonHandlerError(500, "No completion service found")
         if not completion_service.completion_tracking_enabled():
             raise JsonHandlerError(404, "Completion tracking is not enabled and API calls are unexpected")
-        if not isinstance(data['completion'], (int, float)):
+        if not isinstance(data["completion"], (int, float)):
             message = "Invalid completion value {}. Must be a float in range [0.0, 1.0]"
-            raise JsonHandlerError(400, message.format(data['completion']))
-        if not 0.0 <= data['completion'] <= 1.0:
+            raise JsonHandlerError(400, message.format(data["completion"]))
+        if not 0.0 <= data["completion"] <= 1.0:
             message = "Invalid completion value {}. Must be in range [0.0, 1.0]"
-            raise JsonHandlerError(400, message.format(data['completion']))
+            raise JsonHandlerError(400, message.format(data["completion"]))
         self.runtime.publish(self, "completion", data)
         return {"result": "ok"}
 
@@ -201,22 +204,13 @@ class VideoStudentViewHandlers:
             add_attachment_header (bool): whether to add attachment header or not
         """
         headerlist = [
-            ('Content-Language', language),
+            ("Content-Language", language),
         ]
 
         if add_attachment_header:
-            headerlist.append(
-                (
-                    'Content-Disposition',
-                    f'attachment; filename="{filename}"'
-                )
-            )
+            headerlist.append(("Content-Disposition", f'attachment; filename="{filename}"'))
 
-        response = Response(
-            content,
-            headerlist=headerlist,
-            charset='utf8'
-        )
+        response = Response(content, headerlist=headerlist, charset="utf8")
         response.content_type = content_type
 
         return response
@@ -247,11 +241,11 @@ class VideoStudentViewHandlers:
                     Returns list of languages, for which transcript files exist.
                     For 'en' check if SJSON exists. For non-'en' check if SRT file exists.
         """
-        is_bumper = request.GET.get('is_bumper', False)
+        is_bumper = request.GET.get("is_bumper", False)
         transcripts = self.get_transcripts_info(is_bumper)
 
-        if dispatch.startswith('translation'):
-            language = dispatch.replace('translation', '').strip('/')
+        if dispatch.startswith("translation"):
+            language = dispatch.replace("translation", "").strip("/")
 
             # Because scrapers hit video blocks, verify that a user exists.
             # use the _request attr to get the django request object.
@@ -263,7 +257,7 @@ class VideoStudentViewHandlers:
                 log.info("Invalid /translation request: no language.")
                 return Response(status=400)
 
-            if language not in ['en'] + list(transcripts["transcripts"].keys()):
+            if language not in ["en"] + list(transcripts["transcripts"].keys()):
                 log.info("Video: transcript facilities are not available for given language.")
                 return Response(status=404)
 
@@ -271,57 +265,45 @@ class VideoStudentViewHandlers:
                 self.transcript_language = language
 
             try:
-                youtube_id = None if is_bumper else request.GET.get('videoId')
+                youtube_id = None if is_bumper else request.GET.get("videoId")
                 content, filename, mimetype = get_transcript(
                     self,
                     lang=self.transcript_language,
                     output_format=TranscriptExtensions.SJSON,
                     youtube_id=youtube_id,
-                    is_bumper=is_bumper
+                    is_bumper=is_bumper,
                 )
                 response = self.make_transcript_http_response(
-                    content,
-                    filename,
-                    self.transcript_language,
-                    mimetype,
-                    add_attachment_header=False
+                    content, filename, self.transcript_language, mimetype, add_attachment_header=False
                 )
             except TranscriptNotFoundError as exc:
                 edx_video_id = clean_video_id(self.edx_video_id)
                 log.warning(
-                    '[Translation Dispatch] %s: %s',
+                    "[Translation Dispatch] %s: %s",
                     self.usage_key,
-                    exc if is_bumper else f'Transcript not found for {edx_video_id}, lang: {self.transcript_language}',
+                    exc if is_bumper else f"Transcript not found for {edx_video_id}, lang: {self.transcript_language}",
                 )
                 response = self.get_static_transcript(request, transcripts)
 
-        elif dispatch == 'download':
-            lang = request.GET.get('lang', None)
+        elif dispatch == "download":
+            lang = request.GET.get("lang", None)
 
             try:
                 content, filename, mimetype = get_transcript(self, lang, output_format=self.transcript_download_format)
             except TranscriptNotFoundError:
                 return Response(status=404)
 
-            response = self.make_transcript_http_response(
-                content,
-                filename,
-                self.transcript_language,
-                mimetype
-            )
-        elif dispatch.startswith('available_translations'):
-            video_config_service = self.runtime.service(self, 'video_config')
+            response = self.make_transcript_http_response(content, filename, self.transcript_language, mimetype)
+        elif dispatch.startswith("available_translations"):
+            video_config_service = self.runtime.service(self, "video_config")
             if not video_config_service:
                 return Response(status=404)
             available_translations = video_config_service.available_translations(
-                self,
-                transcripts,
-                verify_assets=True,
-                is_bumper=is_bumper
+                self, transcripts, verify_assets=True, is_bumper=is_bumper
             )
             if available_translations:
                 response = Response(json.dumps(available_translations))
-                response.content_type = 'application/json'
+                response.content_type = "application/json"
             else:
                 response = Response(status=404)
         else:  # unknown dispatch
@@ -331,25 +313,23 @@ class VideoStudentViewHandlers:
         return response
 
     @XBlock.handler
-    def student_view_user_state(self, request, suffix=''):  # lint-amnesty, pylint: disable=unused-argument
+    def student_view_user_state(self, request, suffix=""):  # lint-amnesty, pylint: disable=unused-argument
         """
         Endpoint to get user-specific state, like current position and playback speed,
         without rendering the full student_view HTML. This is similar to student_view_state,
         but that one cannot contain user-specific info.
         """
         view_state = self.student_view_data()
-        view_state.update({
-            "saved_video_position": self.saved_video_position.total_seconds(),
-            "speed": self.speed,
-        })
-        return Response(
-            json.dumps(view_state),
-            content_type='application/json',
-            charset='UTF-8'
+        view_state.update(
+            {
+                "saved_video_position": self.saved_video_position.total_seconds(),
+                "speed": self.speed,
+            }
         )
+        return Response(json.dumps(view_state), content_type="application/json", charset="UTF-8")
 
     @XBlock.handler
-    def yt_video_metadata(self, request, suffix=''):  # lint-amnesty, pylint: disable=unused-argument
+    def yt_video_metadata(self, request, suffix=""):  # lint-amnesty, pylint: disable=unused-argument
         """
         Endpoint to get YouTube metadata.
         This handler is only used in the openedx_content-based runtime. The old
@@ -357,11 +337,11 @@ class VideoStudentViewHandlers:
         """
         if not self.youtube_id_1_0:
             # TODO: more informational response to explain that yt_video_metadata not supported for non-youtube videos.
-            return Response('{}', status=400)
+            return Response("{}", status=400)
 
         metadata, status_code = load_metadata_from_youtube(video_id=self.youtube_id_1_0, request=request)
         response = Response(json.dumps(metadata), status=status_code)
-        response.content_type = 'application/json'
+        response.content_type = "application/json"
         return response
 
 
@@ -369,6 +349,7 @@ class VideoStudioViewHandlers:
     """
     Handlers for Studio view.
     """
+
     def validate_transcript_upload_data(self, data):
         """
         Validates video transcript file.
@@ -381,30 +362,24 @@ class VideoStudioViewHandlers:
         error = None
         _ = self.runtime.service(self, "i18n").ugettext
         # Validate the must have attributes - this error is unlikely to be faced by common users.
-        must_have_attrs = ['edx_video_id', 'language_code', 'new_language_code']
+        must_have_attrs = ["edx_video_id", "language_code", "new_language_code"]
         missing = [attr for attr in must_have_attrs if attr not in data]
 
         # Get available transcript languages.
         transcripts = self.get_transcripts_info()
-        video_config_service = self.runtime.service(self, 'video_config')
+        video_config_service = self.runtime.service(self, "video_config")
         if not video_config_service:
             return error
-        available_translations = video_config_service.available_translations(
-            self,
-            transcripts,
-            verify_assets=True
-        )
+        available_translations = video_config_service.available_translations(self, transcripts, verify_assets=True)
 
         if missing:
-            error = _('The following parameters are required: {missing}.').format(missing=', '.join(missing))
-        elif (
-            data['language_code'] != data['new_language_code'] and data['new_language_code'] in available_translations
-        ):
+            error = _("The following parameters are required: {missing}.").format(missing=", ".join(missing))
+        elif data["language_code"] != data["new_language_code"] and data["new_language_code"] in available_translations:
             error = _('A transcript with the "{language_code}" language code already exists.').format(
-                language_code=data['new_language_code'],
+                language_code=data["new_language_code"],
             )
-        elif 'file' not in data:
-            error = _('A transcript file is required.')
+        elif "file" not in data:
+            error = _("A transcript file is required.")
 
         return error
 
@@ -438,13 +413,12 @@ class VideoStudioViewHandlers:
                     no SRT extension or not parse-able by PySRT
                 UnicodeDecodeError: non-UTF8 uploaded file content encoding.
         """
-        if dispatch.startswith('translation'):
-
-            if request.method == 'POST':
+        if dispatch.startswith("translation"):
+            if request.method == "POST":
                 response = self._studio_transcript_upload(request)
-            elif request.method == 'DELETE':
+            elif request.method == "DELETE":
                 response = self._studio_transcript_delete(request)
-            elif request.method == 'GET':
+            elif request.method == "GET":
                 response = self._studio_transcript_get(request)
             else:
                 # Any other HTTP method is not allowed.
@@ -461,22 +435,22 @@ class VideoStudioViewHandlers:
         Upload transcript. Used in "POST" method in `studio_transcript`
         """
         _ = self.runtime.service(self, "i18n").ugettext
-        video_config_service = self.runtime.service(self, 'video_config')
+        video_config_service = self.runtime.service(self, "video_config")
         if not video_config_service:
-            return Response(json={'error': _('Runtime does not support transcripts.')}, status=400)
+            return Response(json={"error": _("Runtime does not support transcripts.")}, status=400)
         error = self.validate_transcript_upload_data(data=request.POST)
         if error:
-            return Response(json={'error': error}, status=400)
-        edx_video_id = (request.POST['edx_video_id'] or "").strip()
-        language_code = request.POST['language_code']
-        new_language_code = request.POST['new_language_code']
+            return Response(json={"error": error}, status=400)
+        edx_video_id = (request.POST["edx_video_id"] or "").strip()
+        language_code = request.POST["language_code"]
+        new_language_code = request.POST["new_language_code"]
         try:
             video_config_service.upload_transcript(
                 video_block=self,  # NOTE: .edx_video_id and .transcripts may get mutated
                 edx_video_id=edx_video_id,
                 language_code=language_code,
                 new_language_code=new_language_code,
-                transcript_file=request.POST['file'].file,
+                transcript_file=request.POST["file"].file,
             )
             return Response(
                 json.dumps(
@@ -489,12 +463,8 @@ class VideoStudioViewHandlers:
             )
         except (TranscriptsGenerationException, UnicodeDecodeError):
             return Response(
-                json={
-                    'error': _(
-                        'There is a problem with this transcript file. Try to upload a different file.'
-                    )
-                },
-                status=400
+                json={"error": _("There is a problem with this transcript file. Try to upload a different file.")},
+                status=400,
             )
 
     def _studio_transcript_delete(self, request):
@@ -502,16 +472,16 @@ class VideoStudioViewHandlers:
         Delete transcript. Used in "DELETE" method in `studio_transcript`
         """
         _ = self.runtime.service(self, "i18n").ugettext
-        video_config_service = self.runtime.service(self, 'video_config')
+        video_config_service = self.runtime.service(self, "video_config")
         if not video_config_service:
-            return Response(json={'error': _('Runtime does not support transcripts.')}, status=400)
+            return Response(json={"error": _("Runtime does not support transcripts.")}, status=400)
         request_data = request.json
-        if 'lang' not in request_data or 'edx_video_id' not in request_data:
+        if "lang" not in request_data or "edx_video_id" not in request_data:
             return Response(status=400)
         video_config_service.delete_transcript(
             video_block=self,
-            edx_video_id=request_data['edx_video_id'],
-            language_code=request_data['lang'],
+            edx_video_id=request_data["edx_video_id"],
+            language_code=request_data["lang"],
         )
         return Response(status=200)
 
@@ -520,29 +490,25 @@ class VideoStudioViewHandlers:
         Get transcript. Used in "GET" method in `studio_transcript`
         """
         _ = self.runtime.service(self, "i18n").ugettext
-        language = request.GET.get('language_code')
+        language = request.GET.get("language_code")
         if not language:
-            return Response(json={'error': _('Language is required.')}, status=400)
+            return Response(json={"error": _("Language is required.")}, status=400)
 
         try:
-            video_config_service = self.runtime.service(self, 'video_config')
+            video_config_service = self.runtime.service(self, "video_config")
             if not video_config_service:
                 return Response(status=404)
             transcript_content, transcript_name, mime_type = video_config_service.get_transcript(
                 self, lang=language, output_format=TranscriptExtensions.SRT
             )
-            response = Response(transcript_content, headerlist=[
-                (
-                    'Content-Disposition',
-                    f'attachment; filename="{transcript_name}"'
-                ),
-                ('Content-Language', language),
-                ('Content-Type', mime_type)
-            ])
-        except (
-            UnicodeDecodeError,
-            TranscriptsGenerationException,
-            TranscriptNotFoundError
-        ):
+            response = Response(
+                transcript_content,
+                headerlist=[
+                    ("Content-Disposition", f'attachment; filename="{transcript_name}"'),
+                    ("Content-Language", language),
+                    ("Content-Type", mime_type),
+                ],
+            )
+        except (UnicodeDecodeError, TranscriptsGenerationException, TranscriptNotFoundError):
             response = Response(status=404)
         return response

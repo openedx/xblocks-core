@@ -3,7 +3,6 @@ Utility functions for video block transcripts.
 ++++++++++++++++++++++++++++++++++++++++++++++
 """
 
-
 import copy
 import logging
 
@@ -16,20 +15,21 @@ from xblocks_contrib.video.video_utils import get_edxval_api
 
 log = logging.getLogger(__name__)
 
-NON_EXISTENT_TRANSCRIPT = 'non_existent_dummy_file_name'
+NON_EXISTENT_TRANSCRIPT = "non_existent_dummy_file_name"
 
 
 class TranscriptExtensions:
     """
     Video block transcript extensions.
     """
-    SRT = 'srt'
-    TXT = 'txt'
-    SJSON = 'sjson'
+
+    SRT = "srt"
+    TXT = "txt"
+    SJSON = "sjson"
     mime_types = {
-        SRT: 'application/x-subrip; charset=utf-8',
-        TXT: 'text/plain; charset=utf-8',
-        SJSON: 'application/json',
+        SRT: "application/x-subrip; charset=utf-8",
+        TXT: "text/plain; charset=utf-8",
+        SJSON: "application/json",
     }
 
 
@@ -38,18 +38,18 @@ def get_html5_ids(html5_sources):
     Helper method to parse out an HTML5 source into the ideas
     NOTE: This assumes that '/' are not in the filename
     """
-    html5_ids = [x.split('/')[-1].rsplit('.', 1)[0] for x in html5_sources]
+    html5_ids = [x.split("/")[-1].rsplit(".", 1)[0] for x in html5_sources]
     return html5_ids
 
 
-def subs_filename(subs_id, lang='en'):
+def subs_filename(subs_id, lang="en"):
     """
     Generate proper filename for storage.
     """
-    if lang == 'en':
-        return f'subs_{subs_id}.srt.sjson'
+    if lang == "en":
+        return f"subs_{subs_id}.srt.sjson"
     else:
-        return f'{lang}_subs_{subs_id}.srt.sjson'
+        return f"{lang}_subs_{subs_id}.srt.sjson"
 
 
 def clean_video_id(edx_video_id):
@@ -102,19 +102,19 @@ class VideoTranscriptsMixin:
             if resolved_transcript_dest_lang:
                 return resolved_transcript_dest_lang
             # language in plugin selector is english and empty transcripts or transcripts and sub exists
-            if dest_lang == 'en' and (not other_lang or (other_lang and sub)):
-                return 'en'
+            if dest_lang == "en" and (not other_lang or (other_lang and sub)):
+                return "en"
 
         if self.transcript_language in other_lang:
             return self.transcript_language
 
         if sub:
-            return 'en'
+            return "en"
 
         if len(other_lang) > 0:
             return sorted(other_lang)[0]
 
-        return 'en'
+        return "en"
 
     def get_transcripts_info(self, is_bumper=False):
         """
@@ -129,7 +129,7 @@ class VideoTranscriptsMixin:
         #       https://github.com/openedx/edx-platform/issues/36282
 
         if is_bumper:
-            transcripts = copy.deepcopy(get_bumper_settings(self).get('transcripts', {}))
+            transcripts = copy.deepcopy(get_bumper_settings(self).get("transcripts", {}))
             sub = transcripts.pop("en", "")
         else:
             transcripts = self.transcripts if self.transcripts else {}
@@ -138,7 +138,8 @@ class VideoTranscriptsMixin:
         # Only attach transcripts that are not empty.
         transcripts = {
             language_code: transcript_file
-            for language_code, transcript_file in transcripts.items() if transcript_file != ''
+            for language_code, transcript_file in transcripts.items()
+            if transcript_file != ""
         }
 
         # bumper transcripts are stored in content store so we don't need to include val transcripts
@@ -148,7 +149,7 @@ class VideoTranscriptsMixin:
             # transcript module and contentstore will only function as fallback until all the
             # data is migrated to edx-val.
             for language_code in transcript_languages:
-                if language_code == 'en' and not sub:
+                if language_code == "en" and not sub:
                     sub = NON_EXISTENT_TRANSCRIPT
                 elif not transcripts.get(language_code):
                     transcripts[language_code] = NON_EXISTENT_TRANSCRIPT
@@ -163,7 +164,7 @@ def resolve_language_code_to_transcript_code(transcripts, dest_lang):
     """
     Attempts to match the requested dest lang with the existing transcript languages
     """
-    sub, other_lang = transcripts["sub"], transcripts["transcripts"]  # pylint: disable=unused-variable
+    _, other_lang = transcripts["sub"], transcripts["transcripts"]
     # lang code exists in list of other transcript languages as-is
     if dest_lang in other_lang:
         return dest_lang
@@ -171,7 +172,7 @@ def resolve_language_code_to_transcript_code(transcripts, dest_lang):
     # Language codes can be base languages, 2-3 characters, or they can include a
     # locale (`fr` for french, `fr-ca` for canadian french). Sometimes the part after the
     # dash is capitalized, sometimes it is not. Check both variants.
-    dash_index = dest_lang.find('-')
+    dash_index = dest_lang.find("-")
     if dash_index >= 0:
         lowercase_dest_lang = dest_lang.lower()
         if lowercase_dest_lang in other_lang:
@@ -209,14 +210,14 @@ def get_endonym_or_label(language_code):
     # LANGUAGE_DICT
     try:
         lang_info = get_language_info(language_code)
-        return lang_info['name_local']
+        return lang_info["name_local"]
     except KeyError:
         pass
 
     # Last place to look is in settings.ALL_LANGUAGES. Ideally we find the actual code,
     # but also, check the 'generic' language. If even the generic language isn't found,
     # something is wrong, so log an error and throw an exception.
-    first_dash_index = language_code.find('-')
+    first_dash_index = language_code.find("-")
     generic_code = None if first_dash_index == -1 else language_code[:first_dash_index]
     potential_generic_label = None
     for code, language_label in settings.ALL_LANGUAGES:

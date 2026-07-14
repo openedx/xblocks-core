@@ -101,7 +101,7 @@ def command_test(problem):
 
 def check_that_blanks_fail(problem):
     """Leaving it blank should never work. Neither should a space."""
-    blank_answers = dict((answer_id, "") for answer_id in problem.get_question_answers())
+    blank_answers = dict.fromkeys(problem.get_question_answers(), "")
     grading_results = problem.grade_answers(blank_answers)
     try:
         assert all(result == "incorrect" for result in grading_results.values())
@@ -133,16 +133,16 @@ def check_that_suggested_answers_work(problem):
     # all_answers is real_answers + blanks for other answer_ids for which the
     # responsetypes can't provide us pre-canned answers (customresponse)
     all_answer_ids = problem.get_answer_ids()
-    all_answers = dict((answer_id, real_answers.get(answer_id, "")) for answer_id in all_answer_ids)
+    all_answers = {answer_id: real_answers.get(answer_id, "") for answer_id in all_answer_ids}
 
     log.debug("Real answers: %s", real_answers)
     if real_answers:
         try:
-            real_results = dict(
-                (answer_id, result)
+            real_results = {
+                answer_id: result
                 for answer_id, result in problem.grade_answers(all_answers).items()
                 if answer_id in real_answers
-            )
+            }
             log.debug(real_results)
             assert all(result == "correct" for answer_id, result in real_results.items())
         except UndefinedVariable as uv_exc:

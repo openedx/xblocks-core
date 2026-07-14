@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: upgrade help requirements
+.PHONY: upgrade help requirements lint format test docs
 .PHONY: extract_translations compile_translations
 .PHONY: detect_changed_source_translations dummy_translations build_dummy_translations
 .PHONY: validate_translations pull_translations push_translations install_transifex_clients
@@ -13,29 +13,26 @@ JS_TARGET := $(PACKAGE_NAME)/public/js/translations
 help:
 	@perl -nle'print $& if m{^[\.a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m  %-25s\033[0m %s\n", $$1, $$2}'
 
-# Define PIP_COMPILE_OPTS=-v to get more information during make upgrade.
-PIP_COMPILE = pip-compile --upgrade $(PIP_COMPILE_OPTS)
+lint: ## run linting checks
+	tox -e quality
 
-upgrade: export CUSTOM_COMPILE_COMMAND=make upgrade
-upgrade: ## update the requirements/*.txt files with the latest packages satisfying requirements/*.in
-	pip install -qr requirements/pip-tools.txt
-	# Make sure to compile files after any other files they include!
-	$(PIP_COMPILE) --allow-unsafe -o requirements/pip-tools.txt requirements/pip-tools.in
-	pip install -qr requirements/pip-tools.txt
-	$(PIP_COMPILE) -o requirements/base.txt requirements/base.in
-	$(PIP_COMPILE) -o requirements/test.txt requirements/test.in
-	$(PIP_COMPILE) -o requirements/doc.txt requirements/doc.in
-	$(PIP_COMPILE) -o requirements/quality.txt requirements/quality.in
-	$(PIP_COMPILE) -o requirements/dev.txt requirements/dev.in
-	# Let tox control the Django version for tests
-	sed '/^[dD]jango==/d' requirements/test.txt > requirements/test.tmp
-	mv requirements/test.tmp requirements/test.txt
+format: ## auto-fix ruff lint and formatting issues
+	uv run ruff check --fix .
+	uv run ruff format .
 
-piptools: ## install pinned version of pip-compile and pip-sync
-	pip install -r requirements/pip-tools.txt
+test: ## run tests against all supported Python/Django combinations
+	tox -e "py312-django{42,52}"
 
-requirements: piptools ## install development environment requirements
-	pip-sync -q requirements/dev.txt requirements/private.*
+docs: ## build documentation
+	tox -e docs
+
+upgrade: ## update uv.lock and regenerate uv constraints from edx-lint
+	uv run --with edx-lint edx_lint write_uv_constraints pyproject.toml
+	uv lock --upgrade
+
+requirements: ## install development environment requirements using uv
+	uv sync --group dev
+	uv tool install tox --with tox-uv
 
 # XBlock directories
 XBLOCKS=$(shell find $(shell pwd)/$(PACKAGE_NAME) -mindepth 2 -maxdepth 2 -type d -name 'conf' -exec dirname {} \;)

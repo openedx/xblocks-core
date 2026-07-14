@@ -28,6 +28,7 @@ class SerializationError(Exception):
     """
     Thrown when a module cannot be exported to XML
     """
+
     def __init__(self, location, msg):
         super().__init__(msg)
         self.location = location
@@ -271,8 +272,8 @@ class AnnotatableBlock(LegacyXmlMixin, XBlock):
     @classmethod
     def definition_from_xml(cls, xml_object, system):
         if len(xml_object) == 0 and len(list(xml_object.items())) == 0:
-            return {'data': ''}, []
-        return {'data': etree.tostring(xml_object, pretty_print=True, encoding='unicode')}, []
+            return {"data": ""}, []
+        return {"data": etree.tostring(xml_object, pretty_print=True, encoding="unicode")}, []
 
     def definition_to_xml(self, resource_fs):
         """
@@ -299,13 +300,7 @@ class AnnotatableBlock(LegacyXmlMixin, XBlock):
         except etree.XMLSyntaxError as err:
             # Can't recover here, so just add some info and
             # re-raise
-            lines = self.data.split('\n')
+            lines = self.data.split("\n")
             line, offset = err.position  # lint-amnesty, pylint: disable=unpacking-non-sequence
-            msg = (
-                "Unable to create xml for block {loc}. "
-                "Context: '{context}'"
-            ).format(
-                context=lines[line - 1][offset - 40:offset + 40],
-                loc=self.usage_key,
-            )
+            msg = f"Unable to create xml for block {self.usage_key}. Context: '{lines[line - 1][offset - 40 : offset + 40]}'"
             raise SerializationError(self.usage_key, msg) from err

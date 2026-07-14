@@ -18,9 +18,9 @@ def compute_location(course_key, path, revision=None, is_thumbnail=False):  # py
     - revision: is the object's revision information
     - is_thumbnail: is whether or not we want the thumbnail version of this asset
     """
-    path = path.replace('/', '_')
+    path = path.replace("/", "_")
     return course_key.make_asset_key(
-        'asset' if not is_thumbnail else 'thumbnail',
+        "asset" if not is_thumbnail else "thumbnail",
         AssetLocator.clean_keeping_underscores(path),
     ).for_branch(None)
 
@@ -33,9 +33,9 @@ def get_location_from_path(path):
         return AssetKey.from_string(path)
     except InvalidKeyError:
         # TODO - re-address this once LMS-11198 is tackled.
-        if path.startswith('/') or path.endswith('/'):
+        if path.startswith("/") or path.endswith("/"):
             # try stripping off the leading/trailing slash and try again
-            return AssetKey.from_string(path.strip('/'))
+            return AssetKey.from_string(path.strip("/"))
         return None
 
 
@@ -44,6 +44,6 @@ def serialize_asset_key_with_slash(asset_key):
     Legacy code expects the serialized asset key to start with a slash.
     """
     url = str(asset_key)
-    if not url.startswith('/'):
-        url = '/' + url  # TODO - re-address this once LMS-11198 is tackled.
+    if not url.startswith("/"):
+        url = "/" + url  # TODO - re-address this once LMS-11198 is tackled.
     return url

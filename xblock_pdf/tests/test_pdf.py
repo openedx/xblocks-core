@@ -1,9 +1,10 @@
 """Tests for the PDF Block"""
+
 import json
-from typing import Any, Optional
+from typing import Any
 from unittest.mock import MagicMock, patch
 
-from django.test import TestCase, override_settings
+from django.test import override_settings
 from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
 from xblock.test.toy_runtime import ToyRuntime
@@ -24,7 +25,7 @@ def get_student_content(block: PDFBlock) -> str:
     return as_dict["content"]
 
 
-def mock_handle_request(data: Optional[dict[str, Any]] = None, method: str = "POST"):
+def mock_handle_request(data: dict[str, Any] | None = None, method: str = "POST"):
     """Return a request object compatible with an xblock_handler."""
     mock_request = MagicMock()
     mock_request.method = method
@@ -34,7 +35,6 @@ def mock_handle_request(data: Optional[dict[str, Any]] = None, method: str = "PO
 
 def test_defaults_render():
     """Test the basic view loads."""
-    scope_ids = ScopeIds("1", "2", "3", "4")
     block = make_block()
     content = get_student_content(block)
     assert '<iframe src="https://tutorial.math.lamar.edu/pdf/Trig_Cheat_Sheet.pdf"' in content
@@ -45,10 +45,10 @@ def test_download_button():
     block = make_block(allow_download=True)
     get_student_content(block)
     content = get_student_content(block)
-    assert 'Download the PDF' in content
+    assert "Download the PDF" in content
     block.allow_download = False
     content = get_student_content(block)
-    assert 'Download the PDF' not in content
+    assert "Download the PDF" not in content
 
 
 def test_source_url():
@@ -66,13 +66,15 @@ def test_source_url():
 def test_saves_settings():
     """Test that PDF settings are saved."""
     block = make_block()
-    request = mock_handle_request({
-        "display_name": "Novel application of theory",
-        "url": "https://example.com/nature_article.pdf",
-        "allow_download": "false",
-        "source_text": "Get educated",
-        "source_url": "https://example.com/nature_article.tex",
-    })
+    request = mock_handle_request(
+        {
+            "display_name": "Novel application of theory",
+            "url": "https://example.com/nature_article.pdf",
+            "allow_download": "false",
+            "source_text": "Get educated",
+            "source_url": "https://example.com/nature_article.tex",
+        }
+    )
     block.save_pdf(request)
     assert block.display_name == "Novel application of theory"
     assert block.url == "https://example.com/nature_article.pdf"
@@ -88,20 +90,22 @@ def test_saves_settings_omits_on_download_disabled_flag():
     downloads disabled flag is set.
     """
     block = make_block()
-    request = mock_handle_request({
-        "display_name": "Novel application of theory",
-        "url": "https://example.com/nature_article.pdf",
-        # These fields shouldn't be visible on the front end,
-        # but should be dropped if they somehow are.
-        #
-        # Potential future improvement would be saving these
-        # but ignoring them when rendering. This is not currently
-        # the case since the fields are entirely absent from the studio
-        # render, and so would send blank data which would error out.
-        "allow_download": "false",
-        "source_text": "Get educated",
-        "source_url": "https://example.com/nature_article.tex",
-    })
+    request = mock_handle_request(
+        {
+            "display_name": "Novel application of theory",
+            "url": "https://example.com/nature_article.pdf",
+            # These fields shouldn't be visible on the front end,
+            # but should be dropped if they somehow are.
+            #
+            # Potential future improvement would be saving these
+            # but ignoring them when rendering. This is not currently
+            # the case since the fields are entirely absent from the studio
+            # render, and so would send blank data which would error out.
+            "allow_download": "false",
+            "source_text": "Get educated",
+            "source_url": "https://example.com/nature_article.tex",
+        }
+    )
     block.save_pdf(request)
     assert block.display_name == "Novel application of theory"
     assert block.url == "https://example.com/nature_article.pdf"
@@ -124,7 +128,7 @@ def test_download_event_fires(mock_publish):
         {
             "url": "https://tutorial.math.lamar.edu/pdf/Trig_Cheat_Sheet.pdf",
             "source_url": "",
-        }
+        },
     )
 
 

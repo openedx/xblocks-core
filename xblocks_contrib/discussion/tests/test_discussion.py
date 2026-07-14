@@ -1,5 +1,4 @@
-""" Tests for DiscussionXBLock"""
-
+"""Tests for DiscussionXBLock"""
 
 import itertools
 import random
@@ -21,7 +20,7 @@ def attribute_pair_repr(self):
     Custom string representation for the AttributePair namedtuple which is
     consistent between test runs.
     """
-    return f'<AttributePair name={self.name}>'
+    return f"<AttributePair name={self.name}>"
 
 
 AttributePair = namedtuple("AttributePair", ["name", "value"])
@@ -37,7 +36,12 @@ def _random_string():
     """
     Generates random string
     """
-    return ''.join(random.choice(string.ascii_lowercase, ) for _ in range(12))
+    return "".join(
+        random.choice(
+            string.ascii_lowercase,
+        )
+        for _ in range(12)
+    )
 
 
 def _make_attribute_test_cases():
@@ -49,7 +53,7 @@ def _make_attribute_test_cases():
         yield (
             AttributePair(id_attr, _random_string()),
             AttributePair(category_attr, _random_string()),
-            AttributePair(target_attr, _random_string())
+            AttributePair(target_attr, _random_string()),
         )
 
 
@@ -58,6 +62,7 @@ class DiscussionXBlockImportExportTests(TestCase):
     """
     Import and export tests
     """
+
     DISCUSSION_XBLOCK_LOCATION = "xblocks_contrib.discussion.DiscussionXBlock"
 
     def setUp(self):
@@ -85,18 +90,14 @@ class DiscussionXBlockImportExportTests(TestCase):
         """
         Test that xblock export XML format can be parsed preserving field values
         """
-        xblock_xml = """
+        xblock_xml = f"""
         <discussion
             url_name="82bb87a2d22240b1adac2dfcc1e7e5e4" xblock-family="xblock.v1"
-            {id_attr}="{id_value}"
-            {category_attr}="{category_value}"
-            {target_attr}="{target_value}"
+            {id_pair.name}="{id_pair.value}"
+            {category_pair.name}="{category_pair.value}"
+            {target_pair.name}="{target_pair.value}"
         />
-        """.format(
-            id_attr=id_pair.name, id_value=id_pair.value,
-            category_attr=category_pair.name, category_value=category_pair.value,
-            target_attr=target_pair.name, target_value=target_pair.value,
-        )
+        """
         node = etree.fromstring(xblock_xml)
 
         patched_load_definition_xml.side_effect = Exception("Irrelevant")
@@ -118,16 +119,12 @@ class DiscussionXBlockImportExportTests(TestCase):
         Test that legacy export XML format can be parsed preserving field values
         """
         xblock_xml = """<discussion url_name="82bb87a2d22240b1adac2dfcc1e7e5e4"/>"""
-        xblock_definition_xml = """
+        xblock_definition_xml = f"""
         <discussion
-            {id_attr}="{id_value}"
-            {category_attr}="{category_value}"
-            {target_attr}="{target_value}"
-        />""".format(
-            id_attr=id_pair.name, id_value=id_pair.value,
-            category_attr=category_pair.name, category_value=category_pair.value,
-            target_attr=target_pair.name, target_value=target_pair.value,
-        )
+            {id_pair.name}="{id_pair.value}"
+            {category_pair.name}="{category_pair.value}"
+            {target_pair.name}="{target_pair.value}"
+        />"""
         node = etree.fromstring(xblock_xml)
         definition_node = etree.fromstring(xblock_definition_xml)
 
@@ -154,25 +151,25 @@ class DiscussionXBlockImportExportTests(TestCase):
         export,  in a course with a course ID different from the one from which the export was created - because the
         discussion ID would be different.
         """
-        target_node = etree.Element('dummy')
+        target_node = etree.Element("dummy")
 
         block = DiscussionXBlock(self.runtime_mock, scope_ids=self.keys, field_data=DictFieldData({}))
-        discussion_id_field = block.fields['discussion_id']  # pylint: disable=unsubscriptable-object
+        discussion_id_field = block.fields["discussion_id"]  # pylint: disable=unsubscriptable-object
 
         # precondition checks - discussion_id does not have a value and uses UNIQUE_ID
         assert discussion_id_field._get_cached_value(block) == NO_CACHE_VALUE  # pylint: disable=W0212
         assert discussion_id_field.default == UNIQUE_ID
 
         block.add_xml_to_node(target_node)
-        assert target_node.tag == 'discussion'  # pylint: disable=W0212
-        assert 'discussion_id' not in target_node.attrib
+        assert target_node.tag == "discussion"  # pylint: disable=W0212
+        assert "discussion_id" not in target_node.attrib
 
     @ddt.data("jediwannabe", "iddqd", "itisagooddaytodie")
     def test_export_custom_discussion_id(self, discussion_id):
         """
         Test that custom discussion_id values are exported
         """
-        target_node = etree.Element('dummy')
+        target_node = etree.Element("dummy")
 
         block = DiscussionXBlock(self.runtime_mock, scope_ids=self.keys, field_data=DictFieldData({}))
         block.discussion_id = discussion_id
@@ -181,5 +178,5 @@ class DiscussionXBlockImportExportTests(TestCase):
         assert block.discussion_id == discussion_id
 
         block.add_xml_to_node(target_node)
-        assert target_node.tag == 'discussion'
-        assert target_node.attrib['discussion_id'], discussion_id
+        assert target_node.tag == "discussion"
+        assert target_node.attrib["discussion_id"], discussion_id

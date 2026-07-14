@@ -20,7 +20,6 @@ import re
 from collections import OrderedDict
 from copy import deepcopy
 from datetime import datetime
-from typing import Optional
 from xml.sax.saxutils import unescape
 from zoneinfo import ZoneInfo
 
@@ -239,7 +238,7 @@ class LoncapaProblem:
             # Run response late_transforms last (see MultipleChoiceResponse)
             # Sort the responses to be in *_1 *_2 ... order.
             responses = list(self.responders.values())
-            responses = sorted(responses, key=lambda resp: int(resp.id[resp.id.rindex("_") + 1:]))
+            responses = sorted(responses, key=lambda resp: int(resp.id[resp.id.rindex("_") + 1 :]))
             for response in responses:
                 if hasattr(response, "late_transforms"):
                     response.late_transforms(self)
@@ -493,7 +492,7 @@ class LoncapaProblem:
         """
         return all("filesubmission" not in responder.allowed_inputfields for responder in self.responders.values())
 
-    def get_grade_from_current_answers(self, student_answers, correct_map: Optional[CorrectMap] = None):
+    def get_grade_from_current_answers(self, student_answers, correct_map: CorrectMap | None = None):
         """
         Gets the grade for the currently-saved problem state, but does not save it
         to the block.
@@ -925,7 +924,6 @@ class LoncapaProblem:
         python_path = []
 
         for script in tree.findall(".//script"):
-
             stype = script.get("type")
             if stype:
                 if "javascript" in stype:
@@ -965,7 +963,7 @@ class LoncapaProblem:
             except Exception as err:
                 log.exception("Error while execing script code: %s", all_code)
                 msg = Text(f"Error while executing script code: {err}")
-                raise responsetypes.LoncapaProblemError(msg)
+                raise responsetypes.LoncapaProblemError(msg) from None
 
         # Store code source in context, along with the Python path needed to run it correctly.
         context["script_code"] = all_code

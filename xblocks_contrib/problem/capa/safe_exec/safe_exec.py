@@ -187,7 +187,6 @@ def safe_exec(
             emsg, exception = get_remote_exec(data)
 
     else:
-
         # Create a copy so the originals are not modified as part of this call.
         # This has to happen before local exec is run, since globals are modified
         # as a side effect.

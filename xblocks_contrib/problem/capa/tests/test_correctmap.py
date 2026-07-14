@@ -181,7 +181,7 @@ class CorrectMapTest(unittest.TestCase):
         invalid_list = [None, "string", 5, datetime.datetime.today()]
 
         for invalid in invalid_list:
-            with pytest.raises(Exception):
+            with pytest.raises(Exception):  # noqa: B017
                 self.cmap.update(invalid)
 
     def test_set_none_state(self):

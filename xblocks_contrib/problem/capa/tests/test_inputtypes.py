@@ -1,5 +1,4 @@
 # pylint: disable=too-many-lines
-# -*- coding: utf-8 -*-
 """
 Tests of input types.
 
@@ -30,7 +29,6 @@ import six
 from lxml import etree
 from lxml.html import fromstring
 from pyparsing import ParseException
-from six.moves import zip
 
 from xblocks_contrib.problem.capa import inputtypes
 from xblocks_contrib.problem.capa.checker import DemoSystem
@@ -122,14 +120,14 @@ class ChoiceGroupTest(unittest.TestCase):
 
     def check_group(self, tag, expected_input_type, expected_suffix):
         """Test that choice group inputs render expected context."""
-        xml_str = """
+        xml_str = f"""
   <{tag}>
     <choice correct="false" name="foil1"><text>This is foil One.</text></choice>
     <choice correct="false" name="foil2"><text>This is foil Two.</text></choice>
     <choice correct="true" name="foil3">This is foil Three.</choice>
     <choice correct="false" name="foil4">This is <b>foil</b> Four.</choice>
   </{tag}>
-        """.format(tag=tag)
+        """
         element = etree.fromstring(xml_str)
 
         state = {"value": "foil3", "id": "sky_input", "status": "answered", "response_data": RESPONSE_DATA}
@@ -739,7 +737,7 @@ class MatlabTest(unittest.TestCase):
         the_input = lookup_tag("matlabinput")(system, elt, {})
 
         data = {"submission": "x = 1234;"}
-        response = the_input.handle_ajax("plot", data)  # pylint: disable=unused-variable
+        the_input.handle_ajax("plot", data)
 
         body = system.xqueue.interface.send_to_queue.call_args[1]["body"]
         payload = json.loads(body)
@@ -775,15 +773,13 @@ class MatlabTest(unittest.TestCase):
         # test html, that is correct HTML5 html, but is not parsable by XML parser.
         old_render_template = self.the_input.capa_system.render_template
         self.the_input.capa_system.render_template = lambda *args: textwrap.dedent(
-            (
-                "<div class='matlabResponse'><div id='mwAudioPlaceHolder'>"
-                "<audio controls autobuffer autoplay src='data:audio/wav;base64='>"
-                "Audio is not supported on this browser.</audio>"
-                "<div>Right click "
-                "<a href=https://endpoint.mss-mathworks.com/media/filename.wav>here</a> "
-                'and click "Save As" to download the file</div></div>'
-                "<div style='white-space:pre' class='commandWindowOutput'></div><ul></ul></div>"
-            )
+            "<div class='matlabResponse'><div id='mwAudioPlaceHolder'>"
+            "<audio controls autobuffer autoplay src='data:audio/wav;base64='>"
+            "Audio is not supported on this browser.</audio>"
+            "<div>Right click "
+            "<a href=https://endpoint.mss-mathworks.com/media/filename.wav>here</a> "
+            'and click "Save As" to download the file</div></div>'
+            "<div style='white-space:pre' class='commandWindowOutput'></div><ul></ul></div>"
         ).replace("\n", "")
 
         output = self.the_input.get_html()
@@ -876,23 +872,21 @@ class MatlabTest(unittest.TestCase):
         context = the_input._get_render_context()  # pylint: disable=protected-access
         self.maxDiff = None  # pylint: disable=invalid-name
         expected = fromstring(
-            (
-                '\n<div class="matlabResponse"><div class="commandWindowOutput" '
-                'style="white-space: pre;"> <strong>if</strong> Conditionally execute '
-                "statements.\nThe general form of the <strong>if</strong> statement is\n\n"
-                "   <strong>if</strong> expression\n     statements\n   ELSEIF expression\n"
-                "     statements\n   ELSE\n     statements\n   END\n\nThe statements are "
-                "executed if the real part of the expression \nhas all non-zero elements. "
-                "The ELSE and ELSEIF parts are optional.\nZero or more ELSEIF parts can be "
-                "used as well as nested <strong>if</strong>'s.\nThe expression is usually "
-                "of the form expr rop expr where \nrop is ==, &lt;, &gt;, &lt;=, &gt;=, or "
-                '~=.\n<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAjAAAAGkCAIA'
-                'AACgj==">\n\nExample\n   if I == J\n     A(I,J) = 2;\n   elseif abs(I-J) '
-                "== 1\n     A(I,J) = -1;\n   else\n     A(I,J) = 0;\n   end\n\nSee also "
-                "<a>relop</a>, <a>else</a>, <a>elseif</a>, <a>end</a>, <a>for</a>, "
-                "<a>while</a>, <a>switch</a>.\n\nReference page in Help browser\n   "
-                "<a>doc if</a>\n\n</div><ul></ul></div>\n"
-            )
+            '\n<div class="matlabResponse"><div class="commandWindowOutput" '
+            'style="white-space: pre;"> <strong>if</strong> Conditionally execute '
+            "statements.\nThe general form of the <strong>if</strong> statement is\n\n"
+            "   <strong>if</strong> expression\n     statements\n   ELSEIF expression\n"
+            "     statements\n   ELSE\n     statements\n   END\n\nThe statements are "
+            "executed if the real part of the expression \nhas all non-zero elements. "
+            "The ELSE and ELSEIF parts are optional.\nZero or more ELSEIF parts can be "
+            "used as well as nested <strong>if</strong>'s.\nThe expression is usually "
+            "of the form expr rop expr where \nrop is ==, &lt;, &gt;, &lt;=, &gt;=, or "
+            '~=.\n<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAjAAAAGkCAIA'
+            'AACgj==">\n\nExample\n   if I == J\n     A(I,J) = 2;\n   elseif abs(I-J) '
+            "== 1\n     A(I,J) = -1;\n   else\n     A(I,J) = 0;\n   end\n\nSee also "
+            "<a>relop</a>, <a>else</a>, <a>elseif</a>, <a>end</a>, <a>for</a>, "
+            "<a>while</a>, <a>switch</a>.\n\nReference page in Help browser\n   "
+            "<a>doc if</a>\n\n</div><ul></ul></div>\n"
         )
 
         received = fromstring(context["queue_msg"])
@@ -980,7 +974,7 @@ def html_tree_equal(received, expected):
             return False
     if len(received) != len(expected):
         return False
-    if any(not html_tree_equal(rec, exp) for rec, exp in zip(received, expected)):
+    if any(not html_tree_equal(rec, exp) for rec, exp in zip(received, expected, strict=False)):
         return False
     return True
 
@@ -1424,22 +1418,22 @@ class DragAndDropTest(unittest.TestCase):
         """Test that a drag-and-drop input renders correctly with draggables and targets."""
         path_to_images = "/dummy-static/images/"
 
-        xml_str = """
-        <drag_and_drop_input id="prob_1_2" img="{path}about_1.png" target_outline="false">
+        xml_str = f"""
+        <drag_and_drop_input id="prob_1_2" img="{path_to_images}about_1.png" target_outline="false">
             <draggable id="1" label="Label 1"/>
-            <draggable id="name_with_icon" label="cc" icon="{path}cc.jpg"/>
-            <draggable id="with_icon" label="arrow-left" icon="{path}arrow-left.png" />
+            <draggable id="name_with_icon" label="cc" icon="{path_to_images}cc.jpg"/>
+            <draggable id="with_icon" label="arrow-left" icon="{path_to_images}arrow-left.png" />
             <draggable id="5" label="Label2" />
-            <draggable id="2" label="Mute" icon="{path}mute.png" />
-            <draggable id="name_label_icon3" label="spinner" icon="{path}spinner.gif" />
-            <draggable id="name4" label="Star" icon="{path}volume.png" />
+            <draggable id="2" label="Mute" icon="{path_to_images}mute.png" />
+            <draggable id="name_label_icon3" label="spinner" icon="{path_to_images}spinner.gif" />
+            <draggable id="name4" label="Star" icon="{path_to_images}volume.png" />
             <draggable id="7" label="Label3" />
 
             <target id="t1" x="210" y="90" w="90" h="90"/>
             <target id="t2" x="370" y="160" w="90" h="90"/>
 
         </drag_and_drop_input>
-        """.format(path=path_to_images)
+        """
 
         element = etree.fromstring(xml_str)
 
@@ -1663,7 +1657,7 @@ class TestChoiceText(unittest.TestCase):
         """
         Test to ensure that an unrecognized inputtype tag causes an error
         """
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             self.check_group("invalid", "choice", "checkbox")
 
     def test_invalid_input_tag(self):

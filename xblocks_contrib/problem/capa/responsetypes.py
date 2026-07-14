@@ -28,6 +28,7 @@ import numpy
 import random2 as random
 import requests
 import six
+
 # specific library imports
 from calc import UndefinedVariable, UnmatchedParenthesis, evaluator
 from django.utils import html
@@ -35,7 +36,6 @@ from lxml import etree
 from lxml.html.soupparser import fromstring as fromstring_bs  # uses Beautiful Soup!!! FIXME?
 from pyparsing import ParseException
 from shapely.geometry import MultiPoint, Point
-from six.moves import map, range, zip
 from symmath import symmath_check
 
 from xblocks_contrib.problem.capa.safe_exec import safe_exec
@@ -475,7 +475,12 @@ class LoncapaResponse(six.with_metaclass(abc.ABCMeta)):
                 # We need the CorrectMap code for hint functions. No, this is not great.
                 CORRECTMAP_PY = inspect.getsource(correctmap)
 
-            code = CORRECTMAP_PY + "\n" + self.context["script_code"] + "\n" + textwrap.dedent("""
+            code = (
+                CORRECTMAP_PY
+                + "\n"
+                + self.context["script_code"]
+                + "\n"
+                + textwrap.dedent("""
                     new_cmap = CorrectMap()
                     new_cmap.set_dict(new_cmap_dict)
                     old_cmap = CorrectMap()
@@ -484,6 +489,7 @@ class LoncapaResponse(six.with_metaclass(abc.ABCMeta)):
                     new_cmap_dict.update(new_cmap.get_dict())
                     old_cmap_dict.update(old_cmap.get_dict())
                     """).format(hintfn=hintfn)
+            )
             globals_dict = {
                 "answer_ids": self.answer_ids,
                 "student_answers": student_answers,
@@ -535,7 +541,6 @@ class LoncapaResponse(six.with_metaclass(abc.ABCMeta)):
             and hintgroup.find(self.hint_tag) is not None
             and hasattr(self, "check_hint_condition")
         ):
-
             rephints = hintgroup.findall(self.hint_tag)
             hints_to_show = self.check_hint_condition(  # pylint: disable=assignment-from-no-return
                 rephints, student_answers
@@ -688,7 +693,6 @@ class ChoiceResponse(LoncapaResponse):
         self.correct_choices = set()
         self.incorrect_choices = set()
         for choice in self.get_choices():
-
             # contextualize the name and correct attributes
             name = contextualize_text(choice.get("name"), self.context)
             correct = contextualize_text(choice.get("correct"), self.context).upper()
@@ -1669,7 +1673,7 @@ class NumericalResponse(LoncapaResponse):
             if isinstance(student_float, complex):
                 raise StudentInputError(_("You may not use complex numbers in range tolerance problems"))
             boundaries = []
-            for inclusion, answer in zip(self.inclusion, self.answer_range):
+            for inclusion, answer in zip(self.inclusion, self.answer_range, strict=False):
                 boundary = self.get_staff_ans(answer)
                 if boundary.imag != 0:
                     raise StudentInputError(
@@ -2283,9 +2287,7 @@ class CustomResponse(LoncapaResponse):
             correct_map.set(idset[k], correct[k], msg=messages[k], npoints=npoints)
         return correct_map
 
-    def execute_check_function(
-        self, idset, submission
-    ):  # pylint: disable=too-many-statements,too-many-locals,too-many-branches
+    def execute_check_function(self, idset, submission):  # pylint: disable=too-many-statements,too-many-locals,too-many-branches
         """Execute the custom check function for a submission, updating correctness,
         messages, and grades in the context."""
 
@@ -2328,7 +2330,6 @@ class CustomResponse(LoncapaResponse):
                 # If there are multiple inputs, they all get marked
                 # to the same correct/incorrect value
                 if "ok" in ret:
-
                     # Returning any falsy value or the "false" string for "ok" gives incorrect.
                     # Returning any string that includes "partial" for "ok" gives partial credit.
                     # Returning any other truthy value for "ok" gives correct
@@ -2435,7 +2436,6 @@ class CustomResponse(LoncapaResponse):
                     raise ResponseError(_("CustomResponse: check function returned an invalid dictionary!"))
 
             else:
-
                 # Returning any falsy value or the "false" string for "ok" gives incorrect.
                 # Returning any string that includes "partial" for "ok" gives partial credit.
                 # Returning any other truthy value for "ok" gives correct
@@ -2461,7 +2461,6 @@ class CustomResponse(LoncapaResponse):
         # will return "</html>".  To avoid this, we first check
         # that *msg* is a non-empty string.
         if msg:
-
             # When we parse *msg* using etree, there needs to be a root
             # element, so we wrap the *msg* text in <html> tags
             msg = HTML("<html>{msg}</html>").format(msg=HTML(msg))
@@ -2960,7 +2959,7 @@ class ExternalResponse(LoncapaResponse):
         except Exception as err:  # pylint: disable=broad-exception-caught
             log.error("Error %s", err)
             if self.capa_system.DEBUG:
-                cmap.set_dict(dict(list(zip(sorted(self.answer_ids), ["incorrect"] * len(idset)))))
+                cmap.set_dict(dict(list(zip(sorted(self.answer_ids), ["incorrect"] * len(idset), strict=False))))
                 cmap.set_property(
                     self.answer_ids[0], "msg", Text('<span class="inline-error">{}</span>').format(str(err))
                 )
@@ -2997,7 +2996,7 @@ class ExternalResponse(LoncapaResponse):
         if not len(exans) == len(self.answer_ids):
             log.error("Expected %s answers from external server, only got %s!", len(self.answer_ids), len(exans))
             raise Exception("Short response from external server")  # pylint: disable=broad-exception-raised
-        return dict(list(zip(self.answer_ids, exans)))
+        return dict(list(zip(self.answer_ids, exans, strict=False)))
 
 
 # -----------------------------------------------------------------------------
@@ -3123,8 +3122,10 @@ class FormulaResponse(LoncapaResponse):
         """
         variables = samples.split("@")[0].split(",")
         numsamples = int(samples.split("@")[1].split("#")[1])
-        sranges = list(zip(*[list(map(float, x.split(","))) for x in samples.split("@")[1].split("#")[0].split(":")]))
-        ranges = dict(list(zip(variables, sranges)))
+        sranges = list(
+            zip(*[list(map(float, x.split(","))) for x in samples.split("@")[1].split("#")[0].split(":")], strict=False)
+        )
+        ranges = dict(list(zip(variables, sranges, strict=False)))
 
         out = []
         for _ in range(numsamples):
@@ -3149,7 +3150,7 @@ class FormulaResponse(LoncapaResponse):
 
         correct = all(
             compare_with_tolerance(student, instructor, self.tolerance)
-            for student, instructor in zip(student_result, instructor_result)
+            for student, instructor in zip(student_result, instructor_result, strict=False)
         )
         if correct:
             return "correct"
@@ -3257,7 +3258,7 @@ class SchematicResponse(LoncapaResponse):
             msg = _("Error in evaluating SchematicResponse. The error was: {error_msg}").format(error_msg=err)
             raise ResponseError(msg) from err
         cmap = CorrectMap()
-        cmap.set_dict(dict(list(zip(sorted(self.answer_ids), self.context["correct"]))))
+        cmap.set_dict(dict(list(zip(sorted(self.answer_ids), self.context["correct"], strict=False))))
         return cmap
 
     def get_answers(self):

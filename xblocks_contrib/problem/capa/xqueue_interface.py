@@ -5,7 +5,7 @@ LMS Interface to external queueing system (xqueue)
 import hashlib
 import json
 import logging
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -75,8 +75,8 @@ class XQueueInterface:
     def __init__(  # pylint: disable=too-many-positional-arguments
         self,
         url: str,
-        django_auth: Dict[str, str],
-        requests_auth: Optional[HTTPBasicAuth] = None,
+        django_auth: dict[str, str],
+        requests_auth: HTTPBasicAuth | None = None,
         block: "ProblemBlock" = None,
         use_submission_service: bool = False,
     ):
@@ -116,7 +116,7 @@ class XQueueInterface:
 
         # log the send to xqueue
         header_info = json.loads(header)
-        queue_name = header_info.get("queue_name", "")  # pylint: disable=unused-variable
+        _queue_name = header_info.get("queue_name", "")
 
         # Attempt to send to queue
         error, msg = self._send_to_queue(header, body, files_to_upload)
@@ -161,9 +161,7 @@ class XQueueInterface:
         queue_key = header_info["lms_key"]
 
         if self.use_submission_service:
-            submission = self.submission.send_to_submission(  # pylint: disable=unused-variable
-                header, body, queue_key, files
-            )
+            self.submission.send_to_submission(header, body, queue_key, files)
             return None, ""
 
         return self._http_post(self.url + "/xqueue/submit/", payload, files=files)

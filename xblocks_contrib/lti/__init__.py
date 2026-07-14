@@ -4,4 +4,4 @@ THIS BLOCK IS DEPRECATED IN FAVOR OF https://github.com/openedx/xblock-lti-consu
 Learning Tools Interoperability (LTI) module.
 """
 
-from .lti import LTIBlock
+from .lti import LTIBlock as LTIBlock

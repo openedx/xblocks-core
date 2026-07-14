@@ -175,7 +175,7 @@ class CAPAProblemTest(unittest.TestCase):
         """
         question = "Click the country which is home to the Pyramids."
 
-        xml = """
+        xml = f"""
         <problem>
             <p>{question}</p>
             <imageresponse>
@@ -183,7 +183,7 @@ class CAPAProblemTest(unittest.TestCase):
                 src="/static/Africa.png" width="600" height="638" rectangle="(338,98)-(412,168)"/>
             </imageresponse>
         </problem>
-        """.format(question=question)
+        """
         problem = new_loncapa_problem(xml)
         assert problem.problem_data == {"1_2_1": {"label": question, "descriptions": {}}}
         # <p> tag with question text should not be deleted
@@ -819,6 +819,6 @@ class CAPAProblemReportHelpersTest(unittest.TestCase):
             responder_mock.allowed_inputfields = ["filesubmission"]
             responder_mock.evaluate_answers.return_value = correct_map
 
-            with self.assertRaises(Exception):
+            with self.assertRaises(Exception):  # noqa: B017
                 problem.get_grade_from_current_answers(None, correct_map)
             responder_mock.evaluate_answers.assert_not_called()

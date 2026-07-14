@@ -53,7 +53,7 @@ class MLStripper(HTMLParser):
 
     def handle_entityref(self, name):
         """appends the reference to the body"""
-        self.fed.append("&%s;" % name)
+        self.fed.append(f"&{name};")
 
     def get_data(self):
         """joins together the seperate chunks into one cohesive string"""
@@ -409,7 +409,6 @@ class HtmlBlockMixin(LegacyXmlMixin, XBlock):
             # again in the correct format.  This should go away once the CMS is
             # online and has imported all current (fall 2012) courses from xml
             if not system.resources_fs.exists(filepath):
-
                 candidates = cls.backcompat_paths(filepath)
                 # log.debug("candidates = {0}".format(candidates))
                 for candidate in candidates:
@@ -434,9 +433,9 @@ class HtmlBlockMixin(LegacyXmlMixin, XBlock):
                     return definition, []
 
             except ResourceNotFound as err:
-                msg = "Unable to load file contents at path {}: {} ".format(filepath, err)
+                msg = f"Unable to load file contents at path {filepath}: {err} "
                 # add more info and re-raise
-                raise Exception(msg).with_traceback(sys.exc_info()[2])
+                raise Exception(msg).with_traceback(sys.exc_info()[2]) from None
 
     @classmethod
     def parse_xml_new_runtime(cls, node, runtime, keys):
@@ -461,7 +460,7 @@ class HtmlBlockMixin(LegacyXmlMixin, XBlock):
 
         # Write html to file, return an empty tag
         pathname = name_to_pathname(self.usage_key.block_id)
-        filepath = "{category}/{pathname}.html".format(category=self.usage_key.block_type, pathname=pathname)
+        filepath = f"{self.usage_key.block_type}/{pathname}.html"
 
         resource_fs.makedirs(os.path.dirname(filepath), recreate=True)
         with resource_fs.open(filepath, "wb") as filestream:

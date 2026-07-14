@@ -58,31 +58,25 @@ class LTIBlockTest(TestCase):
                     </{action}>
                   </imsx_POXBody>
                 </imsx_POXEnvelopeRequest>
-            """)
-        self.context_key = CourseKey.from_string('org/course/run')
+            """
+        )
+        self.context_key = CourseKey.from_string("org/course/run")
         self.runtime = get_test_system()
         self.runtime.publish = Mock()
-        self.runtime._services['rebind_user'] = Mock()  # pylint: disable=protected-access
+        self.runtime._services["rebind_user"] = Mock()  # pylint: disable=protected-access
 
         self.xblock = LTIBlock(
             self.runtime,
             DictFieldData({}),
-            ScopeIds(
-                None, None, None, BlockUsageLocator(self.context_key, "lti", "name")
-            ),
+            ScopeIds(None, None, None, BlockUsageLocator(self.context_key, "lti", "name")),
         )
         current_user = self.runtime.service(self.xblock, "user").get_current_user()
         self.user_id = current_user.opt_attrs.get(ATTR_KEY_ANONYMOUS_USER_ID)
         self.lti_id = self.xblock.lti_id
 
-        self.unquoted_resource_link_id = (
-            "{}-i4x-2-3-lti-31de800015cf4afb973356dbe81496df".format(settings.LMS_BASE)
-        )
+        self.unquoted_resource_link_id = f"{settings.LMS_BASE}-i4x-2-3-lti-31de800015cf4afb973356dbe81496df"
 
-        sourced_id = ":".join(
-            parse.quote(i)
-            for i in (self.lti_id, self.unquoted_resource_link_id, self.user_id)
-        )
+        sourced_id = ":".join(parse.quote(i) for i in (self.lti_id, self.unquoted_resource_link_id, self.user_id))
 
         self.defaults = {
             "namespace": "http://www.imsglobal.org/services/ltiv1p1/xsd/imsoms_v1p0",
@@ -112,18 +106,12 @@ class LTIBlockTest(TestCase):
         namespaces = {"def": lti_spec_namespace}
 
         code_major = root.xpath("//def:imsx_codeMajor", namespaces=namespaces)[0].text
-        description = root.xpath("//def:imsx_description", namespaces=namespaces)[
-            0
-        ].text
-        message_identifier = root.xpath(
-            "//def:imsx_messageIdentifier", namespaces=namespaces
-        )[0].text
+        description = root.xpath("//def:imsx_description", namespaces=namespaces)[0].text
+        message_identifier = root.xpath("//def:imsx_messageIdentifier", namespaces=namespaces)[0].text
         imsx_pox_body = root.xpath("//def:imsx_POXBody", namespaces=namespaces)[0]
 
         try:
-            action = imsx_pox_body.getchildren()[0].tag.replace(
-                "{" + lti_spec_namespace + "}", ""
-            )
+            action = imsx_pox_body.getchildren()[0].tag.replace("{" + lti_spec_namespace + "}", "")
         except Exception:  # pylint: disable=broad-except
             action = None
 
@@ -312,25 +300,17 @@ class LTIBlockTest(TestCase):
         mock_url_prefix = "https://hostname/"
         test_service_name = "test_service"
 
-        def mock_handler_url(
-            block, handler_name, **kwargs
-        ):  # pylint: disable=unused-argument
+        def mock_handler_url(block, handler_name, **kwargs):  # pylint: disable=unused-argument
             """Mock function for returning fully-qualified handler urls"""
             return mock_url_prefix + handler_name
 
         self.xblock.runtime.handler_url = Mock(side_effect=mock_handler_url)
-        real_outcome_service_url = self.xblock.get_outcome_service_url(
-            service_name=test_service_name
-        )
+        real_outcome_service_url = self.xblock.get_outcome_service_url(service_name=test_service_name)
         assert real_outcome_service_url == (mock_url_prefix + test_service_name)
 
     def test_resource_link_id(self):
-        with patch(
-            "xblocks_contrib.lti.lti.LTIBlock.usage_key", new_callable=PropertyMock
-        ):
-            self.xblock.usage_key.html_id = (
-                lambda: "i4x-2-3-lti-31de800015cf4afb973356dbe81496df"
-            )
+        with patch("xblocks_contrib.lti.lti.LTIBlock.usage_key", new_callable=PropertyMock):
+            self.xblock.usage_key.html_id = lambda: "i4x-2-3-lti-31de800015cf4afb973356dbe81496df"
             expected_resource_link_id = str(parse.quote(self.unquoted_resource_link_id))
             real_resource_link_id = self.xblock.get_resource_link_id()
             assert real_resource_link_id == expected_resource_link_id
@@ -397,9 +377,7 @@ class LTIBlockTest(TestCase):
         with pytest.raises(LTIError):
             self.xblock.get_client_key_secret()
 
-    @patch(
-        "xblocks_contrib.lti.lti.signature.verify_hmac_sha1", Mock(return_value=True)
-    )
+    @patch("xblocks_contrib.lti.lti.signature.verify_hmac_sha1", Mock(return_value=True))
     @patch(
         "xblocks_contrib.lti.lti.LTIBlock.get_client_key_secret",
         Mock(return_value=("test_client_key", "test_client_secret")),
@@ -470,9 +448,7 @@ class LTIBlockTest(TestCase):
         Tests that tool provider returned grade back with wrong XML Namespace.
         """
         with pytest.raises(IndexError):
-            mocked_request = self.get_signed_grade_mock_request(
-                namespace_lti_v1p1=False
-            )
+            mocked_request = self.get_signed_grade_mock_request(namespace_lti_v1p1=False)
             self.xblock.parse_grade_xml_body(mocked_request.body)
 
     def test_parse_grade_xml_body(self):
@@ -482,17 +458,13 @@ class LTIBlockTest(TestCase):
         Tests that xml body was parsed successfully.
         """
         mocked_request = self.get_signed_grade_mock_request()
-        message_identifier, sourced_id, grade, action = (
-            self.xblock.parse_grade_xml_body(mocked_request.body)
-        )
+        message_identifier, sourced_id, grade, action = self.xblock.parse_grade_xml_body(mocked_request.body)
         assert self.defaults["messageIdentifier"] == message_identifier
         assert self.defaults["sourcedId"] == sourced_id
         assert self.defaults["grade"] == grade
         assert self.defaults["action"] == action
 
-    @patch(
-        "xblocks_contrib.lti.lti.signature.verify_hmac_sha1", Mock(return_value=False)
-    )
+    @patch("xblocks_contrib.lti.lti.signature.verify_hmac_sha1", Mock(return_value=False))
     @patch(
         "xblocks_contrib.lti.lti.LTIBlock.get_client_key_secret",
         Mock(return_value=("test_client_key", "test_client_secret")),
@@ -538,9 +510,7 @@ class LTIBlockTest(TestCase):
         Custom parameters are presented in right format.
         """
         self.xblock.custom_parameters = ["test_custom_params=test_custom_param_value"]
-        self.xblock.get_client_key_secret = Mock(
-            return_value=("test_client_key", "test_client_secret")
-        )
+        self.xblock.get_client_key_secret = Mock(return_value=("test_client_key", "test_client_secret"))
         self.xblock.oauth_params = Mock()
         self.xblock.get_input_fields()
         self.xblock.oauth_params.assert_called_with(
@@ -555,9 +525,7 @@ class LTIBlockTest(TestCase):
         """
         bad_custom_params = ["test_custom_params: test_custom_param_value"]
         self.xblock.custom_parameters = bad_custom_params
-        self.xblock.get_client_key_secret = Mock(
-            return_value=("test_client_key", "test_client_secret")
-        )
+        self.xblock.get_client_key_secret = Mock(return_value=("test_client_key", "test_client_secret"))
         self.xblock.oauth_params = Mock()
         with pytest.raises(LTIError):
             self.xblock.get_input_fields()
