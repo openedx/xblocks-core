@@ -606,8 +606,11 @@ class VideoBlock(
             if key not in cls.fields:  # pylint: disable=unsupported-membership-test
                 continue  # parse_video_xml returns some old non-fields like 'source'
             setattr(video_block, key, cls.fields[key].from_json(val))
-        # Don't use VAL in the new runtime:
-        video_block.edx_video_id = None
+        # Note: unlike .parse_xml(), we do not import <video_asset> data into VAL here
+        # (there is no course to associate the video with), but we deliberately keep
+        # edx_video_id so that videos already present in VAL on this instance keep
+        # working in content libraries. Nulling it out caused "No playable video
+        # source" and the ID vanishing from the editor after save.
         return video_block
 
     @classmethod
