@@ -86,7 +86,10 @@
 
                 describe('[play]', function() {
                     beforeEach(function() {
-                        spyOn(state.videoPlayer.player.video, 'play').and.callThrough();
+                        spyOn(state.videoPlayer.player.video, 'play').and.callFake(function() {
+                            jasmine.fireEvent(state.videoPlayer.player.video, 'play');
+                            return Promise.resolve();
+                        });
                         state.videoPlayer.player.playerState = STATUS.PAUSED;
                         state.videoPlayer.player.playVideo();
                     });
@@ -117,6 +120,10 @@
 
                 describe('[pause]', function() {
                     beforeEach(function(done) {
+                        spyOn(state.videoPlayer.player.video, 'play').and.callFake(function() {
+                            jasmine.fireEvent(state.videoPlayer.player.video, 'play');
+                            return Promise.resolve();
+                        });
                         spyOn(state.videoPlayer.player.video, 'pause').and.callThrough();
                         state.videoPlayer.player.playerState = STATUS.UNSTARTED;
                         state.videoPlayer.player.playVideo();
