@@ -98,23 +98,15 @@
                         expect(state.videoPlayer.player.video.play).toHaveBeenCalled();
                     });
 
-                    it('player state was changed', function(done) {
-                        jasmine.waitUntil(function() {
-                            return state.videoPlayer.player.getPlayerState() !== STATUS.PAUSED;
-                        }).then(function() {
-                            expect([STATUS.BUFFERING, STATUS.PLAYING]).toContain(
-                                state.videoPlayer.player.getPlayerState()
-                            );
-                        }).always(done);
+                    it('player state was changed', function() {
+                        expect([STATUS.BUFFERING, STATUS.PLAYING]).toContain(
+                            state.videoPlayer.player.getPlayerState()
+                        );
                     });
 
-                    it('callback was called', function(done) {
-                        jasmine.waitUntil(function() {
-                            return state.videoPlayer.player.getPlayerState() !== STATUS.PAUSED;
-                        }).then(function() {
-                            expect(state.videoPlayer.player.callStateChangeCallback)
-                                .toHaveBeenCalled();
-                        }).always(done);
+                    it('callback was called', function() {
+                        expect(state.videoPlayer.player.callStateChangeCallback)
+                            .toHaveBeenCalled();
                     });
                 });
 
