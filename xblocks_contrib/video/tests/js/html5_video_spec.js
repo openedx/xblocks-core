@@ -86,7 +86,10 @@
 
                 describe('[play]', function() {
                     beforeEach(function() {
-                        spyOn(state.videoPlayer.player.video, 'play').and.callThrough();
+                        spyOn(state.videoPlayer.player.video, 'play').and.callFake(function() {
+                            jasmine.fireEvent(state.videoPlayer.player.video, 'play');
+                            return Promise.resolve();
+                        });
                         state.videoPlayer.player.playerState = STATUS.PAUSED;
                         state.videoPlayer.player.playVideo();
                     });
@@ -95,28 +98,24 @@
                         expect(state.videoPlayer.player.video.play).toHaveBeenCalled();
                     });
 
-                    it('player state was changed', function(done) {
-                        jasmine.waitUntil(function() {
-                            return state.videoPlayer.player.getPlayerState() !== STATUS.PAUSED;
-                        }).then(function() {
-                            expect([STATUS.BUFFERING, STATUS.PLAYING]).toContain(
-                                state.videoPlayer.player.getPlayerState()
-                            );
-                        }).always(done);
+                    it('player state was changed', function() {
+                        expect([STATUS.BUFFERING, STATUS.PLAYING]).toContain(
+                            state.videoPlayer.player.getPlayerState()
+                        );
                     });
 
-                    it('callback was called', function(done) {
-                        jasmine.waitUntil(function() {
-                            return state.videoPlayer.player.getPlayerState() !== STATUS.PAUSED;
-                        }).then(function() {
-                            expect(state.videoPlayer.player.callStateChangeCallback)
-                                .toHaveBeenCalled();
-                        }).always(done);
+                    it('callback was called', function() {
+                        expect(state.videoPlayer.player.callStateChangeCallback)
+                            .toHaveBeenCalled();
                     });
                 });
 
                 describe('[pause]', function() {
                     beforeEach(function(done) {
+                        spyOn(state.videoPlayer.player.video, 'play').and.callFake(function() {
+                            jasmine.fireEvent(state.videoPlayer.player.video, 'play');
+                            return Promise.resolve();
+                        });
                         spyOn(state.videoPlayer.player.video, 'pause').and.callThrough();
                         state.videoPlayer.player.playerState = STATUS.UNSTARTED;
                         state.videoPlayer.player.playVideo();
