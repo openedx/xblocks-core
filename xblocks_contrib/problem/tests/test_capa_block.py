@@ -2780,16 +2780,15 @@ class ProblemBlockTest(unittest.TestCase):
 
         mock_progress.assert_called_with(1, 2)
 
-    def test_get_progress_reuses_already_built_lcp(self):
+    def test_get_progress_uses_lcp_get_max_score_when_unattempted(self):
         """
-        get_progress() should reuse self.lcp when it's already been built (e.g.
-        by handle_ajax, which explicitly touches self.lcp before calling here)
-        instead of re-parsing the problem via max_score(), when the problem
-        hasn't been attempted yet.
+        get_progress() should use self.lcp.get_max_score() -- not the separate
+        max_score() helper, which would re-parse the problem from scratch --
+        to reflect the problem's current point value when it hasn't been
+        attempted yet.
         """
         block = CapaFactory.create(attempts=0)
         block.weight = None
-        assert "lcp" in block.__dict__  # CapaFactory.create() forces lcp to build
 
         # If max_score() were called it would re-parse the problem and return a
         # value consistent with the current XML (1) -- give it an obviously wrong
@@ -2800,21 +2799,6 @@ class ProblemBlockTest(unittest.TestCase):
 
         block.max_score.assert_not_called()
         assert total == 1
-
-    def test_get_progress_falls_back_to_max_score_when_lcp_not_built(self):
-        """
-        get_progress() should fall back to max_score() (rather than force a full
-        lcp build) when self.lcp genuinely hasn't been constructed yet.
-        """
-        block = CapaFactory.create(attempts=0)
-        block.weight = None
-        del block.__dict__["lcp"]  # simulate a block whose lcp was never built
-        block.max_score = Mock(return_value=3)
-
-        _, total = block.get_display_progress()
-
-        block.max_score.assert_called_once()
-        assert total == 3
 
     def test_get_progress_shows_genuine_zero_not_stale_value(self):
         """
