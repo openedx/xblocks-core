@@ -1004,6 +1004,12 @@ data-url='/problem/quiz/'> \
       expect(MathJax.typesetClear).toHaveBeenCalled();
       expect(MathJax.typesetPromise).toHaveBeenCalled();
     });
+
+    it("preserves backslash-delimited TeX without wrapping in AsciiMath backticks", function () {
+      $("#input_example_1").val("\\\(E=mc^2\\\)");
+      this.problem.refreshMath({ target: $("#input_example_1").get(0) });
+      expect($("#display_example_1").text()).toBe("\\\(E=mc^2\\\)");
+    });
   });
 
   describe("updateMathML", function () {

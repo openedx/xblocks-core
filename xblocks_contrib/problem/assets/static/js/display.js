@@ -787,8 +787,10 @@ Problem.prototype.refreshMath = function (event, element) {
     if (dynEl) { dynEl.value = ""; }
     return;
   }
-  const isTexDelimited = (eqn.trim().startsWith("$") && eqn.trim().endsWith("$"))
-    || (/^\\s*\\$\\$/.test(eqn) && /\\$\\$\\s*$/.test(eqn));
+  const isTexDelimited = (/^\s*\\\(/.test(eqn) && /\\\)\s*$/.test(eqn))
+    || (/^\s*\\\[/.test(eqn) && /\\\]\s*$/.test(eqn))
+    || (/^\s*\$\$/.test(eqn) && /\$\$\s*$/.test(eqn))
+    || (/^\s*\$[^$]/.test(eqn) && /[^$]\$\s*$/.test(eqn));
   math.textContent = isTexDelimited ? eqn : `\`${eqn}\``;
   MathJax.typesetPromise([math]).then(() => {
     const jax = MathJax.startup.document.getMathItemsWithin(math)[0];
