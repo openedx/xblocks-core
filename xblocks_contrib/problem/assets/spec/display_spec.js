@@ -91,6 +91,23 @@ data-url='/problem/quiz/'> \
     it("bind the math input", function () {
       expect($("input.math")).toHandleWith("keyup", this.problem.refreshMath);
     });
+
+    it("does not bind refreshMath to formula equation inputs", function () {
+      // Formula-equation inputs are exclusively managed by formula_equation_preview.js.
+      $.ajax.and.callFake(function (settings) {
+        if (settings.url.match(/.+\/problem_get$/)) {
+          settings.success({
+            html: readFixtures("problem_content.html") +
+              '<section class="formulaequationinput"><input type="text" id="input_formula_1" />' +
+              '<div id="input_formula_1_preview" class="equation"></div></section>',
+          });
+        }
+      });
+      this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
+      MathJax.typesetClear.calls.reset();
+      $(".formulaequationinput input").trigger("keyup");
+      expect(MathJax.typesetClear).not.toHaveBeenCalled();
+    });
   });
 
   describe("bind_with_custom_input_id", function () {

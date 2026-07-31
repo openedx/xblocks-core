@@ -119,9 +119,10 @@ Problem.prototype.bind = function () {
     this.submitAnswersAndSubmitButton(true);
   }
   Collapsible.setCollapsibles(this.el);
-  this.$("input.math, .formulaequationinput input").keyup(this.refreshMath);
+  // Formula equation inputs use formula_equation_preview.js to manage their server-rendered preview.
+  this.$("input.math").keyup(this.refreshMath);
   if (isMathJaxTypesetReady()) {
-    this.$("input.math, .formulaequationinput input").each(function (index, element) {
+    this.$("input.math").each(function (index, element) {
       return MathJax.startup.promise.then(() => that.refreshMath(null, element));
     });
   }
