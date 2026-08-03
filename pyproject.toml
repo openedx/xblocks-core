@@ -145,6 +145,7 @@ uv_constraints = [
     # repo root (because Path.relative_to(cwd) treats any subdirectory as "in CWD").
     # This causes collection failures across all tests that transitively import nltk
     # (via chem -> nltk -> regex). Pin until upstream fixes the false-positive blocking.
+    # TODO: unpin nltk and test with newer versions once a fix is released.
     "nltk<3.10.1",
 ]
 
