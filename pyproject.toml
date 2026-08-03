@@ -139,6 +139,13 @@ uv_constraints = [
     # https://github.com/openedx/openedx-platform/pull/37991
     # Unpin once the issue is resolved.
     "setuptools<=80.9.0",
+    # Date: 2026-08-03
+    # nltk 3.10.1 introduced a new security module (inisec.py) that incorrectly blocks
+    # imports of packages installed in .tox subdirectories when running pytest from the
+    # repo root (because Path.relative_to(cwd) treats any subdirectory as "in CWD").
+    # This causes collection failures across all tests that transitively import nltk
+    # (via chem -> nltk -> regex). Pin until upstream fixes the false-positive blocking.
+    "nltk<3.10.1",
 ]
 
 [tool.ruff]
@@ -221,6 +228,7 @@ constraint-dependencies = [
     "Django<6.0",
     "elasticsearch<7.14.0",
     "setuptools<=80.9.0",
+    "nltk<3.10.1",
 ]
 
 [tool.semantic_release]
