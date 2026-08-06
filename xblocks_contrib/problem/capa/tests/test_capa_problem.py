@@ -13,8 +13,8 @@ from markupsafe import Markup
 
 from xblocks_contrib.problem.capa.correctmap import CorrectMap
 from xblocks_contrib.problem.capa.responsetypes import LoncapaProblemError
+from xblocks_contrib.problem.capa.testing.codejail import UseUnsafeCodejail
 from xblocks_contrib.problem.capa.tests.helpers import new_loncapa_problem
-from xblocks_contrib.problem.capa.tests.test_util import UseUnsafeCodejail
 from xblocks_contrib.problem.markup import HTML
 
 

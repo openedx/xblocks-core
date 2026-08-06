@@ -21,8 +21,8 @@ import requests
 
 from xblocks_contrib.problem.capa.correctmap import CorrectMap
 from xblocks_contrib.problem.capa.responsetypes import LoncapaProblemError, ResponseError, StudentInputError
-from xblocks_contrib.problem.capa.tests.helpers import load_fixture, mock_capa_system, new_loncapa_problem
-from xblocks_contrib.problem.capa.tests.response_xml_factory import (
+from xblocks_contrib.problem.capa.testing.codejail import UseUnsafeCodejail
+from xblocks_contrib.problem.capa.testing.response_xml_factory import (
     AnnotationResponseXMLFactory,
     ChoiceResponseXMLFactory,
     ChoiceTextResponseXMLFactory,
@@ -38,7 +38,7 @@ from xblocks_contrib.problem.capa.tests.response_xml_factory import (
     SymbolicResponseXMLFactory,
     TrueFalseResponseXMLFactory,
 )
-from xblocks_contrib.problem.capa.tests.test_util import UseUnsafeCodejail
+from xblocks_contrib.problem.capa.tests.helpers import load_fixture, mock_capa_system, new_loncapa_problem
 from xblocks_contrib.problem.capa.util import convert_files_to_filenames
 from xblocks_contrib.problem.capa.xqueue_interface import DATEFORMAT
 
