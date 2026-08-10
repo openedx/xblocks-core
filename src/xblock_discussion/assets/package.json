@@ -16,6 +16,7 @@
     "imports-loader": "^0.8",
     "webpack": "^5",
     "webpack-cli": "^5",
+    "webpack-merge": "^5",
     "draggabilly": "^3.0.0",
     "edx-ui-toolkit": "^1",
     "jasmine-core": "2.6.4",
