@@ -175,15 +175,13 @@ indent-style = "space"
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "test_settings"
 django_find_project = false
-addopts = "--cov xblocks_contrib --cov xblock_pdf --cov-report term-missing --cov-report xml"
-norecursedirs = [".*", "docs", "requirements", "site-packages"]
+pythonpath = [".", "src"]
+addopts = "--cov src --cov-report term-missing --cov-report xml"
+norecursedirs = [".*", "build", "docs", "requirements", "site-packages"]
 
 [tool.coverage.run]
 branch = true
-source = [
-    "xblocks_contrib",
-    "xblock_pdf",
-]
+source = ["src"]
 omit = [
     "*/tests/*",
     "*/migrations/*",
