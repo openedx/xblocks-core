@@ -139,6 +139,11 @@ uv_constraints = [
     # https://github.com/openedx/openedx-platform/pull/37991
     # Unpin once the issue is resolved.
     "setuptools<=80.9.0",
+    # Date: 2026-08-10
+    # pytest-django 4.13.0 references `_pre_setup_ran_eagerly`, an attribute
+    # that only exists on Django 5.x TransactionTestCase, causing AttributeError
+    # on Django 4.2. Pin until a compatible release is available.
+    "pytest-django<4.13.0",
 ]
 
 [tool.ruff]
@@ -220,6 +225,7 @@ conflicts = [
 constraint-dependencies = [
     "Django<6.0",
     "elasticsearch<7.14.0",
+    "pytest-django<4.13.0",
     "setuptools<=80.9.0",
 ]
 
