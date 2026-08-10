@@ -1,4 +1,5 @@
 {
+  "name": "xblocks-core",
   "private": true,
   "workspaces": [
     "xblocks_contrib/*/*",

@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "setuptools-scm>=8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "xblocks-contrib"
+name = "xblocks-core"
 dynamic = ["version"]
 description = "core xblocks"
 readme = "README.rst"
@@ -14,7 +14,7 @@ authors = [
 ]
 keywords = ["Python", "edx"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
@@ -56,7 +56,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/openedx/xblocks-contrib"
+Homepage = "https://github.com/openedx/xblocks-core"
 
 [project.entry-points."xblock.v1"]
 # _extracted suffix is added for testing only.
