@@ -133,7 +133,7 @@
 
                     it('player state was changed', function(done) {
                         jasmine.waitUntil(function() {
-                            return state.videoPlayer.player.getPlayerState() !== STATUS.PLAYING;
+                            return state.videoPlayer.player.getPlayerState() === STATUS.PAUSED;
                         }).then(function() {
                             expect(state.videoPlayer.player.getPlayerState())
                                 .toBe(STATUS.PAUSED);
