@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: upgrade help requirements lint format test docs
+.PHONY: upgrade help requirements lint format test docs test_course
 .PHONY: extract_translations compile_translations
 .PHONY: detect_changed_source_translations dummy_translations build_dummy_translations
 .PHONY: validate_translations pull_translations push_translations install_transifex_clients
@@ -106,6 +106,15 @@ install_transifex_client: ## Install the Transifex client
 	git diff -s --exit-code HEAD || { echo "Please commit changes first."; exit 1; }
 	curl -o- https://raw.githubusercontent.com/transifex/cli/master/install.sh | bash
 	git checkout -- LICENSE README.md ## overwritten by Transifex installer
+
+# Test course: a minimal OLX course with one example of each XBlock type.
+TEST_COURSE_DIR := test-course
+TEST_COURSE_TAR := $(TEST_COURSE_DIR)/xblocks-core-test-course.tar.gz
+
+test_course: ## package test-course/ OLX into a (gitignored) .tar.gz for Studio import
+	rm -f $(TEST_COURSE_TAR)
+	cd $(TEST_COURSE_DIR) && tar czvf $(notdir $(TEST_COURSE_TAR)) course
+	@echo "Wrote $(TEST_COURSE_TAR)"
 
 selfcheck: ## check that the Makefile is well-formed
 	@echo "The Makefile is well-formed."

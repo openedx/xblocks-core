@@ -123,3 +123,6 @@ stats.json
 .karma/
 **/.karma/
 
+# Packaged test course (regenerate with `make test_course`)
+/test-course/*.tar.gz
+

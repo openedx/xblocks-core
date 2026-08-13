@@ -1,0 +1,16 @@
+{
+  "course/examples": {
+    "display_name": "XBlocks-Core Examples",
+    "advanced_modules": [
+      "annotatable",
+      "lti",
+      "pdf",
+      "poll_question",
+      "word_cloud"
+    ],
+    "lti_passports": [
+      "example:example_key:example_secret"
+    ],
+    "start": "2026-01-01T00:00:00Z"
+  }
+}
