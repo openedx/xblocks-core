@@ -225,8 +225,8 @@ conflicts = [
 constraint-dependencies = [
     "Django<6.0",
     "elasticsearch<7.14.0",
-    "pytest-django<4.13.0",
     "setuptools<=80.9.0",
+    "pytest-django<4.13.0",
 ]
 
 [tool.semantic_release]
