@@ -10,11 +10,11 @@ from unittest import mock
 import ddt
 from lxml import etree
 
+from xblocks_contrib.problem.capa.testing.codejail import UseUnsafeCodejail
 from xblocks_contrib.problem.capa.tests.helpers import mock_capa_system, new_loncapa_problem
-from xblocks_contrib.problem.capa.tests.test_util import UseUnsafeCodejail
 from xblocks_contrib.problem.markup import HTML
 
-from .response_xml_factory import CustomResponseXMLFactory, StringResponseXMLFactory
+from ..testing.response_xml_factory import CustomResponseXMLFactory, StringResponseXMLFactory
 
 
 @ddt.ddt

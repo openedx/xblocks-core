@@ -22,10 +22,3 @@ prune */spec
 prune xblocks_contrib/problem/capa/static/js/capa/spec
 prune xblocks_contrib/problem/capa/static/js/capa/fixtures
 prune xblocks_contrib/problem/capa/tests/test_files
-
-# --- TEST UTILITY INCLUSIONS ---
-# Re-include specific test files that are excluded above.
-# We do this because openedx-platform imports these specific test helpers.
-include xblocks_contrib/problem/capa/tests/test_util.py
-include xblocks_contrib/problem/capa/tests/helpers.py
-include xblocks_contrib/problem/capa/tests/response_xml_factory.py

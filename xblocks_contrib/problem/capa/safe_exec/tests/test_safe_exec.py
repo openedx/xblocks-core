@@ -24,7 +24,7 @@ from xblocks_contrib.problem.capa.safe_exec.remote_exec import (
     is_codejail_rest_service_enabled,
 )
 from xblocks_contrib.problem.capa.safe_exec.safe_exec import emsg_normalizers, normalize_error_message
-from xblocks_contrib.problem.capa.tests.test_util import UseUnsafeCodejail
+from xblocks_contrib.problem.capa.testing.codejail import UseUnsafeCodejail
 
 
 @UseUnsafeCodejail()

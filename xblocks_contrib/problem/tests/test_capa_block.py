@@ -31,7 +31,7 @@ from xblock.scorable import Score
 from xblocks_contrib.problem.capa import responsetypes
 from xblocks_contrib.problem.capa.correctmap import CorrectMap
 from xblocks_contrib.problem.capa.responsetypes import LoncapaProblemError, ResponseError, StudentInputError
-from xblocks_contrib.problem.capa.tests.test_util import UseUnsafeCodejail
+from xblocks_contrib.problem.capa.testing.codejail import UseUnsafeCodejail
 from xblocks_contrib.problem.capa.xqueue_interface import XQueueInterface
 from xblocks_contrib.problem.capa_block import ComplexEncoder, ProblemBlock
 from xblocks_contrib.problem.tests import DATA_DIR
