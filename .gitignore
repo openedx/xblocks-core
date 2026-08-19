@@ -83,8 +83,7 @@ output/*/index.html
 # Sphinx
 docs/_build/
 docs/modules.rst
-docs/xblocks_contrib.rst
-docs/xblocks_contrib.*.rst
+docs/xblock_*.rst
 
 # Private requirements
 requirements/private.in
@@ -123,4 +122,7 @@ stats.json
 # Karma
 .karma/
 **/.karma/
+
+# Packaged test course (regenerate with `make test_course`)
+/test-course/*.tar.gz
 

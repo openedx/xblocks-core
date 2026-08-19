@@ -1,0 +1,11 @@
+<chapter display_name="XBlock Examples">
+  <sequential url_name="html_examples"/>
+  <sequential url_name="problem_examples"/>
+  <sequential url_name="video_examples"/>
+  <sequential url_name="annotatable_examples"/>
+  <sequential url_name="discussion_examples"/>
+  <sequential url_name="lti_examples"/>
+  <sequential url_name="pdf_examples"/>
+  <sequential url_name="poll_question_examples"/>
+  <sequential url_name="word_cloud_examples"/>
+</chapter>

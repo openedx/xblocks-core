@@ -1,0 +1,7 @@
+<vertical display_name="Poll Question Example 1: Minimal">
+  <poll_question display_name="Poll Question Example 1">
+    <p>Did this example help you understand OLX?</p>
+    <answer id="yes">Yes</answer>
+    <answer id="no">No</answer>
+  </poll_question>
+</vertical>

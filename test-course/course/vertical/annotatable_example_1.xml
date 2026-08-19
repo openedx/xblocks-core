@@ -1,0 +1,12 @@
+<vertical display_name="Annotatable Example 1: Minimal">
+  <annotatable display_name="Annotatable Example 1">
+    <annotatable>
+      <instructions>
+        <p>Read the passage below. Hover over the highlighted text to see the annotation.</p>
+      </instructions>
+      <p>The Open edX platform is built on XBlocks.
+      <annotation title="Note" body="An XBlock is a reusable course component." highlight="yellow">This sentence is annotated.</annotation>
+      Annotations let authors add commentary to any text.</p>
+    </annotatable>
+  </annotatable>
+</vertical>

@@ -1,0 +1,10 @@
+<problem display_name="Problem Example 1" markdown_edited="false" showanswer="finished">
+  <multiplechoiceresponse>
+    <label>What is the correct answer?</label>
+    <choicegroup type="MultipleChoice">
+      <choice correct="false">Incorrect</choice>
+      <choice correct="true">Correct</choice>
+      <choice correct="false">Incorrect</choice>
+    </choicegroup>
+  </multiplechoiceresponse>
+</problem>
