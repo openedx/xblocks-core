@@ -128,9 +128,7 @@ class Attribute:
     # want to allow default to be None, but also allow required objects
     _sentinel = object()
 
-    def __init__(  # pylint: disable=too-many-positional-arguments,too-many-arguments
-        self, name, default=_sentinel, transform=None, validate=None, render=True
-    ):
+    def __init__(self, name, default=_sentinel, transform=None, validate=None, render=True):
         """
         Define an attribute
 

@@ -2,4 +2,6 @@
 Init for the ProblemBlock.
 """
 
-from .capa_block import ProblemBlock as ProblemBlock
+from .capa_block import ProblemBlock
+
+__all__ = ["ProblemBlock"]

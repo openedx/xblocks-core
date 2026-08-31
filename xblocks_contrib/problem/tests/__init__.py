@@ -168,7 +168,7 @@ class TestDescriptorSystem(TestRuntime):
         """Satisfy abstract method."""
         return ""
 
-    def handler_url(  # pylint: disable=arguments-differ,too-many-positional-arguments,unused-argument
+    def handler_url(  # pylint: disable=arguments-differ,unused-argument
         self, block, handler_name, suffix="", query="", thirdparty=False
     ):
         """Mock handler URL generation to look like edx-platform URLs."""

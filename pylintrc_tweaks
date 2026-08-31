@@ -1,0 +1,8 @@
+# pylintrc tweaks for use with edx_lint.
+[MASTER]
+ignore = migrations
+load-plugins = edx_lint.pylint
+
+[MESSAGES CONTROL]
+# ruff owns unused-import (F401); it can auto-fix, pylint cannot.
+disable+ = unused-import
