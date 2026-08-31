@@ -290,6 +290,7 @@ disable =
 	
 	logging-fstring-interpolation,
 	unused-import,
+	useless-import-alias,
 
 [REPORTS]
 output-format = text
@@ -391,4 +392,4 @@ pii-terms =
 	email,
 	username
 
-# badd9d8b0b3d145856e467f78a0bdc696c0f118c
+# 577e288e949dc21e2dbe1011554448b82c84b597

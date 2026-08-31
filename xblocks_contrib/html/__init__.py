@@ -2,6 +2,5 @@
 Init for the HtmlBlock.
 """
 
-from .html import HtmlBlock, HtmlBlockMixin
-
-__all__ = ["HtmlBlock", "HtmlBlockMixin"]
+from .html import HtmlBlock as HtmlBlock
+from .html import HtmlBlockMixin as HtmlBlockMixin
