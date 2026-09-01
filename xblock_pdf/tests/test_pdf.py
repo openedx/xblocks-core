@@ -15,7 +15,7 @@ from xblock.fields import ScopeIds
 from xblock.test.toy_runtime import ToyRuntime
 
 from xblock_pdf import PDFBlock
-from xblock_pdf.utils import error_response
+from xblock_pdf.utils import error_response, fetch_external_url
 
 MockOptValues = TypedDict("MockOptValues", {"edx-platform.user_is_staff": bool, "edx-platform.user_id": int})
 
@@ -225,3 +225,19 @@ def test_successful_conversion_with_perms_service(mock_fetch, mock_requests, moc
     result = block.convert_pdf(request)
     assert result.status_code == 200
     assert b"https://example.com/exported.pdf" in result.body
+
+
+@override_settings(LMS_ROOT_URL="https://example.com/")
+def test_fetch_external_url_raises():
+    with pytest.raises(HTTPError):
+        fetch_external_url("https://foo.bar")
+
+
+@override_settings(LMS_ROOT_URL="https://example.com/")
+@patch("xblock_pdf.utils.requests")
+def test_fetch_external_url(mock_requests):
+    mock_response = Response()
+    mock_response.__setstate__({"status_code": 200, "_content": b"boop"})
+    mock_requests.get.return_value = mock_response
+    result = fetch_external_url("https://example.com/beep.pdf")
+    assert result == b"boop"

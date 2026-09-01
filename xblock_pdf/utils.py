@@ -10,6 +10,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from opaque_keys.edx.locator import BlockUsageLocator, LibraryUsageLocatorV2
+from requests import HTTPError
 from webob import Response
 
 logger = getLogger(__name__)
@@ -63,6 +64,20 @@ def add_asset(
             return "/" + path
 
 
+def fetch_external_url(
+    url: str,
+) -> bytes:
+    """
+    Fetches an 'external' URL, which is only actually permitted if it's from the LMS,
+    and returns its byte content.
+    """
+    if not url.startswith(settings.LMS_ROOT_URL):
+        raise HTTPError("Unpermitted URL.")
+    response = requests.get(url, timeout=(10, 120))
+    response.raise_for_status()
+    return response.content
+
+
 def fetch_source_asset(
     location: BlockUsageLocator | LibraryUsageLocatorV2, source_url: str
 ) -> bytes:  # pragma: no cover
@@ -74,14 +89,10 @@ def fetch_source_asset(
     from openedx_content import api as content_api
 
     if not source_url.startswith("/"):
-        response = requests.get(source_url, timeout=(10, 120))
-        response.raise_for_status()
-        return response.content
+        return fetch_external_url(source_url)
     match location:
         case BlockUsageLocator():
-            response = requests.get(source_url, timeout=(10, 120))
-            response.raise_for_status()
-            return response.content
+            return fetch_external_url(source_url)
         case LibraryUsageLocatorV2():
             version_uuid = libraries_api.get_component_from_usage_key(location).versioning.draft.uuid
             component_version = content_api.get_component_version_by_uuid(version_uuid)
