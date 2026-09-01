@@ -311,6 +311,38 @@ class VideoBlockImportTestCase(TestCase):
             },
         )
 
+    @patch("xblocks_contrib.video.video.VideoBlock.import_video_info_into_val")
+    def test_parse_xml_new_runtime_keeps_edx_video_id(self, mock_import_into_val):
+        """
+        In the new (content libraries v2) runtime, ``parse_xml_new_runtime`` must
+        preserve ``edx_video_id`` from the OLX and must NOT import ``<video_asset>``
+        data into VAL (there is no course to associate the video with).
+
+        Regression test: nulling ``edx_video_id`` here caused library videos to
+        render "No playable video source" and the ID to vanish from the editor
+        after save. Videos already present in VAL must keep resolving.
+        """
+        runtime = DummyRuntime(load_error_blocks=True)
+        edx_video_id = "8e92a901-88cb-4e0c-9999-000000000000"
+        xml_data = f"""
+            <video edx_video_id="{edx_video_id}" display_name="Test Video">
+                <video_asset client_video_id="4K UHD Video">
+                    <encoded_video profile="hls" url="https://example.com/v.m3u8"/>
+                    <encoded_video profile="desktop_mp4" url="https://example.com/v.mp4"/>
+                </video_asset>
+            </video>
+        """
+        node = etree.fromstring(xml_data)
+        keys = ScopeIds("user", "video", "def_id", "usage_id")
+
+        block = VideoBlock.parse_xml_new_runtime(node, runtime, keys)
+
+        # The fix: edx_video_id survives so videos already in VAL keep working.
+        assert block.edx_video_id == edx_video_id
+        # And, unlike the course path (.parse_xml), the new runtime deliberately
+        # does not push <video_asset> encodings into VAL.
+        mock_import_into_val.assert_not_called()
+
     @XBlockAside.register_temp_plugin(AsideTestType, "test_aside")
     @patch("xblocks_contrib.video.video.VideoBlock.load_file")
     @patch("xblocks_contrib.video.video.is_pointer_tag")
