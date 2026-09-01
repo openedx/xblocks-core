@@ -154,7 +154,7 @@ def own_metadata(block: XBlock) -> dict[str, Any]:
                 result[field.name] = field.read_json(block)
             except TypeError as exception:
                 exception_message = f"{str(exception)}, Block-location:{str(block.usage_key)}, Field-name:{field.name}"
-                raise TypeError(exception_message) from None  # lint-amnesty, pylint: disable=raise-missing-from
+                raise TypeError(exception_message) from None
     return result
 
 

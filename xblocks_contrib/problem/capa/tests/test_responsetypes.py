@@ -378,9 +378,7 @@ class SymbolicResponseTest(ResponseTest):
         with pytest.raises(Exception):  # noqa: B017
             self.build_problem(math_display=True, expect="2*x+3*y", num_inputs=3)
 
-    def _assert_symbolic_grade(  # pylint: disable=too-many-arguments,too-many-positional-arguments
-        self, problem, student_input, dynamath_input, expected_correctness, snuggletex_resp=""
-    ):
+    def _assert_symbolic_grade(self, problem, student_input, dynamath_input, expected_correctness, snuggletex_resp=""):
         """
         Assert that the symbolic response has a certain grade.
 

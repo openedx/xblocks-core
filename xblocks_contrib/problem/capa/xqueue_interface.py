@@ -72,7 +72,7 @@ def parse_xreply(xreply):
 class XQueueInterface:
     """Initializes the XQueue interface."""
 
-    def __init__(  # pylint: disable=too-many-positional-arguments
+    def __init__(
         self,
         url: str,
         django_auth: dict[str, str],

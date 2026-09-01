@@ -1,0 +1,11 @@
+# pylintrc tweaks for use with edx_lint.
+[MASTER]
+ignore = migrations
+load-plugins = edx_lint.pylint
+
+[MESSAGES CONTROL]
+# unused-import: ruff owns F401; it can auto-fix, pylint cannot.
+# useless-import-alias: `import X as X` is the explicit re-export idiom (PEP 484).
+disable+ =
+    unused-import,
+    useless-import-alias,

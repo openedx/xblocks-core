@@ -443,7 +443,7 @@ class LTIBlock(
                 msg = _('Could not parse custom parameter: {custom_parameter}. Should be "x=y" string.').format(
                     custom_parameter=f"{custom_parameter!r}"
                 )
-                raise LTIError(msg) from None  # lint-amnesty, pylint: disable=raise-missing-from
+                raise LTIError(msg) from None
 
             # LTI specs: 'custom_' should be prepended before each custom parameter, as pointed in link above.
             if param_name not in PARAMETERS:
@@ -989,7 +989,7 @@ oauth_consumer_key="", oauth_signature="frVp4JuvT1mVXlxktiAUjQ7%2F1cw%3D"',
                 msg = _('Could not parse LTI passport: {lti_passport}. Should be "id:key:secret" string.').format(
                     lti_passport=f"{lti_passport!r}"
                 )
-                raise LTIError(msg) from None  # lint-amnesty, pylint: disable=raise-missing-from
+                raise LTIError(msg) from None
 
             if lti_id == self.lti_id.strip():
                 return key, secret

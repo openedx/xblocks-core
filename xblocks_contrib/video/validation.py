@@ -16,9 +16,7 @@ class StudioValidationMessage(ValidationMessage):
 
     TYPES = [ValidationMessage.WARNING, ValidationMessage.ERROR, NOT_CONFIGURED]
 
-    def __init__(  # pylint: disable=too-many-positional-arguments
-        self, message_type, message_text, action_label=None, action_class=None, action_runtime_event=None
-    ):
+    def __init__(self, message_type, message_text, action_label=None, action_class=None, action_runtime_event=None):
         """
         Create a new message.
 
