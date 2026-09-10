@@ -76,8 +76,8 @@ class StubUserService(UserService):
     Stub UserService for testing the sequence block.
     """
 
-    def __init__(
-        self,  # pylint: disable=too-many-positional-arguments
+    def __init__(  # pylint: disable=too-many-positional-arguments
+        self,
         user=None,
         user_is_staff=False,
         user_role=None,
@@ -129,7 +129,7 @@ class MockRuntime(Runtime):  # pylint: disable=abstract-method
         super().__init__(id_reader=lambda: None, id_generator=lambda: None, services=services)
         self.anonymous_student_id = anonymous_student_id
 
-    def handler_url(self, block, handler_name, suffix="", query="", thirdparty=False):  # pylint: disable=too-many-positional-arguments
+    def handler_url(self, block, handler_name, suffix="", query="", thirdparty=False):
         return f"/mock_url/{handler_name}"
 
     def local_resource_url(self, block, resource):  # pylint: disable=arguments-renamed

@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: upgrade help requirements lint format test docs
+.PHONY: upgrade help requirements quality format test docs
 .PHONY: extract_translations compile_translations
 .PHONY: detect_changed_source_translations dummy_translations build_dummy_translations
 .PHONY: validate_translations pull_translations push_translations install_transifex_clients
@@ -13,7 +13,7 @@ JS_TARGET := $(PACKAGE_NAME)/public/js/translations
 help:
 	@perl -nle'print $& if m{^[\.a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m  %-25s\033[0m %s\n", $$1, $$2}'
 
-lint: ## run linting checks
+quality: ## run quality checks
 	tox -e quality
 
 format: ## auto-fix ruff lint and formatting issues
