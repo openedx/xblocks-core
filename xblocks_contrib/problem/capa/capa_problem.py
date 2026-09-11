@@ -1150,7 +1150,19 @@ class LoncapaProblem:
 
         return problem_data
 
-    def response_a11y_data(  # pylint: disable=too-many-locals,too-many-branches
+    @staticmethod
+    def _preceding_prompt_ids(response, responsetype_id):
+        """Assign ids to contiguous preceding ``<p>`` siblings and return them in document order."""
+        ids = []
+        sibling = response.getprevious()
+        while sibling is not None and isinstance(sibling.tag, str) and sibling.tag.lower() == "p":
+            pid = sibling.get("id") or f"prompt_{responsetype_id}_{len(ids) + 1}"
+            sibling.set("id", pid)
+            ids.append(pid)
+            sibling = sibling.getprevious()
+        return list(reversed(ids))
+
+    def response_a11y_data(  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
         self, response, inputfields, responsetype_id, problem_data
     ):
         """
@@ -1193,12 +1205,21 @@ class LoncapaProblem:
             if group_description_ids:
                 response.set("multiinput-group_description_ids", " ".join(group_description_ids))
 
+            preceding_prompt_ids = (
+                self._preceding_prompt_ids(response, responsetype_id)
+                if inputfields[0].tag in ACCESSIBLE_CAPA_INPUT_TYPES
+                else []
+            )
+
             for inputfield in inputfields:
-                problem_data[inputfield.get("id")] = {
+                entry = {
                     "group_label": group_label_tag_text,
                     "label": HTML(inputfield.attrib.get("label", "")),
                     "descriptions": {},
                 }
+                if preceding_prompt_ids:
+                    entry["additional_describedby_ids"] = list(preceding_prompt_ids)
+                problem_data[inputfield.get("id")] = entry
         else:
             # Extract label value from <label> tag or label attribute from inside the responsetype
             responsetype_label_tag = response.find("label")
@@ -1239,7 +1260,12 @@ class LoncapaProblem:
                 response.remove(description)
                 description_id += 1
 
-            problem_data[inputfields[0].get("id")] = {
+            entry = {
                 "label": HTML(label.strip()) if label else "",
                 "descriptions": descriptions,
             }
+            if inputfields[0].tag in ACCESSIBLE_CAPA_INPUT_TYPES:
+                preceding_prompt_ids = self._preceding_prompt_ids(response, responsetype_id)
+                if preceding_prompt_ids:
+                    entry["additional_describedby_ids"] = preceding_prompt_ids
+            problem_data[inputfields[0].get("id")] = entry
