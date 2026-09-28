@@ -332,6 +332,7 @@ class InputTypeBase:
         status_id = "status_" + self.input_id
         descriptions.append(status_id)
         descriptions.extend(list(self.response_data.get("descriptions", {}).keys()))
+        descriptions.extend(self.response_data.get("additional_describedby_ids", []))
         description_ids = " ".join(descriptions)
         context.update({"describedby_html": HTML('aria-describedby="{}"').format(description_ids)})
 
