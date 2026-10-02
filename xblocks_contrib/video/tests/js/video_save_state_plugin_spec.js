@@ -179,6 +179,26 @@ import * as Time from '../../assets/js/src/utils/time.js';
             });
         });
 
+        it('sends the next saved position only after the previous request settles', function() {
+            var requests = [];
+            $.ajax.and.callFake(function(options) {
+                var deferred = $.Deferred();
+                requests.push({options: options, deferred: deferred});
+                return deferred.promise();
+            });
+            state.config.saveStateEnabled = true;
+            state.videoPlayer.currentTime = 10;
+            state.videoSaveStatePlugin.saveState(true);
+            state.videoPlayer.currentTime = 73;
+            state.videoSaveStatePlugin.saveState(true);
+            expect(requests.length).toBe(1);
+            expect(requests[0].options.data.saved_video_position).toBe('00:00:10');
+            requests[0].deferred.resolve({success: true});
+            expect(requests.length).toBe(2);
+            expect(requests[1].options.data.saved_video_position).toBe('00:01:13');
+            requests[1].deferred.resolve({success: true});
+        });
+
         it('can save state on page unload', function() {
             $.ajax.calls.reset();
             state.videoSaveStatePlugin.onUnload();
