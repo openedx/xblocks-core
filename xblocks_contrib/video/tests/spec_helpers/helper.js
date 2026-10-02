@@ -180,7 +180,7 @@
                 // Do nothing.
                 return {};
             } else if (settings.url === '/save_user_state') {
-                return {success: true};
+                return $.Deferred().resolve({success: true}).promise();
             } else if (settings.url.match(/.+video-transcript.+$/)) {
                 if (settings.url.match(/.+&video_id=notAIGenerated/)) {
                     return settings.success(null);

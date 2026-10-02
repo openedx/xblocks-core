@@ -24,6 +24,8 @@ let SaveStatePlugin = function(state, i18n, options) {
     this.options = _.extend({events: []}, options);
     this.state.videoSaveStatePlugin = this;
     this.i18n = i18n;
+    this.pendingSaves = [];
+    this.saving = false;
     this.initialize();
 
     return $.Deferred().resolve().promise();
@@ -117,14 +119,30 @@ SaveStatePlugin.prototype = {
                 data.saved_video_position = formatFull(data.saved_video_position);
             }
 
-            $.ajax({
-                url: this.state.config.saveStateUrl,
-                type: 'POST',
-                async: !!async,
-                dataType: 'json',
-                data: data
-            });
+            // Keep snapshots in client request order instead of overlapping
+            // ordinary saves. Transport failure does not prove server commit
+            // order; this queue is not a durable-delivery protocol.
+            this.pendingSaves.push({async: !!async, data: _.extend({}, data)});
+            this.processSaveQueue();
         }
+    },
+
+    processSaveQueue: function() {
+        if (this.saving || !this.pendingSaves.length) {
+            return;
+        }
+        let next = this.pendingSaves.shift();
+        this.saving = true;
+        $.ajax({
+            url: this.state.config.saveStateUrl,
+            type: 'POST',
+            async: next.async,
+            dataType: 'json',
+            data: next.data
+        }).always(() => {
+            this.saving = false;
+            this.processSaveQueue();
+        });
     }
 };
 
