@@ -301,7 +301,7 @@ class AnnotatableBlock(LegacyXmlMixin, XBlock):
             # Can't recover here, so just add some info and
             # re-raise
             lines = self.data.split("\n")
-            line, offset = err.position  # lint-amnesty, pylint: disable=unpacking-non-sequence
+            line, offset = err.position
             context = lines[line - 1][offset - 40 : offset + 40]
             msg = f"Unable to create xml for block {self.usage_key}. Context: '{context}'"
             raise SerializationError(self.usage_key, msg) from err
