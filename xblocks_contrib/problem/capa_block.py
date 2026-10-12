@@ -2449,7 +2449,7 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
             # Can't recover here, so just add some info and
             # re-raise
             lines = self.data.split("\n")
-            line, offset = err.position  # pylint: disable=unpacking-non-sequence
+            line, offset = err.position
             msg = (
                 f"Unable to create xml for block {self.usage_key}. "
                 f"Context: '{lines[line - 1][offset - 40 : offset + 40]}'"

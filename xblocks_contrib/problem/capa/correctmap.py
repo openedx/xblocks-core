@@ -43,7 +43,7 @@ class CorrectMap:
         return self.cmap.__iter__()
 
     # See the documentation for 'set_dict' for the use of kwargs
-    def set(  # pylint: disable=too-many-positional-arguments,too-many-arguments
+    def set(  # pylint: disable=too-many-positional-arguments,too-many-arguments,unused-argument
         self,
         answer_id=None,
         correctness=None,
@@ -53,7 +53,7 @@ class CorrectMap:
         hintmode=None,
         queuestate=None,
         answervariable=None,
-        **kwargs,  # pylint: disable=unused-argument
+        **kwargs,
     ):
         """
         Set or update the stored evaluation result for a given answer_id.
