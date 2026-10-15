@@ -639,6 +639,14 @@ Problem.prototype.reset_internal = function () {
         that.el.trigger("contentChanged", [that.id, response.html, response]);
         that.render(response.html, that.scroll_to_problem_meta);
         that.updateProgress(response);
+        // After reset, bind() calls submitAnswersAndSubmitButton() synchronously, but
+        // browsers cache the checked state of new inputs by name/id before repainting
+        // so :checked still returns true on fresh inputs and the button stays enabled.
+        // requestAnimationFrame defers the check until after the repaint, when the
+        // stale form state is gone and the button is correctly disabled.
+        window.requestAnimationFrame(function () {
+          that.submitAnswersAndSubmitButton();
+        });
         return window.SR.readText(gettext("This problem has been reset."));
       } else {
         return that.gentle_alert(response.msg);
