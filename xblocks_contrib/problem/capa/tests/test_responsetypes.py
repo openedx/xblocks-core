@@ -21,7 +21,6 @@ import requests
 
 from xblocks_contrib.problem.capa.correctmap import CorrectMap
 from xblocks_contrib.problem.capa.responsetypes import LoncapaProblemError, ResponseError, StudentInputError
-from xblocks_contrib.problem.capa.testing.codejail import UseUnsafeCodejail
 from xblocks_contrib.problem.capa.testing.response_xml_factory import (
     AnnotationResponseXMLFactory,
     ChoiceResponseXMLFactory,
@@ -113,7 +112,6 @@ class ResponseTest(unittest.TestCase):
         return str(rand.randint(0, 1e9))
 
 
-@UseUnsafeCodejail()
 class MultiChoiceResponseTest(ResponseTest):
     """Unit tests for the MultipleChoiceResponse class."""
 
@@ -399,7 +397,6 @@ class SymbolicResponseTest(ResponseTest):
             assert correct_map.get_correctness("1_2_1") == expected_correctness
 
 
-@UseUnsafeCodejail()
 class OptionResponseTest(ResponseTest):
     """Unit tests for the OptionResponse class."""
 
@@ -445,7 +442,6 @@ class OptionResponseTest(ResponseTest):
         assert correct_map.get_property("1_2_1", "answervariable") == "$a"
 
 
-@UseUnsafeCodejail()
 class FormulaResponseTest(ResponseTest):
     """
     Test the FormulaResponse class
@@ -579,7 +575,6 @@ class FormulaResponseTest(ResponseTest):
         assert not list(problem.responders.values())[0].validate_answer("3*y+2*x")
 
 
-@UseUnsafeCodejail()
 class StringResponseTest(ResponseTest):
     """Unit and integration tests for the StringResponse class."""
 
@@ -1161,7 +1156,6 @@ class CodeResponseTest(ResponseTest):
                 assert output[answer_id]["msg"] == "Invalid grader reply. Please contact the course staff."
 
 
-@UseUnsafeCodejail()
 class ChoiceResponseTest(ResponseTest):
     """Unit and integration tests for the ChoiceResponse class."""
 
@@ -1306,7 +1300,6 @@ class ChoiceResponseTest(ResponseTest):
         self.assert_grade(problem, ["choice_1", "choice_3"], "incorrect")
 
 
-@UseUnsafeCodejail()
 class NumericalResponseTest(ResponseTest):
     """Unit and integration tests for the NumericalResponse class."""
 
@@ -1670,7 +1663,6 @@ class NumericalResponseTest(ResponseTest):
         assert not responder.validate_answer("fish")
 
 
-@UseUnsafeCodejail()
 class CustomResponseTest(ResponseTest):
     """Unit tests for validating CustomResponse behavior"""
 
@@ -2423,7 +2415,6 @@ class CustomResponseTest(ResponseTest):
         assert correct_map.get_msg("1_2_11") == "11"
 
 
-@UseUnsafeCodejail()
 class SchematicResponseTest(ResponseTest):
     """
     Class containing setup and tests for Schematic responsetype.
@@ -2521,7 +2512,6 @@ class AnnotationResponseTest(ResponseTest):
             assert expected_points == actual_points, f"{answer_id} should have {expected_points} points"
 
 
-@UseUnsafeCodejail()
 class ChoiceTextResponseTest(ResponseTest):
     """
     Class containing setup and tests for ChoiceText responsetype.
