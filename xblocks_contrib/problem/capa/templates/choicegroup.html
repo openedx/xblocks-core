@@ -10,6 +10,7 @@
             <div class="field">
                 <input type="{{ input_type }}" name="input_{{ id }}{{ name_array_suffix }}" id="input_{{ id }}_{{ choice_id }}"
                     class="field-input input-{{ input_type }}{% if input_type == 'radio' and choice_id == value or input_type != 'radio' and choice_id in value %} submitted{% endif %}" value="{{ choice_id }}"
+                    {{ describedby_html }}
                     {# If the student selected this choice... #}
                     {% if input_type == 'radio' and choice_id == value or input_type != 'radio' and choice_id in value %}
                         checked="true"
