@@ -156,6 +156,64 @@ class HtmlBlockCourseApiTestCase(unittest.TestCase):
         rendered = module_system.render(block, view, {}).content
         assert html in rendered
 
+    def _rendered_fragment(self, use_mfe_theming, view="student_view"):
+        """Render the block and return the real Fragment, for inspecting resources.
+
+        The block's own `student_view` is called directly: going through
+        `module_system.render()` returns a Mock, which hides the resources.
+        """
+        block = HtmlBlock(
+            get_test_system(),
+            DictFieldData(
+                {
+                    "data": "<p>This is a test</p>",
+                    "use_mfe_theming": use_mfe_theming,
+                }
+            ),
+            Mock(),
+        )
+        return getattr(block, view)({})
+
+    def test_default_use_mfe_theming_is_false(self):
+        """The field defaults to off, so existing blocks render unchanged."""
+        block = HtmlBlock(get_test_system(), DictFieldData({}), Mock())
+        assert block.use_mfe_theming is False
+
+    def test_unthemed_block_loads_legacy_css(self):
+        fragment = self._rendered_fragment(use_mfe_theming=False)
+        resources = [str(r.data) for r in fragment._resources]
+        assert any("@import" in r for r in resources), "expected legacy html.css"
+
+    def test_block_is_initialized_regardless_of_theme(self):
+        """Both variants must be initialized.
+
+        initialize_js is what emits `data-init` on the block root, and every rule
+        in html.css is scoped to it. Gating it on use_mfe_theming left unthemed
+        blocks completely unstyled.
+        """
+        for use_mfe_theming in (False, True):
+            fragment = self._rendered_fragment(use_mfe_theming=use_mfe_theming)
+            assert fragment.js_init_fn == "HtmlBlock", use_mfe_theming
+            assert fragment.json_init_args["use_mfe_theming"] is use_mfe_theming
+
+    def test_themed_block_skips_legacy_css(self):
+        """The legacy stylesheet must not be loaded for themed blocks."""
+        fragment = self._rendered_fragment(use_mfe_theming=True)
+        resources = [str(r.data) for r in fragment._resources]
+        assert not any("@import" in r for r in resources), "legacy html.css should be skipped"
+
+    def test_themed_block_passes_theme_config_to_js(self):
+        """The view tells the JS to sandbox the content and where to get the theme."""
+        fragment = self._rendered_fragment(use_mfe_theming=True)
+        assert fragment.json_init_args["use_mfe_theming"] is True
+        assert fragment.json_init_args["mfe_config_api"].endswith("/api/mfe_config/v1")
+
+    def test_view_ships_the_sandbox_script(self):
+        """The JS that creates the shadow root is attached to the fragment."""
+        fragment = self._rendered_fragment(use_mfe_theming=True)
+        resources = [str(r.data) for r in fragment._resources]
+        assert any("attachShadow" in r for r in resources), "expected the shadow DOM script"
+
 
 class HtmlBlockSubstitutionTestCase(unittest.TestCase):
     def test_substitution_user_id(self):
