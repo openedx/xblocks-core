@@ -13,13 +13,11 @@ from markupsafe import Markup
 
 from xblocks_contrib.problem.capa.correctmap import CorrectMap
 from xblocks_contrib.problem.capa.responsetypes import LoncapaProblemError
-from xblocks_contrib.problem.capa.testing.codejail import UseUnsafeCodejail
 from xblocks_contrib.problem.capa.tests.helpers import new_loncapa_problem
 from xblocks_contrib.problem.markup import HTML
 
 
 @ddt.ddt
-@UseUnsafeCodejail()
 class CAPAProblemTest(unittest.TestCase):
     """CAPA problem related tests"""
 
@@ -432,7 +430,6 @@ class CAPAProblemTest(unittest.TestCase):
 
 
 @ddt.ddt
-@UseUnsafeCodejail()
 class CAPAMultiInputProblemTest(unittest.TestCase):
     """TestCase for CAPA problems with multiple inputtypes"""
 
