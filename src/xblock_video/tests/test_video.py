@@ -881,7 +881,7 @@ class VideoExportTestCase(VideoBlockTestBase):
         self.assertXmlEqual(expected, xml)
 
     @patch("xblock_video.block.get_edxval_api", return_value=None)
-    def est_export_to_xml_empty_end_time(self, _mock_get_edxval_api):
+    def test_export_to_xml_empty_end_time(self, _mock_get_edxval_api):
         """
         Test that we write the correct XML on export.
         """
