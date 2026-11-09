@@ -8,4 +8,6 @@ consider upstreaming that code to the xblock package itself rather than putting 
 This module also holds the canonical xblocks-core version string.
 """
 
-__version__ = "1.0.0"
+from importlib.metadata import version
+
+__version__ = version("xblocks-core")
