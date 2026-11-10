@@ -27,9 +27,7 @@ settings.configure(
     USE_TZ=True,
     LANGUAGE_CODE="en-us",
     LANGUAGES=[("en", "English")],
-    INSTALLED_APPS=[
-        "edxval",
-    ],
+    INSTALLED_APPS=["edxval", "django.contrib.contenttypes", "django.contrib.auth"],
     TRANSCRIPT_LANG_CACHE_TIMEOUT=60 * 60 * 24,  # 24 hours, required by edxval
 )
 
