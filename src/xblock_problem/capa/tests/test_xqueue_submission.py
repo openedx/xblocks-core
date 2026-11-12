@@ -38,8 +38,8 @@ def test_get_submission_params(xqueue_service):  # pylint: disable=redefined-out
         }
     )
 
-    student_item, student_answer, queue_name, grader_file_name, points_possible = xqueue_service.get_submission_params(
-        header, payload
+    student_item, student_answer, queue_name, grader_file_name, points_possible, grader_options = (
+        xqueue_service.get_submission_params(header, payload)
     )
 
     assert student_item == {
@@ -52,6 +52,7 @@ def test_get_submission_params(xqueue_service):  # pylint: disable=redefined-out
     assert queue_name == "default"
     assert grader_file_name == "test.py"
     assert points_possible == 10
+    assert grader_options == {"lang": "", "hide_output": False, "skip_grader": False}
 
 
 @pytest.mark.django_db
@@ -94,8 +95,157 @@ def test_send_to_submission(mock_create_external_grader_detail, xqueue_service):
         queue_key="default",
         grader_file_name="test.py",
         points_possible=10,
+        lang="",
+        hide_output=False,
+        skip_grader=False,
         files=None,
     )
+
+
+@pytest.mark.parametrize(
+    "grader_payload, expected_grader_file_name",
+    [
+        (json.dumps({"grader": "test.py"}), "test.py"),
+        (json.dumps({"grader": "test.py", "lang": "es", "hide_output": True}), "test.py"),
+        ({"grader": "test.py"}, "test.py"),
+        (json.dumps({"lang": "es"}), ""),
+        ("", ""),
+        ("not json at all", ""),
+        (json.dumps(["test.py"]), ""),
+        (json.dumps("test.py"), ""),
+    ],
+)
+def test_get_submission_params_grader_payload_shapes(
+    xqueue_service,  # pylint: disable=redefined-outer-name
+    grader_payload,
+    expected_grader_file_name,
+):
+    """
+    Whatever a course author puts in <grader_payload>, we pull out "grader" if we
+    can and don't fail the submission if we can't.
+    """
+    header = json.dumps({"queue_name": "default"})
+    payload = json.dumps(
+        {
+            "student_info": json.dumps({"anonymous_student_id": "student_id"}),
+            "student_response": "student_answer",
+            "grader_payload": grader_payload,
+        }
+    )
+
+    _, _, _, grader_file_name, _, _ = xqueue_service.get_submission_params(header, payload)
+
+    assert grader_file_name == expected_grader_file_name
+
+
+def test_get_submission_params_without_grader_payload(xqueue_service):  # pylint: disable=redefined-outer-name
+    """A body with no grader_payload at all still gives us submission params."""
+    header = json.dumps({"queue_name": "default"})
+    payload = json.dumps(
+        {
+            "student_info": json.dumps({"anonymous_student_id": "student_id"}),
+            "student_response": "student_answer",
+        }
+    )
+
+    _, student_answer, _, grader_file_name, _, grader_options = xqueue_service.get_submission_params(header, payload)
+
+    assert student_answer == "student_answer"
+    assert grader_file_name == ""
+    assert grader_options == {"lang": "", "hide_output": False, "skip_grader": False}
+
+
+@pytest.mark.parametrize(
+    "grader_payload, expected_grader_options",
+    [
+        # Nothing set: xqueue-watcher's defaults.
+        ({"grader": "test.py"}, {"lang": "", "hide_output": False, "skip_grader": False}),
+        (
+            {"grader": "test.py", "lang": "es", "hide_output": True, "skip_grader": True},
+            {"lang": "es", "hide_output": True, "skip_grader": True},
+        ),
+        # xqueue-watcher only checks truthiness, so the string "false" counts as true.
+        ({"hide_output": "false", "skip_grader": 1}, {"lang": "", "hide_output": True, "skip_grader": True}),
+        ({"hide_output": 0, "skip_grader": None}, {"lang": "", "hide_output": False, "skip_grader": False}),
+        # A lang that isn't a short string is dropped.
+        ({"lang": 5}, {"lang": "", "hide_output": False, "skip_grader": False}),
+        ({"lang": None}, {"lang": "", "hide_output": False, "skip_grader": False}),
+        ({"lang": "x" * 33}, {"lang": "", "hide_output": False, "skip_grader": False}),
+        ({"lang": "x" * 32}, {"lang": "x" * 32, "hide_output": False, "skip_grader": False}),
+    ],
+)
+def test_get_submission_params_grader_options(
+    xqueue_service,  # pylint: disable=redefined-outer-name
+    grader_payload,
+    expected_grader_options,
+):
+    """We pull lang, hide_output, and skip_grader out of grader_payload the way xqueue-watcher reads them."""
+    header = json.dumps({"queue_name": "default"})
+    payload = json.dumps(
+        {
+            "student_info": json.dumps({"anonymous_student_id": "student_id"}),
+            "student_response": "student_answer",
+            "grader_payload": json.dumps(grader_payload),
+        }
+    )
+
+    *_, grader_options = xqueue_service.get_submission_params(header, payload)
+
+    assert grader_options == expected_grader_options
+
+
+@pytest.mark.django_db
+@patch("submissions.api.create_external_grader_detail")
+def test_send_to_submission_passes_grader_options(
+    mock_create_external_grader_detail,
+    xqueue_service,  # pylint: disable=redefined-outer-name
+):
+    """The lang, hide_output, and skip_grader options from grader_payload go to edx-submissions."""
+    header = json.dumps({"queue_name": "default"})
+    body = json.dumps(
+        {
+            "grader_payload": json.dumps(
+                {"grader": "output/grader.py", "lang": "es", "hide_output": True, "skip_grader": True}
+            ),
+            "student_info": json.dumps({"anonymous_student_id": "student_id"}),
+            "student_response": "student_answer",
+        }
+    )
+
+    xqueue_service.send_to_submission(header, body, queue_key="default")
+
+    kwargs = mock_create_external_grader_detail.call_args.kwargs
+    assert kwargs["grader_file_name"] == "output/grader.py"
+    assert kwargs["lang"] == "es"
+    assert kwargs["hide_output"] is True
+    assert kwargs["skip_grader"] is True
+
+
+@pytest.mark.django_db
+@patch("submissions.api.create_external_grader_detail")
+def test_send_to_submission_non_json_grader_payload(
+    mock_create_external_grader_detail,
+    xqueue_service,  # pylint: disable=redefined-outer-name
+):
+    """
+    A problem with no <grader_payload> (or one that isn't a JSON object) is still
+    queued, with xqueue-watcher's default grader options.
+    """
+    header = json.dumps({"queue_name": "default"})
+    body = json.dumps(
+        {
+            "grader_payload": "",
+            "student_info": json.dumps({"anonymous_student_id": "student_id"}),
+            "student_response": "student_answer",
+        }
+    )
+
+    result = xqueue_service.send_to_submission(header, body, queue_key="default")
+
+    assert result == mock_create_external_grader_detail.return_value
+    kwargs = mock_create_external_grader_detail.call_args.kwargs
+    assert kwargs["grader_file_name"] == ""
+    assert (kwargs["lang"], kwargs["hide_output"], kwargs["skip_grader"]) == ("", False, False)
 
 
 @pytest.mark.django_db
