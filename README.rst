@@ -94,10 +94,10 @@ Localization (l10n) is adapting a program to local language and cultural habits.
 
 For information on how to enable translations, visit the `Open edX XBlock tutorial on Internationalization <https://docs.openedx.org/projects/xblock/en/latest/xblock-tutorial/edx_platform/edx_lms.html#internationalization-support>`_.
 
-The included Makefile contains targets for extracting, compiling and validating translatable strings.
+The included Makefile contains a target for extracting translatable strings.
 Each XBlock in this repository has its own translation configuration under
-``src/xblock_<name>/conf/locale/`` and its own Transifex resource mapping under
-``src/xblock_<name>/.tx/config``. All Make targets iterate over every XBlock automatically.
+``src/xblock_<name>/conf/locale/``. The Make target iterates over every XBlock automatically.
+
 
 The general steps to provide multilingual messages for a Python program (or an XBlock) are:
 
@@ -153,19 +153,15 @@ This iterates over every XBlock and:
 
 1. Runs ``i18n_tool extract --no-segment`` to extract Python, HTML and JS strings.
 2. Merges ``djangojs.po`` into ``django.po`` (if JS strings exist) using ``msgcat``.
-3. Renames the result to ``text.po``.
+3. Moves the result to ``<module_name>/conf/locale/`` at the repository root.
 
 The output for each XBlock is a single file at::
 
-    src/xblock_<name>/conf/locale/en/LC_MESSAGES/text.po
+    xblock_<name>/conf/locale/en/LC_MESSAGES/django.po
 
-Additionally, all per-xblock ``text.po`` files are merged into a single combined file at::
-
-    src/xblocks_core_locale/conf/locale/en/LC_MESSAGES/django.po
-
-This combined file is used by the
+These per-XBlock files are used by the
 `openedx-translations <https://github.com/openedx/openedx-translations>`_ pipeline (OEP-58)
-to sync translations with Transifex. The per-xblock files are used for local development and testing.
+to sync translations with Transifex. Each XBlock is a separate Transifex resource.
 
 3. Create language specific translations
 ----------------------------------------
@@ -196,7 +192,8 @@ for translation management. Translations are managed centrally through the
 `openedx-translations <https://github.com/openedx/openedx-translations>`_ repository:
 
 1. A daily GitHub Actions workflow in openedx-translations clones this repo, runs
-   ``make extract_translations``, and commits the combined ``django.po`` source file.
+   ``make extract_translations``, and commits each XBlock's ``django.po`` source file under
+   ``translations/xblocks-core/<module_name>/conf/locale/``.
 2. The Transifex GitHub App syncs source strings to the ``openedx-translations`` Transifex project
    under the ``open-edx`` organization.
 3. The Open edX translation community translates strings on Transifex.
@@ -206,69 +203,12 @@ Since these XBlocks were extracted from edx-platform, many strings already have 
 in Transifex. The openedx-translations pipeline preserves these so translators do not need to
 re-translate them.
 
-**Direct Transifex CLI (alternative):**
-
-Each XBlock also has a ``.tx/config`` for direct Transifex CLI usage. This is useful for
-testing or when the openedx-translations pipeline is not available.
-
-1. Install the Transifex CLI::
-
-    $ make install_transifex_client
-
-2. Set your Transifex API token (request access from the Open edX Open Source Team)::
-
-    $ export TX_TOKEN=<your-api-token>
-
-3. Pull or push translations::
-
-    $ make pull_translations
-    $ make push_translations
-
-See `Transifex CLI configuration <https://developers.transifex.com/docs/cli>`_ for more details.
-
-3.3 Compile translations
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Once translations are in place, use the following Make target to compile the translation catalogs ``.po`` into
-``.mo`` message files::
-
-    $ make compile_translations
-
-This runs ``django-admin compilemessages`` inside each XBlock directory.
-See `compilemessages documentation <https://docs.djangoproject.com/en/5.2/topics/i18n/translation/#compiling-message-files>`_.
-
 4. Use ``gettext`` to translate strings
 ---------------------------------------
 
-Django will automatically use ``gettext`` and the compiled translations to translate strings.
-
-Validating and testing translations
------------------------------------
-
-**Validate the full translation pipeline** (extract, generate dummy translations, compile, and
-check for source drift)::
-
-    $ make validate_translations
-
-This is the target used in CI (via ``tox -e translations``). It runs the following targets in order:
-
-**Generate dummy (fake) translations** in the Esperanto (``eo``) and fake-RTL (``rtl``) locales for
-visual testing::
-
-    $ make dummy_translations
-
-You can trigger the display by setting your browser's language to Esperanto and navigating to a page.
-Instead of plain English strings you should see accented English like::
-
-    The Future of Online Education  -->  The Futuré of Onliné Education
-
-**Compile translations** (required after pull or dummy generation)::
-
-    $ make compile_translations
-
-**Check if source translation files are up-to-date** with the current source code::
-
-    $ make detect_changed_source_translations
+Open edX pulls the translations from openedx-translations with ``atlas``
+(``make pull_xblock_translations`` in openedx-platform), and Django uses ``gettext`` to
+translate strings.
 
 Make targets reference
 ----------------------
@@ -280,30 +220,10 @@ Make targets reference
     * - Target
       - Description
     * - ``make extract_translations``
-      - Extract translatable strings into ``text.po`` for each XBlock
-    * - ``make compile_translations``
-      - Compile ``.po`` files into ``.mo`` files for each XBlock
-    * - ``make dummy_translations``
-      - Generate dummy Esperanto/RTL ``.po`` files for testing
-    * - ``make build_dummy_translations``
-      - Generate and compile dummy translations
-    * - ``make validate_translations``
-      - Full validation: dummy build + source drift detection (CI target)
-    * - ``make detect_changed_source_translations``
-      - Check if source ``.po`` files are up-to-date
-    * - ``make pull_translations``
-      - Pull translations from Transifex
-    * - ``make push_translations``
-      - Extract and push source translations to Transifex
-    * - ``make install_transifex_client``
-      - Install the Transifex CLI
+      - Extract translatable strings into ``<module_name>/conf/locale/`` for each XBlock
 
 Troubleshooting
 ~~~~~~~~~~~~~~~
-
-If there are any errors compiling ``.po`` files, validate them::
-
-    $ make validate_translations
 
 See `django's i18n troubleshooting documentation
 <https://docs.djangoproject.com/en/5.2/topics/i18n/translation/#troubleshooting-gettext-incorrectly-detects-python-format-in-strings-with-percent-signs>`_
@@ -313,5 +233,3 @@ for more information.
 
 - ``i18n_tool: command not found`` -- Run ``make requirements`` to install ``edx-i18n-tools``.
 - ``msgcat: command not found`` -- Install GNU gettext (``brew install gettext`` on macOS).
-- Transifex push/pull errors -- Ensure ``TX_TOKEN`` is set and you have access to the ``open-edx``
-  organization. Run ``make install_transifex_client`` if the ``tx`` CLI is missing.
