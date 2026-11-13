@@ -161,7 +161,11 @@ class XQueueInterface:
         queue_key = header_info["lms_key"]
 
         if self.use_submission_service:
-            self.submission.send_to_submission(header, body, queue_key, files)
+            result = self.submission.send_to_submission(header, body, queue_key, files)
+            # send_to_submission reports submissions it couldn't create as {"error": msg}. Pass that
+            # back as an error so the learner is told it wasn't queued, rather than waiting on it forever.
+            if isinstance(result, dict) and "error" in result:
+                return 1, result["error"]
             return None, ""
 
         return self._http_post(self.url + "/xqueue/submit/", payload, files=files)
