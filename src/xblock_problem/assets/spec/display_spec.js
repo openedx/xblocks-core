@@ -554,6 +554,39 @@ data-url='/problem/quiz/'> \
       this.problem = new Problem(mockRuntime, $(".xblock-student_view"));
     });
 
+    ["radiobutton_problem.html", "checkbox_problem.html"].forEach(function (fixture) {
+      it(`disables an enabled Submit after resetting ${fixture} until another answer is selected`, function () {
+        const problem = this.problem;
+        const frames = [];
+        const deferred = $.Deferred();
+        spyOn(window, "requestAnimationFrame").and.callFake(function (callback) {
+          frames.push(callback);
+        });
+        problem.el.find("#input_example_1").replaceWith(readFixtures(fixture));
+        problem.bind();
+        const resetHtml = problem.el.html();
+        problem.el.find("#input_1_1_1").prop("checked", true).triggerHandler("click");
+        expect(problem.submitButton).not.toHaveAttr("disabled");
+
+        spyOn($, "postWithPrefix").and.callFake(function (url, data, callback) {
+          deferred.done(callback);
+          return deferred.promise();
+        });
+        problem.reset();
+        expect(problem.submitButton).toHaveAttr("disabled");
+        deferred.resolve({ success: true, html: resetHtml });
+        frames.forEach(function (callback) {
+          callback();
+        });
+
+        expect(problem.el.find("input:checked").length).toBe(0);
+        expect(problem.submitButton).toHaveAttr("disabled");
+        expect(problem.submitButtonLabel.text()).toBe("Submit");
+        problem.el.find("#input_1_1_2").prop("checked", true).triggerHandler("click");
+        expect(problem.submitButton).not.toHaveAttr("disabled");
+      });
+    });
+
     it("log the problem_reset event", function () {
       spyOn($, "postWithPrefix").and.callFake(function (url, answers, callback) {
         let promise;
