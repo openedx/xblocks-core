@@ -506,7 +506,8 @@
 }
 
 .video .video-wrapper .video-controls .secondary-controls .menu-container .menu li .speed-option,
-.video .video-wrapper .video-controls .secondary-controls .menu-container .menu li .control-lang {
+.video .video-wrapper .video-controls .secondary-controls .menu-container .menu li .control-lang,
+.video .video-wrapper .video-controls .secondary-controls .menu-container .menu li .audio-option {
     text-align: left;
     display: block;
     width: 100%;
@@ -525,13 +526,16 @@
 .video .video-wrapper .video-controls .secondary-controls .menu-container .menu li .speed-option:hover,
 .video .video-wrapper .video-controls .secondary-controls .menu-container .menu li .speed-option:focus,
 .video .video-wrapper .video-controls .secondary-controls .menu-container .menu li .control-lang:hover,
-.video .video-wrapper .video-controls .secondary-controls .menu-container .menu li .control-lang:focus {
+.video .video-wrapper .video-controls .secondary-controls .menu-container .menu li .control-lang:focus,
+.video .video-wrapper .video-controls .secondary-controls .menu-container .menu li .audio-option:hover,
+.video .video-wrapper .video-controls .secondary-controls .menu-container .menu li .audio-option:focus {
     background-color: #4f595d;
     color: #fcfcfc;
 }
 
 .video .video-wrapper .video-controls .secondary-controls .menu-container .menu li.is-active .speed-option,
-.video .video-wrapper .video-controls .secondary-controls .menu-container .menu li.is-active .control-lang {
+.video .video-wrapper .video-controls .secondary-controls .menu-container .menu li.is-active .control-lang,
+.video .video-wrapper .video-controls .secondary-controls .menu-container .menu li.is-active .audio-option {
     border-left: calc(var(--baseline, 20px) / 10) solid #90d7f9;
     font-weight: var(--font-bold, 700);
     color: #90d7f9;
@@ -543,6 +547,7 @@
 
 .video .video-wrapper .video-controls .secondary-controls .speeds,
 .video .video-wrapper .video-controls .secondary-controls .lang,
+.video .video-wrapper .video-controls .secondary-controls .audio-tracks,
 .video .video-wrapper .video-controls .secondary-controls .grouped-controls {
     display: inline-block;
 }
@@ -1257,4 +1262,34 @@
 .wrapper-social-share .container-social-share .public-video-copy-btn:hover {
     text-decoration: none;
     color: var(--link-hover-color);
+}
+
+/* ===== Audio Track Control ===== */
+.video .video-wrapper .video-controls .secondary-controls .audio-tracks .audio-track-button .label {
+    padding: 0 calc((var(--baseline, 20px) / 3)) 0 0;
+    font-family: var(--font-family-sans-serif);
+    color: #e7ecee;
+}
+
+@media (max-width: 1120px) {
+    .video .video-wrapper .video-controls .secondary-controls .audio-tracks .audio-track-button .label {
+        position: absolute;
+        clip: rect(1px, 1px, 1px, 1px);
+    }
+}
+
+.video .video-wrapper .video-controls .secondary-controls .audio-tracks .audio-track-button .value {
+    padding: 0 lh(0.5) 0 0;
+    color: #e7ecee;
+    font-weight: bold;
+}
+
+@media (max-width: 1120px) {
+    .video .video-wrapper .video-controls .secondary-controls .audio-tracks .audio-track-button .value {
+        padding: 0 lh(0.5);
+    }
+}
+
+.video .video-wrapper .video-controls .secondary-controls .audio-tracks .video-audio-tracks {
+    min-width: 110px;
 }
