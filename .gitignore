@@ -92,7 +92,7 @@ requirements/private.txt
 # Translations
 *.mo
 *.pot
-*.po
+**/conf/locale/**/LC_MESSAGES/*
 
 # Node.js / npm / yarn / pnpm
 node_modules/
