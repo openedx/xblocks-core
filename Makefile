@@ -36,13 +36,15 @@ requirements: ## install development environment requirements using uv
 ## Localization targets
 
 extract_translations: ## extract strings to be translated, outputting .po files under <module_name>/conf/locale/
-	@for xblock in $(XBLOCKS); do \
+	@set -e; for xblock in $(XBLOCKS); do \
 		module_name=$$(basename $$xblock); \
 		echo "Extracting translations for $$module_name..."; \
-		cd $$xblock && i18n_tool extract --no-segment; \
+		cd $$xblock; \
+		i18n_tool extract --no-segment; \
 		if [ -f $$xblock/$(EXTRACT_DIR)/djangojs.po ]; then \
 			msgcat $$xblock/$(EXTRACT_DIR)/django.po $$xblock/$(EXTRACT_DIR)/djangojs.po \
-				-o $$xblock/$(EXTRACT_DIR)/django.po && rm -f $$xblock/$(EXTRACT_DIR)/djangojs.po; \
+				-o $$xblock/$(EXTRACT_DIR)/django.po; \
+			rm -f $$xblock/$(EXTRACT_DIR)/djangojs.po; \
 		fi; \
 		mkdir -p $(REPO_ROOT)/$$module_name/$(EXTRACT_DIR); \
 		if [ -f $$xblock/$(EXTRACT_DIR)/django.po ]; then \
