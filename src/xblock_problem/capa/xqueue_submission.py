@@ -81,8 +81,7 @@ class XQueueInterfaceSubmission:
 
         return student_dict, student_answer, queue_name, grader_file_name, points_possible, grader_options
 
-    @staticmethod
-    def _parse_grader_payload(payload):
+    def _parse_grader_payload(self, payload):
         """
         Return the payload's grader_payload as a dict, or {} if it isn't a JSON object.
 
@@ -90,18 +89,25 @@ class XQueueInterfaceSubmission:
         <grader_payload> tag, and legacy XQueue passed it to graders without looking
         at it. It's usually a JSON object with a "grader" key, but it can also be
         empty (no <grader_payload> tag), not JSON, or JSON that isn't an object.
-        None of these should keep the submission from being queued.
+        None of these should keep the submission from being queued. We log a warning
+        for them, though, because the grader gets no grader name and will likely fail.
 
         See: https://github.com/openedx/edx-submissions/issues/390
         """
         grader_payload = payload.get("grader_payload")
+        parsed = grader_payload
         if isinstance(grader_payload, str):
             try:
-                grader_payload = json.loads(grader_payload)
+                parsed = json.loads(grader_payload)
             except json.JSONDecodeError:
-                return {}
-        if isinstance(grader_payload, dict):
-            return grader_payload
+                parsed = None
+        if isinstance(parsed, dict):
+            return parsed
+        log.warning(
+            "Queueing %s with no grader name or options because its grader_payload isn't a JSON object: %.100r",
+            self.block.usage_key,
+            grader_payload,
+        )
         return {}
 
     def _get_grader_options(self, grader_payload):

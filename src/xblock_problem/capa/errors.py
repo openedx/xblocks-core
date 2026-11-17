@@ -17,15 +17,6 @@ class JSONParsingError(XQueueSubmissionError):
         super().__init__(self.MESSAGE.format(name=name, error=error))
 
 
-class MissingKeyError(XQueueSubmissionError):
-    """Raised when a required key is missing."""
-
-    MESSAGE = "Missing key: {key}"
-
-    def __init__(self, key):
-        super().__init__(self.MESSAGE.format(key=key))
-
-
 class ValidationError(XQueueSubmissionError):
     """Raised when a validation check fails."""
 

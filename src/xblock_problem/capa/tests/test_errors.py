@@ -7,7 +7,6 @@ import pytest
 from xblock_problem.capa.errors import (
     GetSubmissionParamsError,
     JSONParsingError,
-    MissingKeyError,
     RuntimeErrorSubmission,
     TypeErrorSubmission,
     ValidationError,
@@ -19,13 +18,6 @@ def test_json_parsing_error():
     with pytest.raises(JSONParsingError) as excinfo:
         raise JSONParsingError("test_name", "test_error")
     assert str(excinfo.value) == "Error parsing test_name: test_error"
-
-
-def test_missing_key_error():
-    """Ensure MissingKeyError is raised with the correct key in the message."""
-    with pytest.raises(MissingKeyError) as excinfo:
-        raise MissingKeyError("test_key")
-    assert str(excinfo.value) == "Missing key: test_key"
 
 
 def test_validation_error():

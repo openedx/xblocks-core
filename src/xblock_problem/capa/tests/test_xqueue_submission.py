@@ -3,6 +3,7 @@ Unit tests for the XQueueInterfaceSubmission class.
 """
 
 import json
+import logging
 from unittest.mock import Mock, patch
 
 import pytest
@@ -103,26 +104,30 @@ def test_send_to_submission(mock_create_external_grader_detail, xqueue_service):
 
 
 @pytest.mark.parametrize(
-    "grader_payload, expected_grader_file_name",
+    "grader_payload, expected_grader_file_name, expect_warning",
     [
-        (json.dumps({"grader": "test.py"}), "test.py"),
-        (json.dumps({"grader": "test.py", "lang": "es", "hide_output": True}), "test.py"),
-        ({"grader": "test.py"}, "test.py"),
-        (json.dumps({"lang": "es"}), ""),
-        ("", ""),
-        ("not json at all", ""),
-        (json.dumps(["test.py"]), ""),
-        (json.dumps("test.py"), ""),
+        (json.dumps({"grader": "test.py"}), "test.py", False),
+        (json.dumps({"grader": "test.py", "lang": "es", "hide_output": True}), "test.py", False),
+        ({"grader": "test.py"}, "test.py", False),
+        (json.dumps({"lang": "es"}), "", False),
+        ("", "", True),
+        (None, "", True),
+        ("not json at all", "", True),
+        (json.dumps(["test.py"]), "", True),
+        (json.dumps("test.py"), "", True),
     ],
 )
 def test_get_submission_params_grader_payload_shapes(
     xqueue_service,  # pylint: disable=redefined-outer-name
+    caplog,
     grader_payload,
     expected_grader_file_name,
+    expect_warning,
 ):
     """
     Whatever a course author puts in <grader_payload>, we pull out "grader" if we
-    can and don't fail the submission if we can't.
+    can and don't fail the submission if we can't. When we can't, we log the
+    problem's usage key so there's a trail when the grader fails.
     """
     header = json.dumps({"queue_name": "default"})
     payload = json.dumps(
@@ -133,9 +138,16 @@ def test_get_submission_params_grader_payload_shapes(
         }
     )
 
-    _, _, _, grader_file_name, _, _ = xqueue_service.get_submission_params(header, payload)
+    with caplog.at_level(logging.WARNING, logger="xblock_problem.capa.xqueue_submission"):
+        _, _, _, grader_file_name, _, _ = xqueue_service.get_submission_params(header, payload)
 
     assert grader_file_name == expected_grader_file_name
+    warnings = [r.getMessage() for r in caplog.records if "isn't a JSON object" in r.getMessage()]
+    if expect_warning:
+        assert len(warnings) == 1
+        assert str(xqueue_service.block.usage_key) in warnings[0]
+    else:
+        assert not warnings
 
 
 def test_get_submission_params_without_grader_payload(xqueue_service):  # pylint: disable=redefined-outer-name
