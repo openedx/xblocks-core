@@ -663,6 +663,12 @@ Problem.prototype.reset_internal = function () {
         that.el.trigger("contentChanged", [that.id, response.html, response]);
         that.render(response.html, that.scroll_to_problem_meta);
         that.updateProgress(response);
+        // The request's .always() handler in disableAllButtonsWhileRunning() restores
+        // initially enabled buttons after render/bind checks the reset inputs. Defer
+        // this check until that handler finishes so Submit reflects the new answers.
+        window.requestAnimationFrame(function () {
+          that.submitAnswersAndSubmitButton();
+        });
         return window.SR.readText(gettext("This problem has been reset."));
       } else {
         return that.gentle_alert(response.msg);
