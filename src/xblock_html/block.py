@@ -211,12 +211,12 @@ function HtmlBlock(runtime, element) {
 
     def student_view_data(self, context=None):  # pylint: disable=unused-argument
         """Return a JSON representation of the student_view of this XBlock."""
-        if getattr(settings, "FEATURES", {}).get(self.ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA, False):
+        if getattr(settings, self.ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA, False):
             return {"enabled": True, "html": self.get_html()}
         else:
             return {
                 "enabled": False,
-                "message": f'To enable, set FEATURES["{self.ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA}"]',
+                "message": f"To enable, set the {self.ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA} setting",
             }
 
     def get_html(self):
