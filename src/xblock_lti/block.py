@@ -541,7 +541,9 @@ class LTIBlock(
         """
         This is called to get context with new oauth params to iframe.
         """
-        template = resource_loader.render_django_template("templates/lti_form.html", self.get_context())
+        template = resource_loader.render_django_template(
+            "templates/lti_form.html", self.get_context(), i18n_service=self.runtime.service(self, "i18n")
+        )
         return Response(template, content_type="text/html")
 
     @XBlock.handler

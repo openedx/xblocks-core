@@ -955,6 +955,7 @@ class LoncapaProblem:
                     limit_overrides_context=get_course_id_from_capa_block(self.capa_block),
                     slug=self.problem_id,
                     unsafely=self.capa_system.can_execute_unsafe_code(),
+                    gettext=self.capa_system.i18n.gettext,
                 )
             except Exception as err:
                 log.exception("Error while execing script code: %s", all_code)

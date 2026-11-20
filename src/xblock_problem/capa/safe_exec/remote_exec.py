@@ -9,7 +9,7 @@ from importlib import import_module
 import requests
 from codejail.safe_exec import SafeExecException, json_safe
 from django.conf import settings
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_noop
 from requests.exceptions import HTTPError, RequestException
 from simplejson import JSONDecodeError
 
@@ -45,6 +45,9 @@ def get_codejail_rest_service_endpoint():
 def send_safe_exec_request_v0(data):
     """
     Sends a request to a codejail api service forwarding required code and files.
+
+    Error messages are marked with ``gettext_noop`` and left untranslated here, because this function
+    has no block (and so no translation catalog). ``safe_exec`` translates them with the caller's ``gettext``.
     Arguments:
         data: Dict containing code and other parameters required for jailed code execution.
         It also includes extra_files (python_lib.zip) required by the codejail execution.
@@ -84,19 +87,21 @@ def send_safe_exec_request_v0(data):
             "Failed to connect to codejail api service: url=%s, params=%s", codejail_service_endpoint, str(payload)
         )
         raise CodejailServiceUnavailable(
-            _("Codejail API Service is unavailable. Please try again in a few minutes.")
+            gettext_noop("Codejail API Service is unavailable. Please try again in a few minutes.")
         ) from err
 
     try:
         response.raise_for_status()
     except HTTPError as err:
-        raise CodejailServiceStatusError(_("Codejail API Service invalid response.")) from err
+        raise CodejailServiceStatusError(gettext_noop("Codejail API Service invalid response.")) from err
 
     try:
         response_json = response.json()
     except JSONDecodeError as err:
         log.error("Invalid JSON response received from codejail api service: Response_Content=%s", response.content)
-        raise CodejailServiceParseError(_("Invalid JSON response received from codejail api service.")) from err
+        raise CodejailServiceParseError(
+            gettext_noop("Invalid JSON response received from codejail api service.")
+        ) from err
 
     emsg = response_json.get("emsg")
     exception = None

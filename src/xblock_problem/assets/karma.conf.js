@@ -33,6 +33,7 @@ module.exports = function (config) {
             { pattern: 'spec_helpers/jasmine-extensions.js', included: true },
             { pattern: 'spec_helpers/jasmine-imagediff.js', included: true },
 
+            { pattern: 'static/js/i18n_utils.js', included: true },
             { pattern: 'static/js/xmodule.js', included: true },
             { pattern: 'static/js/javascript_loader.js', included: true },
             { pattern: 'static/js/collapsible.js', included: true },

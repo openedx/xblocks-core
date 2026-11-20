@@ -2,6 +2,15 @@ function Annotatable(runtime, element) {
     var _debug = false;
 
     /*
+    Use this block's translation catalog (window.XBlockAnnotatableI18N, loaded by the
+    block's view) and fall back to the platform's global catalog.
+    */
+    function gettext(msgid) {
+        var catalog = window.XBlockAnnotatableI18N || window;
+        return catalog.gettext ? catalog.gettext(msgid) : msgid;
+    }
+
+    /*
     Selectors for the annotatable xmodule
     */
     var wrapperSelector = '.annotatable-wrapper';

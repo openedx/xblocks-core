@@ -221,6 +221,7 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
     INDEX_CONTENT_TYPE = "CAPA"
 
     is_extracted = True
+    i18n_js_namespace = "XBlockProblemI18N"
 
     has_score = True
     show_in_read_only_mode = True
@@ -415,6 +416,19 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
         if "lcp" in self.__dict__:
             del self.__dict__["lcp"]
 
+    def _add_i18n_js_catalog(self, fragment):
+        """
+        Add this block's JavaScript translation catalog to the fragment, if the runtime provides one.
+
+        The catalog defines ``window.XBlockProblemI18N`` (see ``i18n_js_namespace``).
+        Add it before the block's own JS.
+        """
+        i18n_service = self.runtime.service(self, "i18n")
+        url_getter = getattr(i18n_service, "get_javascript_i18n_catalog_url", None)
+        url = url_getter(self) if url_getter else None
+        if url:
+            fragment.add_javascript_url(url)
+
     def student_view(self, _context, show_detailed_errors=False):
         """
         Return the student view.
@@ -428,6 +442,7 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
             html = self.get_html()
         fragment = Fragment(html)
         fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/ProblemBlockDisplay.css"))
+        self._add_i18n_js_catalog(fragment)
         fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/ProblemBlockDisplay.js"))
         fragment.initialize_js("Problem")
         return fragment

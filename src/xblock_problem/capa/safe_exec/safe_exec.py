@@ -7,6 +7,7 @@ from django.core.exceptions import ImproperlyConfigured
 from edx_django_utils.monitoring import function_trace
 
 from . import lazymod
+from .exceptions import CodejailServiceParseError, CodejailServiceStatusError, CodejailServiceUnavailable
 from .remote_exec import get_codejail_rest_service_host, get_remote_exec
 
 # Establish the Python environment for Capa.
@@ -106,6 +107,7 @@ def safe_exec(
     limit_overrides_context=None,
     slug=None,
     unsafely=False,
+    gettext=None,
 ):
     """
     Execute python code safely.
@@ -137,6 +139,10 @@ def safe_exec(
 
     `slug` is an arbitrary string, a description that's meaningful to the
     caller, that will be used in log messages.
+
+    `gettext` translates the Codejail service error messages. Problem blocks pass their
+    ``i18n`` service's ``gettext`` so the messages come from the block's own catalog.
+    If omitted, the messages are left in English.
 
     `unsafely` is retained as parameter for compatibility but raises
     `ImproperlyConfigured` when set to true, which only happens for
@@ -184,7 +190,13 @@ def safe_exec(
         "extra_files": extra_files,
     }
 
-    emsg, exception = get_remote_exec(data)
+    try:
+        emsg, exception = get_remote_exec(data)
+    except (CodejailServiceUnavailable, CodejailServiceStatusError, CodejailServiceParseError) as err:
+        if gettext is None or not err.args:
+            raise
+        # The messages are marked with gettext_noop in remote_exec, so translating a variable is intended.
+        raise type(err)(gettext(str(err.args[0]))) from err  # pylint: disable=translation-of-non-string
 
     # Put the result back in the cache.  This is complicated by the fact that
     # the globals dict might not be entirely serializable.

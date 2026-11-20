@@ -7,3 +7,5 @@ locales:
 ignore_dirs:
     - '*/css'
     - 'public/js/translations'
+    - 'spec'
+    - 'spec_helpers'

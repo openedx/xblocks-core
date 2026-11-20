@@ -15,6 +15,7 @@ from django.test import override_settings
 from six import unichr
 
 from xblock_problem.capa.safe_exec import safe_exec, update_hash
+from xblock_problem.capa.safe_exec.exceptions import CodejailServiceUnavailable
 
 
 def make_python_library_zip_bytes():
@@ -67,6 +68,24 @@ class TestSafeExec(unittest.TestCase):
 
         payload = mock_remote_exec.call_args.args[0]
         assert "unsafely" not in payload
+
+    @patch("xblock_problem.capa.safe_exec.safe_exec.get_remote_exec")
+    def test_codejail_service_error_is_translated(self, mock_remote_exec):
+        """Verify Codejail service errors are translated with the caller's gettext."""
+        mock_remote_exec.side_effect = CodejailServiceUnavailable("Codejail API Service is unavailable.")
+
+        with pytest.raises(CodejailServiceUnavailable, match="^XX Codejail API Service is unavailable.$"):
+            safe_exec("a = 1", {}, gettext=lambda msg: f"XX {msg}")
+
+    @patch("xblock_problem.capa.safe_exec.safe_exec.get_remote_exec")
+    def test_codejail_service_error_untranslated_without_gettext(self, mock_remote_exec):
+        """Verify Codejail service errors pass through unchanged when no gettext is given."""
+        error = CodejailServiceUnavailable("Codejail API Service is unavailable.")
+        mock_remote_exec.side_effect = error
+
+        with pytest.raises(CodejailServiceUnavailable) as exc_info:
+            safe_exec("a = 1", {})
+        assert exc_info.value is error
 
     def test_set_values(self):
         """Verify assignment of values in safe_exec."""

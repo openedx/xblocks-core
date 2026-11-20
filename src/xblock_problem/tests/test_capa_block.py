@@ -22,6 +22,7 @@ from django.test import override_settings
 from django.utils.encoding import smart_str
 from lxml import etree
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
+from web_fragments.fragment import Fragment
 from webob.multidict import MultiDict
 from xblock.exceptions import NotFoundError
 from xblock.field_data import DictFieldData
@@ -4170,3 +4171,48 @@ class ProblemBlockReportGenerationTest(unittest.TestCase):
                 )
             )
             assert "Python Error: No Answer Retrieved" in list(report_data[0][1].values())
+
+
+class ProblemBlockI18nJsCatalogTest(unittest.TestCase):
+    """Tests for loading the block's namespaced JavaScript translation catalog."""
+
+    def test_namespace(self):
+        assert ProblemBlock.i18n_js_namespace == "XBlockProblemI18N"
+        assert ProblemBlock.get_i18n_js_namespace() == "XBlockProblemI18N"
+
+    def test_no_catalog_without_url(self):
+        """No script is added when there is no catalog or the i18n service can't provide one."""
+        no_catalog = Mock()
+        no_catalog.get_javascript_i18n_catalog_url.return_value = None
+        for i18n_service in (no_catalog, Mock(spec=[])):
+            with self.subTest(i18n_service=i18n_service):
+                block = Mock()
+                block.runtime.service.return_value = i18n_service
+                fragment = Fragment()
+
+                ProblemBlock._add_i18n_js_catalog(block, fragment)  # pylint: disable=protected-access
+
+                assert not fragment.resources
+
+    def _view_js_with_catalog(self, block, view_name, context):
+        """Render ``view_name`` with an i18n service that has a catalog and return the JS resources."""
+        real_service = block.runtime.service
+        i18n_service = Mock()
+        i18n_service.get_javascript_i18n_catalog_url.return_value = "/static/catalog.js"
+
+        def service(blk, name):
+            return i18n_service if name == "i18n" else real_service(blk, name)
+
+        with (
+            patch.object(ProblemBlock, "get_html", return_value="<div></div>"),
+            patch.object(block.runtime, "service", side_effect=service),
+            patch.object(block.runtime, "local_resource_url", side_effect=lambda _block, uri: f"/{uri}"),
+        ):
+            fragment = getattr(block, view_name)(context)
+
+        return [r.data for r in fragment.resources if r.mimetype == "application/javascript"]
+
+    def test_student_view_loads_catalog_before_block_js(self):
+        js = self._view_js_with_catalog(CapaFactory.create(), "student_view", {})
+        assert js[0] == "/static/catalog.js"
+        assert js[1].endswith("ProblemBlockDisplay.js")

@@ -129,6 +129,7 @@ class VideoBlock(
     """
 
     is_extracted = True
+    i18n_js_namespace = "XBlockVideoI18N"
     has_custom_completion = True
     completion_mode = XBlockCompletionMode.COMPLETABLE
 
@@ -252,12 +253,26 @@ class VideoBlock(
         """
         return Fragment(f'<div data-metadata="{json.dumps(self.editable_metadata_fields, cls=EdxJSONEncoder)}"></div>')
 
+    def _add_i18n_js_catalog(self, fragment):
+        """
+        Add this block's JavaScript translation catalog to the fragment, if the runtime provides one.
+
+        The catalog defines ``window.XBlockVideoI18N`` (see ``i18n_js_namespace``).
+        Add it before the block's own JS.
+        """
+        i18n_service = self.runtime.service(self, "i18n")
+        url_getter = getattr(i18n_service, "get_javascript_i18n_catalog_url", None)
+        url = url_getter(self) if url_getter else None
+        if url:
+            fragment.add_javascript_url(url)
+
     def student_view(self, context=None):
         """
         Return the student view.
         """
         fragment = Fragment(self.get_html(context=context))
         fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/video.css"))
+        self._add_i18n_js_catalog(fragment)
         fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/video-xblock.js"))
         fragment.initialize_js("Video")
         return fragment
@@ -280,6 +295,7 @@ class VideoBlock(
 
         fragment = Fragment(self.get_html(view=PUBLIC_VIEW, context=context))
         fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/video.css"))
+        self._add_i18n_js_catalog(fragment)
         fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/video-xblock.js"))
         fragment.initialize_js("Video")
         return fragment

@@ -11,6 +11,9 @@ const defineFooter = new RegExp('(' + defineCallFooter.source + ')|('
     + defineDirectFooter.source + ')|('
     + defineFancyFooter.source + ')', 'm');
 
+// Resolve the block's namespaced translation catalog (see static/js/i18n_utils.js).
+const i18nUtils = path.resolve(__dirname, './static/js/i18n_utils.js');
+
 module.exports = {
     context: __dirname,
 
@@ -36,8 +39,7 @@ module.exports = {
     externals: {
         jquery: 'jQuery',
         underscore: '_',
-        $: 'jQuery',
-        gettext: 'gettext'
+        $: 'jQuery'
     },
 
     resolve: {
@@ -55,7 +57,9 @@ module.exports = {
             jQuery: 'jquery',
             'window.jQuery': 'jquery',
             CodeMirror: 'codemirror',
-            'edx.HtmlUtils': 'edx-ui-toolkit/js/utils/html-utils'
+            'edx.HtmlUtils': 'edx-ui-toolkit/js/utils/html-utils',
+            gettext: [i18nUtils, 'gettext'],
+            ngettext: [i18nUtils, 'ngettext']
         }),
         new CopyWebpackPlugin({
             patterns: [

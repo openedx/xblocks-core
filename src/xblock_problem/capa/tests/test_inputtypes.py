@@ -519,6 +519,7 @@ class MatlabTest(unittest.TestCase):
             "button_enabled": True,
             "queue_len": "3",
             "matlab_editor_js": "/dummy-static/js/vendor/CodeMirror/octave.js",
+            "still_running_msg": "Your code is still being run. Refresh the page to see updates.",
             "response_data": {},
             "describedby_html": HTML('aria-describedby="status_prob_1_2"'),
         }
@@ -555,6 +556,7 @@ class MatlabTest(unittest.TestCase):
             "button_enabled": True,
             "queue_len": "3",
             "matlab_editor_js": "/dummy-static/js/vendor/CodeMirror/octave.js",
+            "still_running_msg": "Your code is still being run. Refresh the page to see updates.",
             "response_data": RESPONSE_DATA,
             "describedby_html": DESCRIBEDBY.format(status_id=prob_id),
         }
@@ -590,6 +592,7 @@ class MatlabTest(unittest.TestCase):
                 "button_enabled": False,
                 "queue_len": "0",
                 "matlab_editor_js": "/dummy-static/js/vendor/CodeMirror/octave.js",
+                "still_running_msg": "Your code is still being run. Refresh the page to see updates.",
                 "response_data": RESPONSE_DATA,
                 "describedby_html": DESCRIBEDBY.format(status_id=prob_id),
             }
@@ -625,6 +628,7 @@ class MatlabTest(unittest.TestCase):
             "button_enabled": True,
             "queue_len": "1",
             "matlab_editor_js": "/dummy-static/js/vendor/CodeMirror/octave.js",
+            "still_running_msg": "Your code is still being run. Refresh the page to see updates.",
             "response_data": RESPONSE_DATA,
             "describedby_html": DESCRIBEDBY.format(status_id=prob_id),
         }
@@ -764,6 +768,7 @@ class MatlabTest(unittest.TestCase):
         \'status\': Status(\'queued\'), \'response_data\': {}, \'queue_msg\': \'\', \'mode\': \'\',
         \'id\': \'prob_1_2\', \'queue_len\': \'3\', \'tabsize\': 4, \'STATIC_URL\': \'/dummy-static/\',
         \'linenumbers\': \'true\', \'cols\': \'80\', \'button_enabled\': True, \'rows\': \'10\',
+        \'still_running_msg\': \'Your code is still being run. Refresh the page to see updates.\',
         \'describedby_html\': Markup(\'aria-describedby="status_prob_1_2"\')"""
         expected_list = (textwrap.dedent(expected_string).replace("\n", " ").strip()).split(",")
         for index, value in enumerate(expected_list):
@@ -918,6 +923,7 @@ class MatlabTest(unittest.TestCase):
             "button_enabled": True,
             "queue_len": "3",
             "matlab_editor_js": "/dummy-static/js/vendor/CodeMirror/octave.js",
+            "still_running_msg": "Your code is still being run. Refresh the page to see updates.",
             "response_data": {},
             "describedby_html": f'aria-describedby="status_{prob_id}"',
         }

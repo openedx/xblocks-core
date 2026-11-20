@@ -2,9 +2,10 @@
 
 import json
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
 from lxml import etree
+from web_fragments.fragment import Fragment
 from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
 from xblock.test.tools import TestRuntime
@@ -159,3 +160,40 @@ class AnnotatableBlockTestCase(unittest.TestCase):
         self.assertEqual(response_body["result"], "success")
         self.assertEqual(self.annotatable.display_name, "New Display Name")
         self.assertEqual(self.annotatable.data, self.sample_xml)
+
+
+class AnnotatableBlockI18nJsCatalogTest(unittest.TestCase):
+    """Tests for loading the block's namespaced JavaScript translation catalog."""
+
+    def test_namespace(self):
+        assert AnnotatableBlock.i18n_js_namespace == "XBlockAnnotatableI18N"
+        assert AnnotatableBlock.get_i18n_js_namespace() == "XBlockAnnotatableI18N"
+
+    def test_no_catalog_without_url(self):
+        """No script is added when there is no catalog or the i18n service can't provide one."""
+        no_catalog = Mock()
+        no_catalog.get_javascript_i18n_catalog_url.return_value = None
+        for i18n_service in (no_catalog, Mock(spec=[])):
+            with self.subTest(i18n_service=i18n_service):
+                block = Mock()
+                block.runtime.service.return_value = i18n_service
+                fragment = Fragment()
+
+                AnnotatableBlock._add_i18n_js_catalog(block, fragment)  # pylint: disable=protected-access
+
+                assert not fragment.resources
+
+    def test_student_view_loads_catalog_before_block_js(self):
+        runtime = TestRuntime()
+        block = AnnotatableBlock(
+            runtime,
+            DictFieldData({"data": AnnotatableBlockTestCase.sample_xml}),
+            ScopeIds("user_id", "block_type", "block_id", "context_key"),
+        )
+        with patch("xblock.runtime.NullI18nService.get_javascript_i18n_catalog_url", return_value="/static/catalog.js"):
+            fragment = block.student_view()
+
+        js = [r for r in fragment.resources if r.mimetype == "application/javascript"]
+        assert js[0].kind == "url"
+        assert js[0].data == "/static/catalog.js"
+        assert "function Annotatable(" in js[1].data

@@ -507,6 +507,7 @@ class LoncapaResponse(six.with_metaclass(abc.ABCMeta)):
                     slug=self.id,
                     random_seed=self.context["seed"],
                     unsafely=self.capa_system.can_execute_unsafe_code(),
+                    gettext=self.capa_system.i18n.gettext,
                 )
             except Exception as err:
                 _ = self.capa_system.i18n.gettext
@@ -2154,6 +2155,7 @@ class CustomResponse(LoncapaResponse):
                             slug=self.id,
                             random_seed=self.context["seed"],
                             unsafely=self.capa_system.can_execute_unsafe_code(),
+                            gettext=self.capa_system.i18n.gettext,
                         )
                         return globals_dict["cfn_return"]
 
@@ -2304,6 +2306,7 @@ class CustomResponse(LoncapaResponse):
                     slug=self.id,
                     random_seed=self.context["seed"],
                     unsafely=self.capa_system.can_execute_unsafe_code(),
+                    gettext=self.capa_system.i18n.gettext,
                 )
             except Exception as err:  # pylint: disable=broad-exception-caught
                 self._handle_exec_exception(err)
@@ -3251,6 +3254,7 @@ class SchematicResponse(LoncapaResponse):
                 slug=self.id,
                 random_seed=self.context["seed"],
                 unsafely=self.capa_system.can_execute_unsafe_code(),
+                gettext=self.capa_system.i18n.gettext,
             )
         except Exception as err:
             _ = self.capa_system.i18n.gettext

@@ -545,3 +545,14 @@ class LTIBlockTest(TestCase):
         Tests that LTI parameter context_id is equal to course_id.
         """
         assert str(self.context_key) == self.xblock.context_id
+
+    def test_preview_handler_renders_with_i18n_service(self):
+        """lti_form.html is rendered with the block's i18n service so its strings use the block catalog."""
+        with (
+            patch.object(LTIBlock, "get_context", return_value={}),
+            patch("xblock_lti.block.resource_loader.render_django_template", return_value="") as mock_render,
+        ):
+            self.xblock.preview_handler(None, None)
+
+        assert mock_render.call_args.args[0] == "templates/lti_form.html"
+        assert mock_render.call_args.kwargs["i18n_service"] is self.runtime.service(self.xblock, "i18n")

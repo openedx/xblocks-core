@@ -1,4 +1,13 @@
 (function(requirejs, require, define) {
+    /*
+    Use the Problem block's translation catalog (window.XBlockProblemI18N, loaded by the
+    block's view) and fall back to the platform's global catalog.
+    */
+    function gettext(msgid) {
+        var catalog = window.XBlockProblemI18N || window;
+        return catalog.gettext ? catalog.gettext(msgid) : msgid;
+    }
+
     define(['edx-ui-toolkit/js/utils/html-utils'], function(HtmlUtils) {
         return BaseImage;
 

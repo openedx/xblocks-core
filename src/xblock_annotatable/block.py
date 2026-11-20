@@ -43,6 +43,7 @@ class AnnotatableBlock(LegacyXmlMixin, XBlock):
 
     # Indicates that this XBlock has been extracted from edx-platform.
     is_extracted = True
+    i18n_js_namespace = "XBlockAnnotatableI18N"
 
     display_name = String(
         display_name=_("Display Name"),
@@ -184,6 +185,19 @@ class AnnotatableBlock(LegacyXmlMixin, XBlock):
             "content_html": self._render_content(),
         }
 
+    def _add_i18n_js_catalog(self, fragment):
+        """
+        Add this block's JavaScript translation catalog to the fragment, if the runtime provides one.
+
+        The catalog defines ``window.XBlockAnnotatableI18N`` (see ``i18n_js_namespace``).
+        Add it before the block's own JS.
+        """
+        i18n_service = self.runtime.service(self, "i18n")
+        url_getter = getattr(i18n_service, "get_javascript_i18n_catalog_url", None)
+        url = url_getter(self) if url_getter else None
+        if url:
+            fragment.add_javascript_url(url)
+
     def student_view(self, context=None):  # pylint: disable=unused-argument
         """Renders the output that a student will see."""
         frag = Fragment()
@@ -195,6 +209,7 @@ class AnnotatableBlock(LegacyXmlMixin, XBlock):
             )
         )
         frag.add_css(resource_loader.load_unicode("static/css/annotatable.css"))
+        self._add_i18n_js_catalog(frag)
         frag.add_javascript(resource_loader.load_unicode("static/js/src/annotatable.js"))
         frag.initialize_js("Annotatable")
         return frag

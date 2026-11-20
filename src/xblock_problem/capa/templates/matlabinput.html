@@ -81,7 +81,7 @@
                         // The XML parsing that capa uses doesn't handle the greater-than symbol properly here, so we are forced to work around it.
                         // The backend MatlabInput code will also terminate after 35 seconds, so this is mostly a protective measure.
                         if (next_timeout === 64000) {
-                            gentle_alert(problem_elt, gettext("Your code is still being run. Refresh the page to see updates."));
+                            gentle_alert(problem_elt, "{{ still_running_msg|escapejs }}");
                         }
                         window.setTimeout(function(){ poll(next_timeout); }, next_timeout);
                    }

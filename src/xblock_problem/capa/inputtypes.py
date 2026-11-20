@@ -948,6 +948,8 @@ class MatlabInput(CodeInput):
             "button_enabled": self.button_enabled(),
             "matlab_editor_js": f"{self.capa_system.STATIC_URL}js/vendor/CodeMirror/octave.js",
             "msg": sanitize_html(self.msg),  # sanitize msg before rendering into template
+            # Translated here, not in the template's inline JS, so it comes from the block's catalog.
+            "still_running_msg": _("Your code is still being run. Refresh the page to see updates."),
         }
         return extra_context
 
