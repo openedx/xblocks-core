@@ -48,7 +48,6 @@ dependencies = [
     "pytz",
     "random2",
     "requests",
-    "shapely",
     "simplejson",
     "webob",
     "wrapt",

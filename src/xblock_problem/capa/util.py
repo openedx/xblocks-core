@@ -6,6 +6,7 @@ import logging
 import re
 from cmath import isinf, isnan
 from decimal import Decimal
+from fractions import Fraction
 
 import nh3
 from calc import evaluator
@@ -250,3 +251,74 @@ def get_course_id_from_capa_block(capa_block):
         #     raise a type error when we try to serialize them into a course
         #     run key. This is tolerable because such course runs are deprecated.
         return None
+
+
+def is_inside_convex_hull(points, x, y):
+    """
+    Return True if (x, y) is strictly inside the convex hull of points.
+
+    A point on an edge or a vertex of the hull is not inside it. Nothing is
+    inside a hull that has no area, which is what fewer than three points, or
+    points that are all on one line, produce.
+
+    Arguments:
+        points (list): [x, y] coordinates, in any order, as parsed from JSON.
+            A third (z) coordinate is allowed and ignored.
+        x (int): x coordinate of the point to test
+        y (int): y coordinate of the point to test
+
+    Raises a ValueError, TypeError, or OverflowError if points has anything in
+    it that is not a finite [x, y] coordinate.
+    """
+    hull = _convex_hull([_exact_xy(point) for point in points])
+    if len(hull) < 3:
+        return False
+    target = (Fraction(x), Fraction(y))
+    # The hull is counterclockwise, so its inside is to the left of every edge.
+    return all(_cross(hull[i - 1], hull[i], target) > 0 for i in range(len(hull)))
+
+
+def _exact_xy(point):
+    """
+    Return the (x, y) of a JSON coordinate as Fractions.
+
+    Fractions keep the arithmetic exact, so a test point that is on or right
+    next to an edge never lands on the wrong side of it from rounding error.
+    """
+    if not isinstance(point, list) or len(point) not in (2, 3):
+        raise ValueError(f"Expected an [x, y] coordinate, got {point!r}")
+    # float() takes numeric strings like "10" as well as numbers, and then
+    # Fraction() rejects NaN and infinity.
+    return Fraction(float(point[0])), Fraction(float(point[1]))
+
+
+def _cross(origin, a, b):
+    """
+    Return the cross product of the vectors origin->a and origin->b.
+
+    It is positive if b is to the left of the line from origin through a,
+    negative if b is to the right, and zero if all three are on one line.
+    """
+    return (a[0] - origin[0]) * (b[1] - origin[1]) - (a[1] - origin[1]) * (b[0] - origin[0])
+
+
+def _convex_hull(points):
+    """
+    Return the corners of the convex hull of points, in counterclockwise order.
+
+    This is Andrew's monotone chain algorithm. Points inside the hull or along
+    its edges are left out, so a hull with no area has fewer than three corners.
+    """
+    points = sorted(set(points))
+    if len(points) < 3:
+        return points
+
+    def half_hull(ordered_points):
+        chain = []
+        for point in ordered_points:
+            while len(chain) >= 2 and _cross(chain[-2], chain[-1], point) <= 0:
+                chain.pop()
+            chain.append(point)
+        return chain[:-1]  # The last point starts the other half.
+
+    return half_hull(points) + half_hull(reversed(points))

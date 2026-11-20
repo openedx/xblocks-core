@@ -35,7 +35,6 @@ from django.utils import html
 from lxml import etree
 from lxml.html.soupparser import fromstring as fromstring_bs  # uses Beautiful Soup!!! FIXME?
 from pyparsing import ParseException
-from shapely.geometry import MultiPoint, Point
 from symmath import symmath_check
 
 from xblock_problem.capa.safe_exec import safe_exec
@@ -52,6 +51,7 @@ from .util import (
     find_with_default,
     get_course_id_from_capa_block,
     get_inner_html_from_xpath,
+    is_inside_convex_hull,
     is_list_of_files,
 )
 
@@ -3301,6 +3301,11 @@ class ImageResponse(LoncapaResponse):
     tags = ["imageresponse"]
     allowed_inputfields = ["imageinput"]
 
+    # The most points that all the regions of one <imageinput> can have between
+    # them. Checking a click takes longer the more points there are, so this
+    # keeps grading fast. No real problem needs anywhere near this many.
+    max_region_points = 1000
+
     def __init__(self, *args, **kwargs):
         self.ielements = []
         super().__init__(*args, **kwargs)
@@ -3367,9 +3372,16 @@ class ImageResponse(LoncapaResponse):
                         # instead of [[[1,2],[3,4],[5,6], [[1,2],[3,4],[5,6]]]
                         # or [[[1,2],[3,4],[5,6]]] - multiple regions syntax
                         parsed_region = [parsed_region]
+                    # A region that isn't a list is an error, but that is left
+                    # for is_inside_convex_hull() to raise.
+                    point_count = sum(len(region) for region in parsed_region if isinstance(region, list))
+                    if point_count > self.max_region_points:
+                        raise ValueError(
+                            f"The regions of {aid} have {point_count} points in total, "
+                            f"and the most allowed is {self.max_region_points}"
+                        )
                     for region in parsed_region:
-                        polygon = MultiPoint(region).convex_hull
-                        if polygon.geom_type == "Polygon" and polygon.contains(Point(ans_x, ans_y)):
+                        if is_inside_convex_hull(region, ans_x, ans_y):
                             correct_map.set(aid, "correct")
                             break
         return correct_map

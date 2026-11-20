@@ -288,6 +288,60 @@ class ImageResponseTest(ResponseTest):
         incorrect_inputs = ["[0,0]", "[3,5]", "[5,15]", "[30, 12]"]
         self.assert_multiple_grade(problem, correct_inputs, incorrect_inputs)
 
+    def test_region_border_grade(self):
+        """Test that the border of a region is not part of it, unlike the border of a rectangle."""
+        problem = self.build_problem(regions="[[10,10], [20,10], [20,20], [10,20]]")
+        correct_inputs = ["[15,15]", "[11,11]", "[19,19]", "[11,19]"]
+        incorrect_inputs = ["[10,15]", "[20,15]", "[15,10]", "[15,20]", "[10,10]", "[20,20]", "[21,15]"]
+        self.assert_multiple_grade(problem, correct_inputs, incorrect_inputs)
+
+    def test_region_point_order_grade(self):
+        """Test that a region is the convex hull of its points, whatever order they are in."""
+        # Connected in this order, the points would make a bowtie that doesn't
+        # have [15,12] or [15,18] in it, and [15,14] would not be in the region.
+        problem = self.build_problem(regions="[[10,10], [20,20], [20,10], [10,20], [15,14]]")
+        correct_inputs = ["[15,12]", "[15,18]", "[12,15]", "[18,15]", "[15,14]"]
+        incorrect_inputs = ["[9,15]", "[21,15]", "[15,9]", "[15,21]"]
+        self.assert_multiple_grade(problem, correct_inputs, incorrect_inputs)
+
+    def test_fractional_region_grade(self):
+        """Test grading for a region with coordinates that aren't whole numbers."""
+        problem = self.build_problem(regions="[[0.5,0.5], [10.5,0.5], [0.5,10.5]]")
+        correct_inputs = ["[1,1]", "[5,5]", "[1,9]"]
+        incorrect_inputs = ["[0,0]", "[5,6]", "[6,6]", "[0,5]"]
+        self.assert_multiple_grade(problem, correct_inputs, incorrect_inputs)
+
+    def test_region_without_area_grade(self):
+        """Test that nothing is correct for a region that is only a point or a line."""
+        region_strs = ["[[10,10]]", "[[10,10], [20,20]]", "[[10,10], [15,15], [20,20]]", "[[10,10], [10,10], [10,10]]"]
+        for region_str in region_strs:
+            problem = self.build_problem(regions=region_str)
+            self.assert_multiple_grade(problem, [], ["[10,10]", "[15,15]", "[20,20]", "[12,17]"])
+
+    def test_region_point_limit_one_region(self):
+        """Test that a region can have 1000 points, and that more is an error."""
+        # These are on a parabola, so every one of them is a corner of the region.
+        points = [[x, x * x] for x in range(1001)]
+        problem = self.build_problem(regions=json.dumps(points[:1000]))
+        self.assert_multiple_grade(problem, ["[500,400000]"], ["[500,200000]"])
+
+        problem = self.build_problem(regions=json.dumps(points))
+        with pytest.raises(ValueError, match="1001 points in total, and the most allowed is 1000"):
+            problem.grade_answers({"1_2_1": "[500,400000]"})
+
+    def test_region_point_limit_many_regions(self):
+        """Test that the limit of 1000 points is on all of the regions together."""
+        # 250 squares in a row, with 4 points each
+        squares = [[[x, 0], [x + 10, 0], [x + 10, 10], [x, 10]] for x in range(0, 2500, 10)]
+        problem = self.build_problem(regions=json.dumps(squares))
+        self.assert_multiple_grade(problem, ["[5,5]", "[2495,5]"], ["[5,20]"])
+
+        # One more region is an error, even for a click in the first region.
+        problem = self.build_problem(regions=json.dumps(squares + [[[0, 20], [10, 20], [5, 30]]]))
+        for click in ["[5,5]", "[5,25]", "[5,50]"]:
+            with pytest.raises(ValueError, match="1003 points in total, and the most allowed is 1000"):
+                problem.grade_answers({"1_2_1": click})
+
     def test_multiple_regions_grade(self):
         """Test grading for multiple regions in ImageResponse."""
         # Define multiple regions that the user can select

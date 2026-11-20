@@ -5,6 +5,7 @@ Tests capa util
 import unittest
 
 import ddt
+import pytest
 from lxml import etree
 
 from xblock_problem.capa.tests.helpers import mock_capa_system
@@ -12,6 +13,7 @@ from xblock_problem.capa.util import (
     compare_with_tolerance,
     contextualize_text,
     get_inner_html_from_xpath,
+    is_inside_convex_hull,
     remove_markup,
     sanitize_html,
 )
@@ -165,3 +167,73 @@ class UtilTest(unittest.TestCase):
         expected_text = "$あなたあなたあなたあなた あなたhi"
         contextual_text = contextualize_text(text, context)
         assert expected_text == contextual_text
+
+    @ddt.data(
+        # A triangle: only points strictly inside it count.
+        ([[0, 0], [10, 0], [0, 10]], 2, 2, True),
+        ([[0, 0], [10, 0], [0, 10]], 6, 6, False),
+        ([[0, 0], [10, 0], [0, 10]], 5, 0, False),  # on an edge
+        ([[0, 0], [10, 0], [0, 10]], 5, 5, False),  # on the diagonal edge
+        ([[0, 0], [10, 0], [0, 10]], 0, 0, False),  # on a corner
+        # The order of the points doesn't matter.
+        ([[0, 10], [10, 0], [0, 0]], 2, 2, True),
+        ([[0, 0], [10, 10], [10, 0], [0, 10]], 5, 2, True),
+        ([[0, 0], [10, 10], [10, 0], [0, 10]], 2, 5, True),
+        # Points that aren't corners of the hull don't change it.
+        ([[0, 0], [10, 0], [10, 10], [5, 1], [0, 10]], 5, 1, True),
+        ([[0, 0], [10, 0], [10, 10], [5, 1], [0, 10]], 5, 5, True),
+        ([[0, 0], [5, 0], [10, 0], [10, 10], [0, 10]], 5, 0, False),
+        ([[0, 0], [5, 0], [10, 0], [10, 10], [0, 10]], 5, 1, True),
+        ([[0, 0], [0, 0], [10, 0], [10, 0], [0, 10]], 2, 2, True),
+        # Negative and fractional coordinates.
+        ([[-5, -5], [10, 0], [0, 10]], 0, 0, True),
+        ([[0.5, 0.5], [10.5, 0.5], [0.5, 10.5]], 1, 1, True),
+        ([[0.5, 0.5], [10.5, 0.5], [0.5, 10.5]], 5, 6, False),  # on an edge
+        # A z coordinate is ignored.
+        ([[0, 0, 7], [10, 0, 8], [0, 10]], 2, 2, True),
+        # Numeric strings are accepted.
+        ([["0", "0"], ["10", "0"], ["0", "1e1"]], 2, 2, True),
+        # Hulls with no area don't contain anything.
+        ([], 0, 0, False),
+        ([[1, 1]], 1, 1, False),
+        ([[1, 1], [3, 3]], 2, 2, False),
+        ([[0, 0], [5, 5], [10, 10]], 5, 5, False),
+        ([[1, 1], [1, 1], [1, 1]], 1, 1, False),
+    )
+    @ddt.unpack
+    def test_is_inside_convex_hull(self, points, x, y, expected):
+        """Test which points are strictly inside the convex hull of a set of points."""
+        assert is_inside_convex_hull(points, x, y) is expected
+
+    @ddt.data(
+        ([[0, 0], [1.1, 5.5], [0, 9]], True),
+        ([[0, 0], [1.1, 5.5], [9, 0]], False),
+    )
+    @ddt.unpack
+    def test_is_inside_convex_hull_is_exact(self, points, expected):
+        """
+        Test that a point right next to an edge is put on the correct side of it.
+
+        (1, 5) would be on the line from (0, 0) to (1.1, 5.5), except that the
+        closest float to 1.1 is a tiny bit more than 1.1. Float arithmetic
+        rounds that difference away and gets these wrong.
+        """
+        assert is_inside_convex_hull(points, 1, 5) is expected
+
+    @ddt.data(
+        [[0], [10, 0], [0, 10]],
+        [[0, 0, 0, 0], [10, 0, 0, 0], [0, 10, 0, 0]],
+        [[], [10, 0], [0, 10]],
+        ["12", [10, 0], [0, 10]],
+        [{"x": 0, "y": 0}, [10, 0], [0, 10]],
+        [[[0, 0], [1, 1]], [[2, 2], [3, 3]]],
+        [["a", 0], [10, 0], [0, 10]],
+        [[None, 0], [10, 0], [0, 10]],
+        [[float("nan"), 0], [10, 0], [0, 10]],
+        [[float("inf"), 0], [10, 0], [0, 10]],
+        [[10**400, 0], [10, 0], [0, 10]],
+    )
+    def test_is_inside_convex_hull_bad_points(self, points):
+        """Test that points which aren't finite [x, y] coordinates are an error."""
+        with pytest.raises((ValueError, TypeError, OverflowError)):
+            is_inside_convex_hull(points, 2, 2)
