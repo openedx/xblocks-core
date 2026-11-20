@@ -2578,15 +2578,13 @@ ScoreMessage = namedtuple("ScoreMessage", ["valid", "correct", "points", "msg"])
 @registry.register
 class CodeResponse(LoncapaResponse):
     """
-    Grade student code using an external queueing server, called 'xqueue'.
+    Grade student code with an external grader that pulls submissions from the LMS.
 
-    Expects 'xqueue' dict in LoncapaSystem with the following properties that are
+    Expects 'xqueue' object in LoncapaSystem with the following properties that are
     needed by CodeResponse::
 
         capa_system.xqueue = object with properties:
             interface: XQueueInterface object.
-            construct_callback: Per-StudentModule callback URL constructor,
-                defaults to using 'score_update' as the correct dispatch (function).
             default_queuename: Default queue name to submit request (string).
         }
 
@@ -2642,13 +2640,6 @@ class CodeResponse(LoncapaResponse):
             "grader_payload": grader_payload,
         }
 
-        # matlab api key can be defined in course settings. if so, add it to the grader payload
-        api_key = getattr(self.capa_system, "matlab_api_key", None)
-        if api_key and self.xml.find("matlabinput") is not None:
-            self.payload["token"] = api_key
-            self.payload["endpoint_version"] = "2"
-            self.payload["requestor_id"] = self.capa_system.anonymous_student_id
-
         self.initial_display = find_with_default(codeparam, "initial_display", "")
         _ = self.capa_system.i18n.gettext
         self.answer = find_with_default(codeparam, "answer_display", _("No answer provided."))
@@ -2683,8 +2674,7 @@ class CodeResponse(LoncapaResponse):
 
         # Generate header
         queuekey = make_hashkey(str(self.capa_system.seed) + qtime + anonymous_student_id + self.answer_id)
-        callback_url = self.capa_system.xqueue.construct_callback()
-        xheader = make_xheader(lms_callback_url=callback_url, lms_key=queuekey, queue_name=self.queue_name)
+        xheader = make_xheader(lms_key=queuekey, queue_name=self.queue_name)
 
         # Generate body
         if is_list_of_files(submission):
