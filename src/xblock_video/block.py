@@ -519,7 +519,9 @@ class VideoBlock(
         if video_config_service:
             template_context.update(video_config_service.get_public_sharing_context(self, self.context_key))
 
-        return loader.render_django_template("templates/video.html", template_context)
+        return loader.render_django_template(
+            "templates/video.html", template_context, i18n_service=self.runtime.service(self, "i18n")
+        )
 
     def is_transcript_feedback_enabled(self):
         """

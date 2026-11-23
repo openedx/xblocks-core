@@ -7,7 +7,6 @@ import urllib
 
 import markupsafe
 from django.conf import settings
-from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import get_language_bidi
 from web_fragments.fragment import Fragment
@@ -17,6 +16,7 @@ from xblock.fields import UNIQUE_ID, Scope, String
 from xblock.utils.resources import ResourceLoader
 from xblock.utils.studio_editable import StudioEditableXBlockMixin
 
+from xblocks_core.django_templates import render_django_template
 from xblocks_core.legacy_utils.xml_utils import LegacyXmlMixin
 
 log = logging.getLogger(__name__)
@@ -154,6 +154,10 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
         if not self.is_visible:
             return fragment
 
+        # Translate with this block's own catalog. The module-level ``_`` only marks strings.
+        i18n_service = self.runtime.service(self, "i18n")
+        _ = i18n_service.gettext
+
         self.add_resource_urls(fragment)
         login_msg = ""
 
@@ -196,7 +200,11 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
                 "PLATFORM_NAME": settings.PLATFORM_NAME,
                 "enable_discussion_home_panel": settings.FEATURES.get("ENABLE_DISCUSSION_HOME_PANEL", False),
             }
-            fragment.add_content(render_to_string("discussion_templates/_discussion_inline.html", context))
+            fragment.add_content(
+                render_django_template(
+                    "discussion_templates/_discussion_inline.html", context, i18n_service=i18n_service
+                )
+            )
 
         fragment.initialize_js("DiscussionInlineBlock")
 
@@ -211,7 +219,13 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
             "discussion_id": self.discussion_id,
             "is_visible": self.is_visible,
         }
-        fragment.add_content(loader.render_django_template("templates/_discussion_inline_studio.html", context))
+        fragment.add_content(
+            loader.render_django_template(
+                "templates/_discussion_inline_studio.html",
+                context,
+                i18n_service=self.runtime.service(self, "i18n"),
+            )
+        )
         return fragment
 
     def student_view_data(self):

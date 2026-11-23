@@ -18,7 +18,6 @@ import traceback
 from zoneinfo import ZoneInfo
 
 import nh3
-from django.template.loader import render_to_string
 from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
 from lxml import etree
@@ -52,6 +51,7 @@ from xblock_problem.capa.inputtypes import Status
 from xblock_problem.capa.responsetypes import LoncapaProblemError, ResponseError, StudentInputError
 from xblock_problem.capa.util import convert_files_to_filenames, get_inner_html_from_xpath
 from xblock_problem.markup import HTML, Text
+from xblocks_core.django_templates import render_django_template
 from xblocks_core.legacy_utils.xml_utils import LegacyXmlMixin, is_pointer_tag
 
 log = logging.getLogger("edx.courseware")
@@ -428,6 +428,15 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
         url = url_getter(self) if url_getter else None
         if url:
             fragment.add_javascript_url(url)
+
+    def _render_django_template(self, template_name, context):
+        """
+        Render one of this block's Django templates (``problem.html``, the capa input templates, ...).
+
+        ``{% trans %}`` in those templates translates through this block's i18n service, i.e. the
+        block's own catalog, not Django's global catalog, which does not contain the block's strings.
+        """
+        return render_django_template(template_name, context, i18n_service=self.runtime.service(self, "i18n"))
 
     def student_view(self, _context, show_detailed_errors=False):
         """
@@ -936,7 +945,7 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
             get_python_lib_zip=sandbox_service.get_python_lib_zip,
             DEBUG=self.debug,
             i18n=self.runtime.service(self, "i18n"),
-            render_template=render_to_string,
+            render_template=self._render_django_template,
             resources_fs=self.runtime.resources_fs,
             seed=seed,  # Why do we do this if we have self.seed?
             xqueue=None if is_studio else xqueue_service,
@@ -1039,7 +1048,7 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
         """
         curr_score, total_possible = self.get_display_progress()
 
-        return render_to_string(
+        return self._render_django_template(
             "problem_ajax.html",
             {
                 "element_id": self.usage_key.html_id(),
@@ -1388,7 +1397,7 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
             "submit_disabled_cta": submit_disabled_ctas[0] if submit_disabled_ctas else None,
         }
 
-        html = render_to_string("problem.html", context)
+        html = self._render_django_template("problem.html", context)
 
         if encapsulate:
             html = HTML('<div id="problem_{id}" class="problem" data-url="{ajax_url}">{html}</div>').format(
@@ -1696,7 +1705,7 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
 
         return {
             "answers": new_answers,
-            "correct_status_html": render_to_string(
+            "correct_status_html": self._render_django_template(
                 "status_span.html",
                 {"status": Status("correct", self.runtime.service(self, "i18n").gettext)},
             ),

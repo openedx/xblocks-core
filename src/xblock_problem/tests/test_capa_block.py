@@ -35,6 +35,7 @@ from xblock_problem.capa.correctmap import CorrectMap
 from xblock_problem.capa.responsetypes import LoncapaProblemError, ResponseError, StudentInputError
 from xblock_problem.capa.xqueue_interface import XQueueInterface
 from xblock_problem.tests import DATA_DIR
+from xblocks_core.tests.i18n import FakeI18nService
 
 from ..block import RANDOMIZATION, SHOWANSWER
 from . import get_test_system
@@ -2292,7 +2293,7 @@ class ProblemBlockTest(unittest.TestCase):
         assert html is not None
         # assert that we got here without exploding
 
-    @patch("xblock_problem.block.render_to_string")
+    @patch("xblock_problem.block.render_django_template")
     def test_get_problem_html(self, render_template):
         """Verify problem HTML rendering uses correct template context and encapsulation."""
         render_template.return_value = "<div>Test Template HTML</div>"
@@ -2354,7 +2355,7 @@ class ProblemBlockTest(unittest.TestCase):
         </demandhint>
         </problem>"""
 
-    @patch("xblock_problem.block.render_to_string")
+    @patch("xblock_problem.block.render_django_template")
     def test_demand_hint(self, render_template):
         """Verify image-based demand hints render correctly without static URL issues."""
         # HTML generation is mocked out to be meaningless here, so instead we check
@@ -2379,7 +2380,7 @@ class ProblemBlockTest(unittest.TestCase):
         assert result["hint_index"] == 0
         assert result["should_enable_next_hint"]
 
-    @patch("xblock_problem.block.render_to_string")
+    @patch("xblock_problem.block.render_django_template")
     def test_single_demand_hint(self, render_template):
         """
         Test the hint button enabled state when there is just a single hint.
@@ -2410,7 +2411,7 @@ class ProblemBlockTest(unittest.TestCase):
         assert result["hint_index"] == 0
         assert not result["should_enable_next_hint"]
 
-    @patch("xblock_problem.block.render_to_string")
+    @patch("xblock_problem.block.render_django_template")
     def test_image_hint(self, render_template):
         """
         Test the hint button shows an image without the static url.
@@ -2473,7 +2474,7 @@ class ProblemBlockTest(unittest.TestCase):
         intersection = set(block2.input_state.keys()).intersection(set(block1.input_state.keys()))
         assert len(intersection) == 0
 
-    @patch("xblock_problem.block.render_to_string")
+    @patch("xblock_problem.block.render_django_template")
     def test_get_problem_html_error(self, render_template):
         """
         In production, when an error occurs with the problem HTML
@@ -2503,7 +2504,7 @@ class ProblemBlockTest(unittest.TestCase):
         # Expect that the block has created a new dummy problem with the error
         assert original_problem != block.lcp
 
-    @patch("xblock_problem.block.render_to_string")
+    @patch("xblock_problem.block.render_django_template")
     def test_get_problem_html_error_preview(self, render_template):
         """
         Test the html response when an error occurs with DEBUG off in Studio.
@@ -2529,7 +2530,7 @@ class ProblemBlockTest(unittest.TestCase):
         assert error_msg in context["problem"]["html"]
 
     @override_settings(DEBUG=True)
-    @patch("xblock_problem.block.render_to_string")
+    @patch("xblock_problem.block.render_django_template")
     def test_get_problem_html_error_w_debug(self, render_template):
         """
         Test the html response when an error occurs with DEBUG on
@@ -2920,7 +2921,7 @@ class ProblemBlockTest(unittest.TestCase):
         "",
         "   ",
     )
-    @patch("xblock_problem.block.render_to_string")
+    @patch("xblock_problem.block.render_django_template")
     def test_problem_no_display_name(self, display_name, render_template):
         """
         Verify that if problem display name is not provided then a default name is used.
@@ -4216,3 +4217,43 @@ class ProblemBlockI18nJsCatalogTest(unittest.TestCase):
         js = self._view_js_with_catalog(CapaFactory.create(), "student_view", {})
         assert js[0] == "/static/catalog.js"
         assert js[1].endswith("ProblemBlockDisplay.js")
+
+
+class ProblemBlockTemplateI18nTest(unittest.TestCase):
+    """The block's Django templates translate through its own i18n service, not Django's global catalog."""
+
+    OPTIONS_SR_TEXT = (
+        "Some problems have options such as save, reset, hints, or show answer. These options follow the Submit button."
+    )
+
+    def _block_with_i18n(self, catalog):
+        """Return a problem block whose runtime "i18n" service translates from ``catalog``."""
+        block = CapaFactory.create()
+        real_service = block.runtime.service
+        i18n_service = FakeI18nService(catalog)
+
+        def service(blk, name):
+            return i18n_service if name == "i18n" else real_service(blk, name)
+
+        patcher = patch.object(block.runtime, "service", side_effect=service)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        block.__dict__.pop("lcp", None)  # rebuild the capa system with the patched service
+        return block
+
+    def test_problem_html_uses_block_catalog(self):
+        """A string that only ``problem.html`` has (via ``{% trans %}``) is translated by the block catalog."""
+        block = self._block_with_i18n({self.OPTIONS_SR_TEXT: "OPCIONES TRADUCIDAS"})
+
+        html = block.get_problem_html(encapsulate=False)
+
+        assert "OPCIONES TRADUCIDAS" in html
+        assert self.OPTIONS_SR_TEXT not in html
+
+    def test_capa_templates_use_block_catalog(self):
+        """The capa system renders its input templates through the same block-aware renderer."""
+        block = self._block_with_i18n({})
+
+        render_template = block.lcp.capa_system.render_template
+        assert render_template.__func__ is ProblemBlock._render_django_template  # pylint: disable=protected-access
+        assert render_template.__self__ is block

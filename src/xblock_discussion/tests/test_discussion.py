@@ -7,12 +7,15 @@ from collections import namedtuple
 from unittest import TestCase, mock
 
 import ddt
+from django.conf import settings
+from django.test import override_settings
 from lxml import etree
 from xblock.field_data import DictFieldData
 from xblock.fields import NO_CACHE_VALUE, UNIQUE_ID, ScopeIds
 from xblock.runtime import Runtime
 
 from xblock_discussion import DiscussionXBlock
+from xblocks_core.tests.i18n import FakeI18nService
 
 
 def attribute_pair_repr(self):
@@ -180,3 +183,56 @@ class DiscussionXBlockImportExportTests(TestCase):
         block.add_xml_to_node(target_node)
         assert target_node.tag == "discussion"
         assert target_node.attrib["discussion_id"], discussion_id
+
+
+class DiscussionXBlockI18nTests(TestCase):
+    """
+    The block's views translate through its own i18n service, not Django's global catalog.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.i18n_service = FakeI18nService(
+            {
+                "Show Discussion": "MOSTRAR DISCUSION",
+                "Discussion": "DISCUSION",
+                "sign in": "INICIAR SESION",
+                "To view live discussions, click Preview or View Live in Unit Settings.": "VISTA PREVIA",
+            }
+        )
+        self.discussion_config = mock.Mock()
+        self.discussion_config.is_discussion_visible.return_value = True
+        self.discussion_config.is_discussion_enabled = True
+        self.discussion_config.has_permission.return_value = True
+        self.user = mock.Mock(is_authenticated=False)
+        services = {
+            "i18n": self.i18n_service,
+            "discussion_config_service": self.discussion_config,
+            "user": mock.Mock(_django_user=self.user),
+        }
+        self.runtime = mock.Mock(spec=Runtime)
+        self.runtime.service = mock.Mock(side_effect=lambda _block, name: services.get(name))
+        self.runtime.local_resource_url = mock.Mock(return_value="/static/resource")
+        keys = ScopeIds("any_user", "discussion", "def_id", "usage_id")
+        self.block = DiscussionXBlock(self.runtime, scope_ids=keys, field_data=DictFieldData({}))
+
+    @override_settings(
+        INSTALLED_APPS=settings.INSTALLED_APPS + ["xblock_discussion"], PLATFORM_NAME="Test", FEATURES={}
+    )
+    @mock.patch("xblock_discussion.block.reverse", return_value="/login")
+    def test_student_view_uses_block_catalog(self, _reverse):
+        """``_discussion_inline.html`` (``{% trans %}``) and the sign-in message (``_()``) use the block catalog."""
+        html = self.block.student_view().content
+
+        assert "MOSTRAR DISCUSION" in html
+        assert "Show Discussion" not in html
+        assert "DISCUSION" in html  # the default display name
+        assert "INICIAR SESION" in html
+        assert ">sign in<" not in html
+
+    def test_author_view_uses_block_catalog(self):
+        """``_discussion_inline_studio.html`` is rendered with the block's i18n service."""
+        html = self.block.author_view().content
+
+        assert "VISTA PREVIA" in html
+        assert "click Preview" not in html
