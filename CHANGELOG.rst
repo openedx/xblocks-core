@@ -14,6 +14,15 @@ Change Log
 Unreleased
 **********
 
+0.16.2 - 2026-11-23
+**********************************************
+
+Security
+========
+* Grade ``symbolicresponse`` problems inside the codejail sandbox instead of
+  evaluating learner input in the LMS process. A configured codejail (local or
+  the codejail REST service) is now required for this problem type.
+
 0.16.0 - 2026-04-21
 **********************************************
 
