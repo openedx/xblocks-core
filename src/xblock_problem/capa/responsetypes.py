@@ -12,7 +12,6 @@ import inspect
 import json
 import logging
 import math
-import numbers
 import re
 import sys
 import textwrap
@@ -24,7 +23,6 @@ from sys import float_info
 from zoneinfo import ZoneInfo
 
 import html5lib
-import numpy
 import random2 as random
 import requests
 import six
@@ -3174,20 +3172,6 @@ class FormulaResponse(LoncapaResponse):
             return True
         except StudentInputError:
             return False
-
-    def strip_dict(self, inp_d):
-        """
-        Takes a dict. Returns an identical dict, with all non-word
-        keys and all non-numeric values stripped out. All values also
-        converted to float. Used so we can safely use Python contexts.
-        """
-        inp_d = {
-            k: numpy.complex(inp_d[k])
-            for k in inp_d
-            if isinstance(k, str) and k.isalnum() and isinstance(inp_d[k], numbers.Number)
-        }
-
-        return inp_d
 
     def check_hint_condition(self, hxml_set, student_answers):
         given = student_answers[self.answer_id]
