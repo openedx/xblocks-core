@@ -74,11 +74,9 @@ pdf = "xblock_pdf:PDFBlock"
 
 [project.entry-points."lms.djangoapp"]
 xblock_problem_capa = "xblock_problem.capa.apps:CapaAppConfig"
-xblock_discussion = "xblock_discussion.apps:DiscussionAppConfig"
 
 [project.entry-points."cms.djangoapp"]
 xblock_problem_capa = "xblock_problem.capa.apps:CapaAppConfig"
-xblock_discussion = "xblock_discussion.apps:DiscussionAppConfig"
 
 [dependency-groups]
 test-base = [

@@ -11,35 +11,25 @@ class CapaAppConfig(AppConfig):
 
     Why are we registering this as a Django App?
     --------------------------------------------
-    By default, Django's template engine (specifically the `app_directories` loader)
-    only discovers `templates/` folders that belong to an app listed in `INSTALLED_APPS`.
+    The capa input templates reference assets under ``capa/static/`` (``js/capa/*``, ``images/*``,
+    ``applets/*``) with ``{% static %}``. Django's ``AppDirectoriesFinder`` only collects a ``static/``
+    directory that belongs to an app in ``INSTALLED_APPS``, so this app exists to get those assets
+    picked up by ``collectstatic`` in the LMS and CMS.
 
-    Since XBlocks are inherently isolated components, they are not typically added
-    to the LMS/CMS global `INSTALLED_APPS`. As a result, any standard Django templates
-    (.html files) inside this block would be invisible to the core Open edX platform
-    when it attempts to route or render them natively.
-
-    Instead of forcing repository consumers to manually modify `lms/envs/common.py`
-    or use deployment-specific Tutor plugins to append to `TEMPLATES['DIRS']`, we
-    leverage the Open edX Django App Plugin Framework (`plugin_app`). This hook
-    dynamically injects this module into `INSTALLED_APPS` at runtime.
-
-    This automatically exposes our `templates/` directory to the platform natively
-    without manual intervention.
+    Rather than asking every deployment to add this module to ``INSTALLED_APPS`` by hand, we use the
+    Open edX Django App Plugin Framework (``lms.djangoapp``/``cms.djangoapp`` entry points), which
+    injects it at runtime.
 
     References:
-
     - Open edX Plugin App Framework:
       https://docs.openedx.org/projects/edx-django-utils/en/latest/plugins/how_tos/how_to_create_a_plugin_app.html
-
-    - Django App Directories Loader:
-      https://docs.djangoproject.com/en/stable/ref/templates/api/#django.template.loaders.app_directories.Loader
-
+    - Django AppDirectoriesFinder:
+      https://docs.djangoproject.com/en/stable/ref/contrib/staticfiles/#django.contrib.staticfiles.finders.AppDirectoriesFinder
     """
 
     name = "xblock_problem.capa"
     label = "xblock_problem_capa"
-    verbose_name = "XBlocks Core - CAPA Problem Templates"
+    verbose_name = "XBlocks Core - CAPA Problem Static Assets"
 
     # The Open edX plugin dictionary that triggers dynamic injection
     plugin_app = {

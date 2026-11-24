@@ -54,9 +54,7 @@ XQUEUE_WAITTIME_BETWEEN_REQUESTS = 5  # seconds
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [
-            BASE_DIR / "src" / "xblock_problem" / "capa" / "templates",
-        ],
+        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
