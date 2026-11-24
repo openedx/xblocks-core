@@ -18,7 +18,7 @@
                value="{{ value }}"
                style="display:none" />
         <p class="indicator-container drag-and-drop--status"
-           aria-describedby="input_{{ id }}">{% include "status_span.html" with status=status status_id=id %}</p>
+           aria-describedby="input_{{ id }}">{{ status.span_html }}</p>
         <p id="answer_{{ id }}" class="answer"></p>
         {% if msg %}<span class="message" tabindex="-1">{{ msg|safe }}</span>{% endif %}
         {% if status == 'unsubmitted' or status == 'correct' or status == 'incorrect' or status == 'partially-correct' or status == 'incomplete' %}

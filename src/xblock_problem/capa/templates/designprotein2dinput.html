@@ -17,7 +17,7 @@
            id="input_{{ id }}"
            aria-describedby="answer_{{ id }}"
            value="{{ value }}" />
-    {% include "status_span.html" with status=status status_id=id %}
+    {{ status.span_html }}
     <p id="answer_{{ id }}" class="answer"></p>
     {% if status == 'unsubmitted' or status == 'correct' or status == 'incorrect' or status == 'partially-correct' or status == 'incomplete' %}
     </div>

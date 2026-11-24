@@ -9,7 +9,7 @@ import sys
 from io import BytesIO
 
 from calc import UndefinedVariable
-from django.template.loader import get_template
+from xblock.utils.resources import ResourceLoader
 
 from xblock_problem.capa.capa_problem import LoncapaProblem
 
@@ -18,16 +18,17 @@ log = logging.getLogger("capa.checker")
 
 
 class DemoSystem:
-    """Render templates using Django's template engine."""
+    """Render the capa templates the way ProblemBlock does, minus the i18n service."""
 
     def __init__(self):
         self.DEBUG = True  # pylint: disable=invalid-name
+        self.resource_loader = ResourceLoader("xblock_problem.capa")
 
     def render_template(self, template_filename, dictionary):
         """
         Render the specified template with the given dictionary of context data.
         """
-        return get_template(template_filename).render(dictionary)
+        return self.resource_loader.render_django_template(f"templates/{template_filename}", dictionary)
 
 
 def main():

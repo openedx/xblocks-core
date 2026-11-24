@@ -52,6 +52,7 @@ import six
 from calc.preview import latex_preview
 from chem import chemcalc
 from lxml import etree
+from xblock.utils.resources import ResourceLoader
 
 from xblock_problem.markup import HTML, Text
 from xblock_problem.stringify import stringify_children
@@ -59,6 +60,7 @@ from xblock_problem.stringify import stringify_children
 from .registry import TagRegistry
 
 log = logging.getLogger(__name__)
+resource_loader = ResourceLoader(__name__)  # resources live in xblock_problem.capa
 
 registry = TagRegistry()
 
@@ -75,9 +77,9 @@ class Status:
         "incomplete": "incorrect",
         "queued": "processing",
     }
-    __slots__ = ("classname", "_status", "display_name", "display_tooltip")
+    __slots__ = ("classname", "_status", "display_name", "display_tooltip", "input_id")
 
-    def __init__(self, status, gettext_func=str):
+    def __init__(self, status, gettext_func=str, input_id=None):
         self.classname = self.css_classes.get(status, status)
         _ = gettext_func
         names = {
@@ -101,9 +103,39 @@ class Status:
         self.display_name = names.get(status, str(status))
         self.display_tooltip = tooltips.get(status, "")
         self._status = status or ""
+        self.input_id = input_id
 
     def __str__(self):
         return self._status
+
+    def _render_span(self, with_id=True, hide_correctness=False):
+        """
+        Render ``status_span.html`` for this status: the icon and screen-reader text next to an input.
+        """
+        html = resource_loader.render_django_template(
+            "templates/status_span.html",
+            {
+                "status": self,
+                "status_id": (self.input_id or "") if with_id else "",
+                "hide_correctness": hide_correctness,
+            },
+        )
+        return HTML(html)
+
+    @property
+    def span_html(self):
+        """The status span, with ``id="status_<input_id>"``."""
+        return self._render_span()
+
+    @property
+    def span_html_without_id(self):
+        """The status span with no ``id`` attribute."""
+        return self._render_span(with_id=False)
+
+    @property
+    def hidden_span_html(self):
+        """The status span with the correctness (class, tooltip, text) left out."""
+        return self._render_span(hide_correctness=True)
 
     def __repr__(self):
         return f"Status({self._status!r})"
@@ -308,7 +340,7 @@ class InputTypeBase:
         context = {
             "id": self.input_id,
             "value": self.value,
-            "status": Status(self.status, self.capa_system.i18n.gettext),
+            "status": Status(self.status, self.capa_system.i18n.gettext, input_id=self.input_id),
             "msg": self.msg,
             "response_data": self.response_data,
             "STATIC_URL": self.capa_system.STATIC_URL,

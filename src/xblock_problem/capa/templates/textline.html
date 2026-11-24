@@ -24,7 +24,7 @@
                {% if size %}size="{{ size }}"{% endif %}
                {% if hidden %}style="display:none;"{% endif %} />
         <span class="trailing_text" id="trailing_text_{{ id }}">{{ trailing_text }}</span>
-        {% include "status_span.html" with status=status status_id=id %}
+        {{ status.span_html }}
         <p id="answer_{{ id }}" class="answer"></p>
         {% if do_math %}
             <div id="display_{{ id }}" class="equation">`{::}`</div>

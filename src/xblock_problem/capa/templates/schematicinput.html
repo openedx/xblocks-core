@@ -14,5 +14,5 @@
            initial_value="{{ initial_value }}"
            submit_analyses="{{ submit_analyses }}" />
     <span id="answer_{{ id }}"></span>
-    <div class="indicator-container">{% include "status_span.html" with status=status status_id=id %}</div>
+    <div class="indicator-container">{{ status.span_html }}</div>
 </div>

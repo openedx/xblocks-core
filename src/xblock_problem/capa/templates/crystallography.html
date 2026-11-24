@@ -20,7 +20,7 @@
                id="input_{{ id }}"
                value="{{ value }}"
                style="display:none" />
-        {% include "status_span.html" with status=status status_id=id %}
+        {{ status.span_html }}
         <p id="answer_{{ id }}" class="answer"></p>
         {% if msg %}<span class="message" tabindex="-1">{{ msg|safe }}</span>{% endif %}
         {% if status == 'unsubmitted' or status == 'correct' or status == 'incorrect' or status == 'partially-correct' or status == 'incomplete' %}

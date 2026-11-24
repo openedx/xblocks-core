@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, Mock
 from xml.sax import saxutils
 
 import fs.osfs
-from django.template.loader import get_template as django_get_template
+from xblock.utils.resources import ResourceLoader
 
 from xblock_problem.capa.capa_problem import LoncapaProblem, LoncapaSystem
 from xblock_problem.capa.inputtypes import Status
@@ -15,18 +15,14 @@ from xblock_problem.capa.inputtypes import Status
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
-def get_template(template_name):
-    """
-    Return template for a capa inputtype.
-    """
-    return django_get_template(template_name)
+capa_resource_loader = ResourceLoader("xblock_problem.capa")
 
 
 def capa_render_template(template, context):
     """
-    Render template for a capa inputtype.
+    Render template for a capa inputtype, the way ProblemBlock does (without an i18n service).
     """
-    return get_template(template).render(context)
+    return capa_resource_loader.render_django_template(f"templates/{template}", context)
 
 
 def tst_render_template(template, context):  # pylint: disable=unused-argument

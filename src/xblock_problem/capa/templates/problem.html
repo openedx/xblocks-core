@@ -10,7 +10,7 @@
         <input type="hidden" name="problem_id" value="{{ problem.name }}" />
         {% if demand_hint_possible %}
             <div class="problem-hint">
-                {% include "problem_notifications.html" with notification_name='hint' notification_type='problem-hint' notification_icon='fa-question' notification_message='' %}
+                {{ hint_notification_html }}
             </div>
         {% endif %}
         <div class="problem-action-buttons-wrapper">
@@ -121,31 +121,10 @@
             </div>
         </div>
     </div>
-    {% include "problem_notifications.html" with notification_type='warning' notification_icon='fa-exclamation-circle' notification_name='gentle-alert' notification_message='' %}
-    {% if answer_notification_type %}
-        {% if answer_notification_type == 'correct' %}
-            {% include "problem_notifications.html" with notification_type='success' notification_icon='fa-check' notification_name='submit' is_hidden=False notification_message=answer_notification_message %}
-        {% endif %}
-        {% if answer_notification_type == 'incorrect' %}
-            {% include "problem_notifications.html" with notification_type='error' notification_icon='fa-close' notification_name='submit' is_hidden=False notification_message=answer_notification_message %}
-        {% endif %}
-        {% if answer_notification_type == 'partially-correct' %}
-            {% include "problem_notifications.html" with notification_type='success' notification_icon='fa-asterisk' notification_name='submit' is_hidden=False notification_message=answer_notification_message %}
-        {% endif %}
-        {% if answer_notification_type == 'submitted' %}
-            {% include "problem_notifications.html" with notification_type='general' notification_icon='fa-info-circle' notification_name='submit' is_hidden=False notification_message=answer_notification_message %}
-        {% endif %}
-    {% endif %}
-    {% if has_saved_answers %}
-        {% include "problem_notifications.html" with notification_type='warning' notification_icon='fa-save' notification_name='save' notification_message=save_message is_hidden=False %}
-    {% else %}
-        {% include "problem_notifications.html" with notification_type='warning' notification_icon='fa-save' notification_name='save' notification_message=save_message is_hidden=True %}
-    {% endif %}
-    {# xss-lint: disable=django-trans-missing-escape #}
-    {% trans "Answers are displayed within the problem" as notification_message %}
-    {% with notification_message=notification_message|force_escape %}
-        {% include "problem_notifications.html" with notification_type='general' notification_icon='fa-info-circle' notification_name='show-answer' notification_message=notification_message is_hidden=True %}
-    {% endwith %}
+    {{ gentle_alert_notification_html }}
+    {{ submit_notification_html }}
+    {{ save_notification_html }}
+    {{ show_answer_notification_html }}
 </div>
 <script>
     function emit_event(message) {

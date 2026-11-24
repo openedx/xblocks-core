@@ -18,7 +18,6 @@ import traceback
 from zoneinfo import ZoneInfo
 
 import nh3
-from django.template.loader import render_to_string
 from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
 from lxml import etree
@@ -45,6 +44,7 @@ from xblock.fields import (
 from xblock.progress import Progress
 from xblock.runtime import KeyValueStore, KvsFieldData
 from xblock.scorable import ScorableXBlockMixin, Score, ShowCorrectness
+from xblock.utils.resources import ResourceLoader
 
 from xblock_problem.capa import responsetypes
 from xblock_problem.capa.capa_problem import LoncapaProblem, LoncapaSystem
@@ -55,6 +55,9 @@ from xblock_problem.markup import HTML, Text
 from xblocks_core.legacy_utils.xml_utils import LegacyXmlMixin, is_pointer_tag
 
 log = logging.getLogger("edx.courseware")
+
+# The block's Django templates (problem.html, the capa input templates, ...) live in xblock_problem.capa.
+resource_loader = ResourceLoader("xblock_problem.capa")
 
 
 # Make '_' a no-op so we can scrape strings. Using function instead of
@@ -417,6 +420,35 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
         url = url_getter(self) if url_getter else None
         if url:
             fragment.add_javascript_url(url)
+
+    def _render_template(self, template_name, context):
+        """
+        Render one of this block's Django templates (``problem.html``, the capa input templates, ...).
+
+        ``{% trans %}`` in them translates through this block's i18n service, so the strings come from the
+        block's own catalog rather than Django's global one, which does not contain them.
+        """
+        return resource_loader.render_django_template(
+            f"templates/{template_name}", context, i18n_service=self.runtime.service(self, "i18n")
+        )
+
+    def _render_notification(self, name, notification_type, icon, message, *, short_id, is_hidden=True):
+        """
+        Render ``problem_notifications.html``: one of the feedback banners shown under the problem.
+        """
+        return HTML(
+            self._render_template(
+                "problem_notifications.html",
+                {
+                    "notification_name": name,
+                    "notification_type": notification_type,
+                    "notification_icon": icon,
+                    "notification_message": message,
+                    "short_id": short_id,
+                    "is_hidden": is_hidden,
+                },
+            )
+        )
 
     def student_view(self, _context, show_detailed_errors=False):
         """
@@ -918,7 +950,7 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
             get_python_lib_zip=sandbox_service.get_python_lib_zip,
             DEBUG=self.debug,
             i18n=self.runtime.service(self, "i18n"),
-            render_template=render_to_string,
+            render_template=self._render_template,
             resources_fs=self.runtime.resources_fs,
             seed=seed,  # Why do we do this if we have self.seed?
             xqueue=None if is_studio else xqueue_service,
@@ -1020,7 +1052,7 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
         """
         curr_score, total_possible = self.get_display_progress()
 
-        return render_to_string(
+        return self._render_template(
             "problem_ajax.html",
             {
                 "element_id": self.usage_key.html_id(),
@@ -1347,10 +1379,26 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
                 button_name=self.submit_button_name()
             )
 
+        short_id = self.usage_key.html_id()
+        # The feedback banners under the problem, rendered here and passed into problem.html because
+        # ResourceLoader templates cannot {% include %}.
+        submit_notification_styles = {
+            "correct": ("success", "fa-check"),
+            "incorrect": ("error", "fa-close"),
+            "partially-correct": ("success", "fa-asterisk"),
+            "submitted": ("general", "fa-info-circle"),
+        }
+        submit_notification_html = ""
+        if answer_notification_type in submit_notification_styles:
+            notification_type, icon = submit_notification_styles[answer_notification_type]
+            submit_notification_html = self._render_notification(
+                "submit", notification_type, icon, answer_notification_message, short_id=short_id, is_hidden=False
+            )
+
         context = {
             "problem": content,
             "id": str(self.usage_key),
-            "short_id": self.usage_key.html_id(),
+            "short_id": short_id,
             "submit_button": submit_button,
             "submit_button_submitting": submit_button_submitting,
             "should_enable_submit_button": should_enable_submit_button,
@@ -1367,9 +1415,26 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
             "has_saved_answers": self.has_saved_answers,
             "save_message": save_message,
             "submit_disabled_cta": submit_disabled_ctas[0] if submit_disabled_ctas else None,
+            "hint_notification_html": self._render_notification(
+                "hint", "problem-hint", "fa-question", "", short_id=short_id
+            ),
+            "gentle_alert_notification_html": self._render_notification(
+                "gentle-alert", "warning", "fa-exclamation-circle", "", short_id=short_id
+            ),
+            "submit_notification_html": submit_notification_html,
+            "save_notification_html": self._render_notification(
+                "save", "warning", "fa-save", save_message, short_id=short_id, is_hidden=not self.has_saved_answers
+            ),
+            "show_answer_notification_html": self._render_notification(
+                "show-answer",
+                "general",
+                "fa-info-circle",
+                _("Answers are displayed within the problem"),
+                short_id=short_id,
+            ),
         }
 
-        html = render_to_string("problem.html", context)
+        html = self._render_template("problem.html", context)
 
         if encapsulate:
             html = HTML('<div id="problem_{id}" class="problem" data-url="{ajax_url}">{html}</div>').format(
@@ -1654,10 +1719,7 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
 
         return {
             "answers": new_answers,
-            "correct_status_html": render_to_string(
-                "status_span.html",
-                {"status": Status("correct", self.runtime.service(self, "i18n").gettext)},
-            ),
+            "correct_status_html": Status("correct", self.runtime.service(self, "i18n").gettext).span_html_without_id,
         }
 
     # Figure out if we should move these to capa_problem?

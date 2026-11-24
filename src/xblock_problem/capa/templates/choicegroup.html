@@ -29,9 +29,9 @@
         </fieldset>
         <div class="indicator-container">
             {% if show_correctness != 'never' %}
-                {% include "status_span.html" with status=status status_id=id %}
+                {{ status.span_html }}
             {% else %}
-                {% include "status_span.html" with status=status status_id=id hide_correctness=True %}
+                {{ status.hidden_span_html }}
             {% endif %}
         </div>
         {% if show_correctness == "never" %}

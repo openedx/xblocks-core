@@ -1,7 +1,7 @@
 {% load i18n %}
 
-{% include "discussion_templates/_underscore_templates.html" %}
-{% include "discussion_templates/_thread_list_template.html" %}
+{{ underscore_templates_html }}
+{{ thread_list_template_html }}
 
 <div class="discussion-module" data-discussion-id="{{ discussion_id }}"
     data-user-create-comment="{{ can_create_comment|yesno:"true,false" }}"

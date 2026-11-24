@@ -49,7 +49,7 @@
                    value="{{ value }}" />
             <div class="indicator-container">
                 {% if input_type == 'checkbox' or not value or status.classname == 'incomplete' or status.classname == 'unsubmitted' or status.classname == 'unanswered' %}
-                    {% include "status_span.html" with status=status status_id=id %}
+                    {{ status.span_html }}
                 {% endif %}
             </div>
             {% if show_correctness == "never" %}
