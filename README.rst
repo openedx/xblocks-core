@@ -14,26 +14,27 @@ XBlocks are modular components that enable rich interactive learning experiences
 Historically, the XBlock code was tightly coupled with the edx-platform, making it challenging to manage and extend.
 By extracting XBlocks into this dedicated repository, we can reduce the complexity of the edx-platform, making it more maintainable and scalable.
 
-XBlocks Being Moved Here
-************************
+XBlocks In This Repository
+**************************
 
-These are the XBlocks being moved here, and each of their statuses:
+These XBlocks were originally built into openedx-platform, and now live here:
 
-* ``poll_question`` -- Ready to Use
-* ``word_cloud`` -- Ready to Use
-* ``annotatable`` -- Ready to Use
-* ``lti`` -- Ready to Use
-* ``pdf`` -- Done
-* ``html`` -- Ready to Use
-* ``discussion`` -- Ready to Use
-* ``problem`` -- Ready to Use
-* ``video`` -- Ready to Use
+* ``annotatable``
+* ``discussion``
+* ``html``
+* ``lti`` -- deprecated in favor of `xblock-lti-consumer <https://github.com/openedx/xblock-lti-consumer>`_
+* ``poll_question`` -- unsupported but stable; consider `xblock-poll <https://github.com/open-craft/xblock-poll>`_,
+  which is supported
+* ``problem``
+* ``video``
+* ``word_cloud``
 
-The possible XBlock statuses are:
+openedx-platform uses these implementations. Its own copies of the blocks, and the
+``USE_EXTRACTED_<BLOCK>_BLOCK`` settings that switched between the two, are being removed in the
+`built-in XBlock removal epic <https://github.com/openedx/openedx-platform/issues/37819>`_.
+openedx-platform's ``pyproject.toml`` declares the ``xblock.v1`` entry points for these eight blocks.
 
-* In Development: We're building and testing this block.
-* Ready to Use: You can try this on your site using the Waffle flag.
-* Done: The built-in block has been removed. The ``pyproject.toml`` entry-point has been removed from edx-platform and added to xblock-contrib.
+The ``pdf`` XBlock also lives here. Its entry point is declared in this repository's ``pyproject.toml``.
 
 
 Additional XBlocks that belong here
