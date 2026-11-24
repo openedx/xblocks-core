@@ -81,7 +81,12 @@ def stringify_children(node):
 
 @XBlock.needs("i18n")
 class PollBlock(LegacyXmlMixin, XBlock):
-    """Poll Block"""
+    """
+    Poll Block
+
+    This block is unsupported but stable. For new content, consider using
+    https://github.com/open-craft/xblock-poll instead, which is supported and stable.
+    """
 
     # Indicates that this XBlock has been extracted from edx-platform.
     is_extracted = True
