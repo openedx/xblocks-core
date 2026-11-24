@@ -27,6 +27,9 @@ class CapaAppConfig(AppConfig):
     This automatically exposes our `templates/` directory to the platform natively
     without manual intervention.
 
+    The same applies to our `static/` directory: Django's staticfiles finder only collects
+    static files from installed apps.
+
     References:
 
     - Open edX Plugin App Framework:

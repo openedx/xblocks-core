@@ -45,6 +45,7 @@ from xblock.fields import (
 from xblock.progress import Progress
 from xblock.runtime import KeyValueStore, KvsFieldData
 from xblock.scorable import ScorableXBlockMixin, Score, ShowCorrectness
+from xblock.utils.templatetags.i18n import I18N_SERVICE_CONTEXT_KEY
 
 from xblock_problem.capa import responsetypes
 from xblock_problem.capa.capa_problem import LoncapaProblem, LoncapaSystem
@@ -417,6 +418,19 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
         url = url_getter(self) if url_getter else None
         if url:
             fragment.add_javascript_url(url)
+
+    def _render_template(self, template_name, context):
+        """
+        Render one of this block's Django templates (``problem.html``, the capa input templates, ...).
+
+        They live under ``capa/templates/xblock_problem/`` and are found through the ``xblock_problem.capa``
+        Django app. Their ``{% load xblock_i18n %}`` tags translate through this block's i18n service, so
+        the strings come from the block's own catalog rather than Django's global one.
+        """
+        return render_to_string(
+            f"xblock_problem/{template_name}",
+            {**context, I18N_SERVICE_CONTEXT_KEY: self.runtime.service(self, "i18n")},
+        )
 
     def student_view(self, _context, show_detailed_errors=False):
         """
@@ -918,7 +932,7 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
             get_python_lib_zip=sandbox_service.get_python_lib_zip,
             DEBUG=self.debug,
             i18n=self.runtime.service(self, "i18n"),
-            render_template=render_to_string,
+            render_template=self._render_template,
             resources_fs=self.runtime.resources_fs,
             seed=seed,  # Why do we do this if we have self.seed?
             xqueue=None if is_studio else xqueue_service,
@@ -1020,7 +1034,7 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
         """
         curr_score, total_possible = self.get_display_progress()
 
-        return render_to_string(
+        return self._render_template(
             "problem_ajax.html",
             {
                 "element_id": self.usage_key.html_id(),
@@ -1369,7 +1383,7 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
             "submit_disabled_cta": submit_disabled_ctas[0] if submit_disabled_ctas else None,
         }
 
-        html = render_to_string("problem.html", context)
+        html = self._render_template("problem.html", context)
 
         if encapsulate:
             html = HTML('<div id="problem_{id}" class="problem" data-url="{ajax_url}">{html}</div>').format(
@@ -1654,7 +1668,7 @@ class ProblemBlock(ScorableXBlockMixin, LegacyXmlMixin, XBlock):
 
         return {
             "answers": new_answers,
-            "correct_status_html": render_to_string(
+            "correct_status_html": self._render_template(
                 "status_span.html",
                 {"status": Status("correct", self.runtime.service(self, "i18n").gettext)},
             ),

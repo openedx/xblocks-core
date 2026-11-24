@@ -14,7 +14,7 @@
             </option>
         {% endfor %}
     </select>
-    <div class="indicator-container">{% include "status_span.html" with status=status status_id=id %}</div>
+    <div class="indicator-container">{% include "xblock_problem/status_span.html" with status=status status_id=id %}</div>
     <p class="answer" id="answer_{{ id }}"></p>
     {% if msg %}<span class="message" aria-describedby="label_{{ id }}" tabindex="-1">{{ msg|safe }}</span>{% endif %}
 </div>
