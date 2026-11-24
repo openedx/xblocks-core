@@ -14,13 +14,14 @@ from web_fragments.fragment import Fragment
 from xblock.completable import XBlockCompletionMode
 from xblock.core import XBlock
 from xblock.fields import UNIQUE_ID, Scope, String
-from xblock.utils.resources import ResourceLoader
 from xblock.utils.studio_editable import StudioEditableXBlockMixin
 
 from xblocks_core.legacy_utils.xml_utils import LegacyXmlMixin
 
 log = logging.getLogger(__name__)
-loader = ResourceLoader(__name__)
+
+# Where the ``{% load xblock_i18n %}`` template tags look for the block's i18n service.
+I18N_SERVICE_CONTEXT_KEY = "_i18n_service"
 Text = markupsafe.escape  # pylint: disable=invalid-name
 
 
@@ -154,6 +155,9 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
         if not self.is_visible:
             return fragment
 
+        # Translate with this block's own catalog. The module-level ``_`` only marks strings.
+        _ = self.runtime.service(self, "i18n").gettext
+
         self.add_resource_urls(fragment)
         login_msg = ""
 
@@ -196,7 +200,7 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
                 "PLATFORM_NAME": settings.PLATFORM_NAME,
                 "enable_discussion_home_panel": settings.FEATURES.get("ENABLE_DISCUSSION_HOME_PANEL", False),
             }
-            fragment.add_content(render_to_string("discussion_templates/_discussion_inline.html", context))
+            fragment.add_content(self._render_template("discussion_templates/_discussion_inline.html", context))
 
         fragment.initialize_js("DiscussionInlineBlock")
 
@@ -211,8 +215,19 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
             "discussion_id": self.discussion_id,
             "is_visible": self.is_visible,
         }
-        fragment.add_content(loader.render_django_template("templates/_discussion_inline_studio.html", context))
+        fragment.add_content(self._render_template("discussion_templates/_discussion_inline_studio.html", context))
         return fragment
+
+    def _render_template(self, template_name, context):
+        """
+        Render one of this block's Django templates, found through the ``xblock_discussion`` Django app.
+
+        Their ``{% load xblock_i18n %}`` tags translate through this block's i18n service, so the strings
+        come from the block's own catalog rather than Django's global one.
+        """
+        return render_to_string(
+            template_name, {**context, I18N_SERVICE_CONTEXT_KEY: self.runtime.service(self, "i18n")}
+        )
 
     def student_view_data(self):
         """

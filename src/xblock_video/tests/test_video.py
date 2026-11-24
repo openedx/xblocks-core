@@ -15,6 +15,7 @@ the course, section, subsection, unit, etc.
 import datetime
 import shutil
 import unittest
+from collections import defaultdict
 from tempfile import mkdtemp
 from unittest.mock import ANY, MagicMock, Mock, patch
 from uuid import uuid4
@@ -32,6 +33,8 @@ from web_fragments.fragment import Fragment
 from xblock.core import XBlockAside
 from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
+
+from xblocks_core.tests.i18n import FakeI18nService
 
 from ..block import EXPORT_IMPORT_STATIC_DIR, VideoBlock, create_youtube_string
 from .test_utils import VALIDATION_MESSAGE_WARNING, AsideTestType, DummyRuntime
@@ -1270,3 +1273,34 @@ class VideoBlockI18nJsCatalogTest(unittest.TestCase):
     def test_public_view_loads_catalog_before_block_js(self):
         js = self._view_js_with_catalog(instantiate_block(), "public_view", {"public_video_embed": True})
         assert js == ["/static/catalog.js", "/public/js/video-xblock.js"]
+
+
+class VideoBlockTemplateI18nTest(unittest.TestCase):
+    """``video.html`` translates through the block's own i18n service, not Django's global catalog."""
+
+    @override_settings(
+        FEATURES={},
+        COMPLETION_VIDEO_COMPLETE_PERCENTAGE=0.95,
+        AI_TRANSLATIONS_API_URL="",
+        YOUTUBE={"API": "https://www.youtube.com/iframe_api", "TEST_TIMEOUT": 1500},
+    )
+    def test_get_html_renders_with_block_catalog(self):
+        block = instantiate_block(data='<video display_name="Video" youtube_id_1_0="3_yD_cEKoCk" />')
+        i18n_service = FakeI18nService({"Loading video player": "CARGANDO VIDEO"})
+        user_service = Mock()
+        user_service.get_current_user.return_value.opt_attrs = defaultdict(lambda: None)
+        real_service = block.runtime.service
+        real_service(block, "video_config").get_public_sharing_context.return_value = {}
+
+        def service(blk, name):
+            if name == "i18n":
+                return i18n_service
+            if name == "user":
+                return user_service
+            return real_service(blk, name)
+
+        with patch.object(block.runtime, "service", side_effect=service):
+            html = block.get_html()
+
+        assert "CARGANDO VIDEO" in html
+        assert "Loading video player" not in html

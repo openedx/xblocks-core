@@ -19,7 +19,7 @@ def get_template(template_name):
     """
     Return template for a capa inputtype.
     """
-    return django_get_template(template_name)
+    return django_get_template(f"xblock_problem/{template_name}")
 
 
 def capa_render_template(template, context):

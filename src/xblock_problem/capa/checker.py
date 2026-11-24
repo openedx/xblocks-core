@@ -27,7 +27,7 @@ class DemoSystem:
         """
         Render the specified template with the given dictionary of context data.
         """
-        return get_template(template_filename).render(dictionary)
+        return get_template(f"xblock_problem/{template_filename}").render(dictionary)
 
 
 def main():

@@ -25,7 +25,12 @@ class CapaAppConfig(AppConfig):
     dynamically injects this module into `INSTALLED_APPS` at runtime.
 
     This automatically exposes our `templates/` directory to the platform natively
-    without manual intervention.
+    without manual intervention. It also makes our `templatetags/` package loadable, which
+    the templates need for `{% load xblock_i18n %}`, the tags that translate through the
+    block's i18n service.
+
+    The same applies to our `static/` directory: Django's staticfiles finder only collects
+    static files from installed apps.
 
     References:
 
