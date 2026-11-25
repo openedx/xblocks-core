@@ -93,7 +93,7 @@ class HtmlBlockCourseApiTestCase(unittest.TestCase):
     Test the HTML XModule's student_view_data method.
     """
 
-    @ddt.data({}, {"FEATURES": {}}, {"FEATURES": {"ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA": False}})
+    @ddt.data({}, {"ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA": False})
     def test_disabled(self, settings):
         """
         Ensure that student_view_data does not return html if the ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA feature flag
@@ -106,7 +106,7 @@ class HtmlBlockCourseApiTestCase(unittest.TestCase):
         with override_settings(**settings):
             assert block.student_view_data() == {
                 "enabled": False,
-                "message": 'To enable, set FEATURES["ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA"]',
+                "message": "To enable, set the ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA setting",
             }
 
     @ddt.data(
@@ -118,7 +118,7 @@ class HtmlBlockCourseApiTestCase(unittest.TestCase):
         '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',  # Images allowed
         "short string " * 100,  # May contain long strings
     )
-    @override_settings(FEATURES={"ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA": True})
+    @override_settings(ENABLE_HTML_XBLOCK_STUDENT_VIEW_DATA=True)
     def test_common_values(self, html):
         """
         Ensure that student_view_data will return HTML data when enabled,

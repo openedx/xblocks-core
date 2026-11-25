@@ -194,7 +194,7 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, LegacyXmlMixin):
                 "can_create_subcomment": self.has_permission("create_sub_comment"),
                 "login_msg": login_msg,
                 "PLATFORM_NAME": settings.PLATFORM_NAME,
-                "enable_discussion_home_panel": settings.FEATURES.get("ENABLE_DISCUSSION_HOME_PANEL", False),
+                "enable_discussion_home_panel": getattr(settings, "ENABLE_DISCUSSION_HOME_PANEL", False),
             }
             fragment.add_content(render_to_string("discussion_templates/_discussion_inline.html", context))
 
