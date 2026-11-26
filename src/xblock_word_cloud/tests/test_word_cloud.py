@@ -2,7 +2,10 @@
 Tests for WordCloudBlock
 """
 
+from unittest.mock import Mock, patch
+
 from django.test import TestCase
+from web_fragments.fragment import Fragment
 from xblock.fields import ScopeIds
 from xblock.test.toy_runtime import ToyRuntime
 
@@ -98,3 +101,35 @@ class TestWordCloudBlock(TestCase):
         self.assertEqual(result[1]["text"], "world")
         self.assertEqual(result[1]["size"], 2)
         self.assertEqual(result[1]["percent"], 40)
+
+
+class TestWordCloudBlockI18nJsCatalog(TestCase):
+    """Tests for loading the block's namespaced JavaScript translation catalog."""
+
+    def test_namespace(self):
+        assert WordCloudBlock.i18n_js_namespace == "XBlockWordCloudI18N"
+        assert WordCloudBlock.get_i18n_js_namespace() == "XBlockWordCloudI18N"
+
+    def test_no_catalog_without_url(self):
+        """No script is added when there is no catalog or the i18n service can't provide one."""
+        no_catalog = Mock()
+        no_catalog.get_javascript_i18n_catalog_url.return_value = None
+        for i18n_service in (no_catalog, Mock(spec=[])):
+            with self.subTest(i18n_service=i18n_service):
+                block = Mock()
+                block.runtime.service.return_value = i18n_service
+                fragment = Fragment()
+
+                WordCloudBlock._add_i18n_js_catalog(block, fragment)  # pylint: disable=protected-access
+
+                assert not fragment.resources
+
+    def test_student_view_loads_catalog_before_block_js(self):
+        block = WordCloudBlock(ToyRuntime(), scope_ids=ScopeIds("1", "2", "3", "4"))
+        with patch("xblock.runtime.NullI18nService.get_javascript_i18n_catalog_url", return_value="/static/catalog.js"):
+            fragment = block.student_view()
+
+        js = [r for r in fragment.resources if r.mimetype == "application/javascript"]
+        assert js[0].kind == "url"
+        assert js[0].data == "/static/catalog.js"
+        assert "function WordCloudBlock(" in js[1].data
