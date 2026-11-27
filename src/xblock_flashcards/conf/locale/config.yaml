@@ -1,0 +1,13 @@
+# Configuration for i18n workflow.
+
+locales:
+    - en  # English - Source Language
+
+# Directories we don't search for strings.
+ignore_dirs:
+    - '*/css'
+    - 'public/js/translations'
+    # The React frontend's dependencies and bundle. Its messages are extracted
+    # from assets/i18n/messages.js, written by `npm run i18n_extract`.
+    - 'assets/node_modules'
+    - 'public'
