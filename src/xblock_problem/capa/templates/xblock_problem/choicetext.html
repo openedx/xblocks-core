@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load xblock_i18n %}
 {% load static %}
 {% with element_checked=False %}
     {% for choice_id, _ in choices %}
@@ -49,7 +49,7 @@
                    value="{{ value }}" />
             <div class="indicator-container">
                 {% if input_type == 'checkbox' or not value or status.classname == 'incomplete' or status.classname == 'unsubmitted' or status.classname == 'unanswered' %}
-                    {% include "status_span.html" with status=status status_id=id %}
+                    {% include "xblock_problem/status_span.html" with status=status status_id=id %}
                 {% endif %}
             </div>
             {% if show_correctness == "never" %}

@@ -17,7 +17,7 @@
                {{ describedby_html }}
                {% if size %}size="{{ size }}"{% endif %} />
         <span class="trailing_text" id="trailing_text_{{ id }}">{{ trailing_text }}</span>
-        {% include "status_span.html" with status=status status_id=id %}
+        {% include "xblock_problem/status_span.html" with status=status status_id=id %}
         <p id="answer_{{ id }}" class="answer"></p>
         <div id="input_{{ id }}_preview" class="equation">
             \(\)

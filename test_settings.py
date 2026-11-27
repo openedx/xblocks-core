@@ -10,6 +10,11 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "submissions",
     "edxval",
+    # The blocks' own Django apps, for their templates.
+    "xblock_problem.capa",
+    "xblock_discussion",
+    # Provides {% load xblock_i18n %}.
+    "xblock.django",
 ]
 
 DATABASES = {
@@ -54,9 +59,7 @@ XQUEUE_WAITTIME_BETWEEN_REQUESTS = 5  # seconds
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [
-            BASE_DIR / "src" / "xblock_problem" / "capa" / "templates",
-        ],
+        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
