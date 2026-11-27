@@ -161,6 +161,45 @@ class AnnotatableBlockTestCase(unittest.TestCase):
         self.assertEqual(self.annotatable.display_name, "New Display Name")
         self.assertEqual(self.annotatable.data, self.sample_xml)
 
+    def _block_with_data(self, data):
+        runtime = TestRuntime()
+        scope_ids = ScopeIds("user_id", "block_type", "block_id", "context_key")
+        return AnnotatableBlock(runtime, DictFieldData({"data": data}), scope_ids)
+
+    def test_get_html_with_empty_data(self):
+        """
+        A block with empty ``data`` (stored by earlier releases, which parsed a bare
+        ``<annotatable/>`` to ``""``) renders as empty content instead of raising XMLSyntaxError.
+        """
+        for data in ("", "   \n"):
+            block = self._block_with_data(data)
+            context = block.get_html()
+            assert context["instructions_html"] is None
+            assert context["content_html"] == "<div/>"
+
+    def test_bare_element_from_xml_renders(self):
+        """
+        A bare ``<annotatable/>`` (the content-library "create new component" flow, or an
+        empty element in imported OLX) must render as empty content.
+        """
+        definition, _children = AnnotatableBlock.definition_from_xml(etree.fromstring("<annotatable/>"), None)
+        block = self._block_with_data(definition["data"])
+        assert block.get_html()["content_html"] == "<div/>"
+
+    def test_bare_element_round_trips_on_export(self):
+        """
+        A bare ``<annotatable/>`` is kept as its OLX, like the built-in block (``RawMixin``),
+        so export writes it back instead of dropping the block (``definition_to_xml`` returns
+        None for empty ``data``).
+        """
+        definition, _children = AnnotatableBlock.definition_from_xml(etree.fromstring("<annotatable/>"), None)
+        assert definition["data"].strip() == "<annotatable/>"
+        block = self._block_with_data(definition["data"])
+        exported = block.definition_to_xml(None)
+        assert exported is not None
+        assert exported.tag == "annotatable"
+        assert len(exported) == 0
+
 
 class AnnotatableBlockI18nJsCatalogTest(unittest.TestCase):
     """Tests for loading the block's namespaced JavaScript translation catalog."""
