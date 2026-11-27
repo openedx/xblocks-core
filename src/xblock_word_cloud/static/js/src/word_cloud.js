@@ -160,6 +160,15 @@ function showWordCloud(response, element)
  */
 function drawWordCloud(response, words, bounds, wordCloudEl)
 {
+  /*
+  Use this block's translation catalog (window.XBlockWordCloudI18N, loaded by the
+  block's view) and fall back to the platform's global catalog.
+  */
+  function gettext(msgid) {
+    const catalog = window.XBlockWordCloudI18N || window;
+    return catalog.gettext ? catalog.gettext(msgid) : msgid;
+  }
+
   // Color words in different colors.
   const fill = d3.scale.category20();
 

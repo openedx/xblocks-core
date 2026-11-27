@@ -39,6 +39,7 @@ class WordCloudBlock(StudioEditableXBlockMixin, LegacyXmlMixin, XBlock):
 
     # Indicates that this XBlock has been extracted from edx-platform.
     is_extracted = True
+    i18n_js_namespace = "XBlockWordCloudI18N"
     # "data" class attribute is added to make the following test case pass in edx-platform repo.
     # cms/djangoapps/contentstore/tests/test_contentstore.py::ImportRequiredTestCases::test_empty_data_roundtrip
     data = String(default="", scope=Scope.content)
@@ -108,6 +109,19 @@ class WordCloudBlock(StudioEditableXBlockMixin, LegacyXmlMixin, XBlock):
             ),
         ]
 
+    def _add_i18n_js_catalog(self, fragment):
+        """
+        Add this block's JavaScript translation catalog to the fragment, if the runtime provides one.
+
+        The catalog defines ``window.XBlockWordCloudI18N`` (see ``i18n_js_namespace``).
+        Add it before the block's own JS.
+        """
+        i18n_service = self.runtime.service(self, "i18n")
+        url_getter = getattr(i18n_service, "get_javascript_i18n_catalog_url", None)
+        url = url_getter(self) if url_getter else None
+        if url:
+            fragment.add_javascript_url(url)
+
     @XBlock.supports("multi_device")
     def student_view(self, context=None):  # pylint: disable=W0613
         """
@@ -130,6 +144,7 @@ class WordCloudBlock(StudioEditableXBlockMixin, LegacyXmlMixin, XBlock):
             )
         )
         frag.add_css(resource_loader.load_unicode("static/css/word_cloud.css"))
+        self._add_i18n_js_catalog(frag)
         frag.add_javascript(resource_loader.load_unicode("static/js/src/word_cloud.js"))
         frag.add_javascript(resource_loader.load_unicode("static/js/src/d3.min.js"))
         frag.add_javascript(resource_loader.load_unicode("static/js/src/d3.layout.cloud.js"))
